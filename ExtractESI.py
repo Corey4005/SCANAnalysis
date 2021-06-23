@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """
 Parameters:
-    sys.argv[1] = filepath to the ESI data as a str. 
-    sys.argv[2] = filepath to the metadata as a str.
+    filepath is set to my local computer. 
+    metadata is set to my local computer. 
 
-Example Usage: 
-    run ExtractESI.py [ESI data] [metadata]
+Note: 
+    if you want the files to work on your computer, set the path variables to your local machine. I am working on 
+    a couple of sys.argv arguments in a few days to make the files work more fluidly with different filepaths. 
+    My next goal is to figure out a way to allow people to key in certain years and be able to pull down whichever
+    data they would like. 
 
-Questions: 
-    I am unsure at the moment of how to get the dates to convert from julian time using the datetime variable. 
-    I am also unsure of how to store the printed variables into a dataframe. 
     
 author: Corey 
 
