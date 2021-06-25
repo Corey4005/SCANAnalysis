@@ -33,6 +33,7 @@ metadata = r'C:\\Users\cwalker\Desktop\Data\Metadata\SCAN_Metadata_AL.csv'
 # else:
 #     pass
 
+#####
 #look for all files in filepath
 files = glob2.glob(filepath + '/*.tif')
 print(len(files))
