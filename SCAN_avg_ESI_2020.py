@@ -3,6 +3,7 @@ import pandas as pd
 # Read in the ESI data
 esi = pd.read_csv('/Users/coreywalker/Desktop/NOAA/ESIExtractProject/ESI_1wk_tif2select_pt.csv')
 esi['Date'] = pd.to_datetime(esi['Date'])
+# print(esi.dtype)
 #print(esi.shape) # 19080 rows x 3 columns
 #print(esi.columns)
 
@@ -22,7 +23,7 @@ sms = scan[['Date', 'station','SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-20.0in
 sms['Date'] = pd.to_datetime(sms['Date'])
 #print(sms.dtypes)
 
-sms_grp = sms.groupby(['station', pd.Grouper(key='Date', freq='7D')]).mean().reset_index()
+sms_grp = sms.groupby(['station', pd.Grouper(key='Date', freq='1W')]).mean().reset_index()
 #print(sms_grp['station'].unique())
 
 # # Get data for year 2020
