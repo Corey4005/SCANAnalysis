@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 # Read in the ESI data
 esi = pd.read_csv('/Users/coreywalker/Desktop/NOAA/ESIExtractProject/ESI_1wk_tif2select_pt.csv')
@@ -18,12 +19,23 @@ scan = pd.read_csv(scan_path)
 
 # # Just get the columns we are interested in
 sms = scan[['Date', 'station','SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-20.0in','SMS-40.0in']]
+sms_test = scan[['Date', 'station', 'SMS-2.0in']]
 
 # # Date column to datetime format
 sms['Date'] = pd.to_datetime(sms['Date'])
 #print(sms.dtypes)
 
-sms_grp = sms.groupby(['station', pd.Grouper(key='Date', freq='1W')]).mean().reset_index()
+sms_grp = sms.groupby(['station', pd.Grouper(key='Date', freq='W-SUN')]).size()
+
+index = np.where(sms_grp == 7)
+print(index[0])
+#print(sms_test.iloc[index[0]])
+#sms_grp.to_csv('/Users/coreywalker/Desktop/test_group.csv')
+#.mean().reset_index()
+#print(sms_grp.size('Date'))
+
+# print(sms_grp.shape)
+#print(filtered.shape)
 #print(sms_grp['station'].unique())
 
 # # Get data for year 2020
@@ -49,17 +61,17 @@ sms_grp = sms.groupby(['station', pd.Grouper(key='Date', freq='1W')]).mean().res
 # print(grp_7_dates.min())
 
 # # merge the esi and SCAN
-sms_esi = pd.merge(left=esi, right=sms_grp, on=['Date', 'station'], how='outer', indicator='how').reset_index()
+# sms_esi = pd.merge(left=esi, right=sms_grp, on=['Date', 'station'], how='outer', indicator='how').reset_index()
 
 
 
-# # This is what we are really interested in:
-both = sms_esi[sms_esi['how']=='both']
-print(both['Date'].nunique()) 
-print(both.shape) 
-print(both)
+# # # This is what we are really interested in:
+# both = sms_esi[sms_esi['how']=='both']
+# print(both['Date'].nunique()) 
+# print(both.shape) 
+# print(both)
 
-both.to_csv('/Users/coreywalker/Desktop/NOAA/both_merged.csv')
+# both.to_csv('/Users/coreywalker/Desktop/NOAA/both_merged.csv')
 
 
 
