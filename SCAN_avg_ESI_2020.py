@@ -1,11 +1,15 @@
 import pandas as pd
+import seaborn as sns
+from scipy import stats
+
 
 # Read in the ESI data
-esi = pd.read_csv('/Users/coreywalker/Desktop/NOAA/ESIExtractProject/ESI_1wk_tif2select_pt.csv')
+esi_path = 'C:/Users/cwalker/Desktop/Data/Processed_ESI/ESI_1wk_tif2select_pt.csv'
+esi = pd.read_csv(esi_path)
 esi['Date'] = pd.to_datetime(esi['Date'])
 
 # # put in the scan_path!
-scan_path = '/Users/coreywalker/Desktop/NOAA/SCANAnalysis/SCAN_DEPTHS_ALL.csv'
+scan_path = 'C:/Users/cwalker/Desktop/Data/SCAN_Data/SCAN_DEPTHS_ALL.csv'
 scan = pd.read_csv(scan_path)
 
 
@@ -17,7 +21,7 @@ sms['Date'] = pd.to_datetime(sms['Date'])
 
 #group the dataframe by station and date and agrigate the mean and count for each group.
 sms_grp = sms.groupby(['station', pd.Grouper(key='Date', freq='W-WED')]).agg(['mean', 'count'])
-print(sms_grp.columns)
+
 
 #the groupby function creates a multiindex that needs to be joined together.
 sms_grp.columns = sms_grp.columns.map('_'.join)
@@ -37,7 +41,37 @@ both = merge_sms_esi[merge_sms_esi['how']=='both']
 corrected = both[both['ESI'] != -9999]
 
 #send that bad boy to a csv for analysis. 
-corrected.to_csv('/Users/coreywalker/Desktop/NOAA/ALL_SMS_ESI_merged.csv')
+# corrected.to_csv('')
+
+x = corrected['ESI']
+y = corrected['SMS-2.0in_mean']
+
+#seaborn plots
+#plot = sns.regplot(x = x_values, y = y_values, 
+#                   scatter_kws={'s':2}, color='red', line_kws={'color': 'black'})
+
+
+plot = sns.regplot(x, y, scatter_kws={'s':2}, line_kws={'color': 'black'})
+stats = stats.pearsonr(x, y)
+r2 = stats[0]
+p_value = stats[1]
+format_r2 = '{0:.3f}'.format(r2)
+format_p = '{0:6f}'.format(p_value)
+plot.text(-3.46, 57,
+          s="R^2:{}, p_value:{}".format('' + str(format_r2), '' + str(format_p)))
+
+
+
+#matplotlib plots
+# x = corrected['ESI']
+# y = corrected['SMS-2.0in_mean']
+
+# plt.xlabel('ESI')
+# plt.ylabel('SMS-Mean-2.0')
+
+# plt.title('ESI vs SMS')
+
+# plt.show()
 
 
 
