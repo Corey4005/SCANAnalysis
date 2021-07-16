@@ -1,6 +1,10 @@
 import pandas as pd
 import seaborn as sns
+from matplotlib.offsetbox import AnchoredText
 from scipy import stats
+import warnings 
+
+warnings.filterwarnings('ignore')
 
 
 # Read in the ESI data
@@ -20,8 +24,14 @@ sms = scan[['Date', 'station','SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-20.0in
 sms['Date'] = pd.to_datetime(sms['Date'])
 
 #group the dataframe by station and date and agrigate the mean and count for each group.
-sms_grp = sms.groupby(['station', pd.Grouper(key='Date', freq='W-WED')]).agg(['mean', 'count'])
+key_codes = pd.DataFrame({'Weekday': ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], 'Key': ['W-Sun', 'W-Mon', 'W-Tue', 'W-Wed', 'W-Thu', 'W-Fri', 'W-Sat',]})
+print(f" \n\n Here is a key of the way you can group the data by week: \n\n {key_codes}")
+freq = input("Input the desired grouping frequency: ")
 
+sms_grp = sms.groupby(['station', pd.Grouper(key='Date', freq=str(freq))]).agg(['mean', 'count'])
+
+# origin = pd.Timestamp("2000-26-01")
+# sms_grp = sms.groupby('station', pd.Grouper(key='Date', freq='W', origin=origin)).agg(['mean', 'count'])
 
 #the groupby function creates a multiindex that needs to be joined together.
 sms_grp.columns = sms_grp.columns.map('_'.join)
@@ -35,7 +45,6 @@ sms_2in_index = two_in[two_in['SMS-2.0in_count'] == 7]
 
 #merge the ESI with the sms 2-in index at Date and Station.
 merge_sms_esi = pd.merge(left=esi, right=sms_2in_index, on=['Date', 'station'], how='outer', indicator='how').reset_index()
-
 #index the dataframe and get only the values where both were merged AND ESI has a real value. 
 both = merge_sms_esi[merge_sms_esi['how']=='both']
 corrected = both[both['ESI'] != -9999]
@@ -57,21 +66,17 @@ r2 = stats[0]
 p_value = stats[1]
 format_r2 = '{0:.3f}'.format(r2)
 format_p = '{0:6f}'.format(p_value)
-plot.text(-3.46, 57,
-          s="R^2:{}, p_value:{}".format('' + str(format_r2), '' + str(format_p)))
+shape = corrected.shape[0]
 
+#create legend for weekly values
+at = AnchoredText(s=f"R2: {format_r2} \n P: {format_p} \n Key: {freq} \n n: {shape}", loc='upper left')
+plot.add_artist(at)
 
+#create legend for specific start date
+# at = AnchoredText(s=f"R2: {format_r2} \n P: {format_p} \n Key: origin \n n: {shape}", loc='upper left')
+# plot.add_artist(at)
+#plot.text(-3.46, 51, s="R2:{} \n P:{} \n Freq:{}".format(' ' + str(format_r2), ' ' + str(format_p), ' ' + str(freq)))
 
-#matplotlib plots
-# x = corrected['ESI']
-# y = corrected['SMS-2.0in_mean']
-
-# plt.xlabel('ESI')
-# plt.ylabel('SMS-Mean-2.0')
-
-# plt.title('ESI vs SMS')
-
-# plt.show()
 
 
 
