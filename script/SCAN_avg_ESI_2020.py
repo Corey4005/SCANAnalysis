@@ -8,12 +8,12 @@ warnings.filterwarnings('ignore')
 
 
 # Read in the ESI data
-esi_path = 'C:/Users/cwalker/Desktop/Data/Processed_ESI/ESI_1wk_tif2select_pt.csv'
+esi_path = 'C:/Users/Corey4005/Desktop/NOAA/ESIExtractProject/data/ESI_1wk_tif2select_pt.csv'
 esi = pd.read_csv(esi_path)
 esi['Date'] = pd.to_datetime(esi['Date'])
 
 # # put in the scan_path!
-scan_path = 'C:/Users/cwalker/Desktop/Data/SCAN_Data/SCAN_DEPTHS_ALL.csv'
+scan_path = 'C:/Users/Corey4005/Desktop/NOAA/SCANAnalysis/data/SCAN_DEPTHS_ALL.csv'
 scan = pd.read_csv(scan_path)
 
 
@@ -28,8 +28,14 @@ key_codes = pd.DataFrame({'Weekday': ['Sunday', 'Monday', 'Tuesday', 'Wednesday'
 print(f" \n\n Here is a key of the way you can group the data by week: \n\n {key_codes}")
 freq = input("Input the desired grouping frequency: ")
 
+#create a dataframe of the unique stations
+
+#create an input variable for the merge
+
 sms_grp = sms.groupby(['station', pd.Grouper(key='Date', freq=str(freq))]).agg(['mean', 'count'])
 
+
+#testing...
 # origin = pd.Timestamp("2000-26-01")
 # sms_grp = sms.groupby('station', pd.Grouper(key='Date', freq='W', origin=origin)).agg(['mean', 'count'])
 
@@ -52,14 +58,11 @@ corrected = both[both['ESI'] != -9999]
 #send that bad boy to a csv for analysis. 
 # corrected.to_csv('')
 
+#create x and y values for weekly plot
 x = corrected['ESI']
 y = corrected['SMS-2.0in_mean']
 
-#seaborn plots
-#plot = sns.regplot(x = x_values, y = y_values, 
-#                   scatter_kws={'s':2}, color='red', line_kws={'color': 'black'})
-
-
+#create a regplot based on weekly values. 
 plot = sns.regplot(x, y, scatter_kws={'s':2}, line_kws={'color': 'black'})
 stats = stats.pearsonr(x, y)
 r2 = stats[0]
@@ -68,14 +71,19 @@ format_r2 = '{0:.3f}'.format(r2)
 format_p = '{0:6f}'.format(p_value)
 shape = corrected.shape[0]
 
-#create legend for weekly values
+#create a legend for weekly values plot.
 at = AnchoredText(s=f"R2: {format_r2} \n P: {format_p} \n Key: {freq} \n n: {shape}", loc='upper left')
 plot.add_artist(at)
 
-#create legend for specific start date
-# at = AnchoredText(s=f"R2: {format_r2} \n P: {format_p} \n Key: origin \n n: {shape}", loc='upper left')
-# plot.add_artist(at)
-#plot.text(-3.46, 51, s="R2:{} \n P:{} \n Freq:{}".format(' ' + str(format_r2), ' ' + str(format_p), ' ' + str(freq)))
+#create a facetplot for each station showing regression by station. 
+g = sns.FacetGrid(corrected, col='station', height=6, col_wrap=3)
+g.map_dataframe(sns.regplot, x="ESI", y="SMS-2.0in_mean")
+g.set_axis_labels("ESI", "SMS-2.0in_mean")
+g.add_legend()
+
+
+
+
 
 
 
