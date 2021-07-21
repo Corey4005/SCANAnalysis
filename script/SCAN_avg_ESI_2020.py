@@ -1,7 +1,9 @@
 import pandas as pd
 import seaborn as sns
 from matplotlib.offsetbox import AnchoredText
+import matplotlib.pyplot as plt
 from scipy import stats
+import scipy as sp
 import warnings 
 
 warnings.filterwarnings('ignore')
@@ -75,18 +77,18 @@ shape = corrected.shape[0]
 at = AnchoredText(s=f"R2: {format_r2} \n P: {format_p} \n Key: {freq} \n n: {shape}", loc='upper left')
 plot.add_artist(at)
 
-#create a facetplot for each station showing regression by station. 
-g = sns.FacetGrid(corrected, col='station', height=6, col_wrap=3)
-g.map_dataframe(sns.regplot, x="ESI", y="SMS-2.0in_mean")
-g.set_axis_labels("ESI", "SMS-2.0in_mean")
-g.add_legend()
 
+#lets try a grid plot to look at individual station stats. 
+g2 = sns.lmplot(x='ESI', y='SMS-2.0in_mean', data=corrected, col='station', height=6, col_wrap=3)
 
+def annotate(data, **kws):
+    r, p =sp.stats.pearsonr(data['ESI'], data['SMS-2.0in_mean'])
+    shape2 = data.shape[0]
+    ax = plt.gca()
+    ax.text(-2, 50, s='r={:.2f}, \n p={:.2g},\n n={shape2}'.format(r, p, shape2=shape2))
 
-
-
-
-
+g2.map_dataframe(annotate)
+plt.show()
 
 
 
