@@ -3,7 +3,6 @@ import seaborn as sns
 from matplotlib.offsetbox import AnchoredText
 import matplotlib.pyplot as plt
 from scipy import stats
-import scipy as sp
 import warnings 
 
 
@@ -12,12 +11,12 @@ warnings.filterwarnings('ignore')
 
 
 # Read in the ESI data
-esi_path = 'C:/Users/Corey4005/Desktop/NOAA/ESIExtractProject/data/ESI_1wk_tif2select_pt.csv'
+esi_path = '/Users/coreywalker/Desktop/NOAA/ESIExtractProject/ESI_1wk_tif2select_pt.csv'
 esi = pd.read_csv(esi_path)
 esi['Date'] = pd.to_datetime(esi['Date'])
 
 # # put in the scan_path!
-scan_path = 'C:/Users/Corey4005/Desktop/NOAA/SCANAnalysis/data/SCAN_DEPTHS_ALL.csv'
+scan_path = '/Users/coreywalker/Desktop/NOAA/SCANAnalysis/data/SCAN_DEPTHS_ALL.csv'
 scan = pd.read_csv(scan_path)
 
 
@@ -87,9 +86,6 @@ two_in_y = two_corrected['SMS-2.0in_mean']
 four_in_x = four_corrected['ESI']
 four_in_y = four_corrected['SMS-4.0in_mean']
 
-print(two_in_x, two_in_y)
-print(four_in_x, four_in_y)
-
 eight_in_x = eight_corrected['ESI']
 eight_in_y = eight_corrected['SMS-8.0in_mean']
 
@@ -99,71 +95,120 @@ twenty_in_y = twenty_corrected['SMS-20.0in_mean']
 forty_in_x = forty_corrected['ESI']
 forty_in_y = forty_corrected['SMS-40.0in_mean']
 
-#create a regplot based on two_in values. 
-plot = sns.regplot(two_in_x, two_in_y, scatter_kws={'s':2}, line_kws={'color': 'black'})
-stats = stats.pearsonr(two_in_x, two_in_y)
-r2 = stats[0]
-p_value = stats[1]
-format_r2 = '{0:.3f}'.format(r2)
-format_p = '{0:6f}'.format(p_value)
-shape = two_corrected.shape[0]
-at = AnchoredText(s=f"R2: {format_r2} \n P: {format_p} \n Key: {freq} \n n: {shape}", loc='upper left')
-plot.add_artist(at)
+#create the figure subplots based on each level of soil. 
+fig, ax = plt.subplots(nrows=1, ncols=5, figsize=(25,10))
+fig.suptitle('Alabama SCAN Soil Moisture Stations (SMS) at Different Depths vs Alexi Sattelite Environmental Stress Index (ESI)')
 
-#create a regplot based on four_in values. 
-plot2 = sns.regplot(four_in_x, four_in_y, scatter_kws={'s':2}, line_kws={'color': 'black'})
-# stats2 = stats.pearsonr(four_in_x, four_in_y)
-# four_in_r2 = stats2[0]
-# four_in_p = stats2[1]
-# format_four_in_r2 = '{0:.3f}'.format(four_in_r2)
-# format_four_in_p = '{0:6f}'.format(four_in_p)
-# shape_four_in = four_corrected.shape[0]
-# at2 = AnchoredText(s=f"R2: {format_four_in_r2} \n P: {format_four_in_p} \n Key: {freq} \n n: {shape_four_in}", loc='upper left')
-# plot2.add_artist(at2)
+#here is the subplot for two in data.
+sns.regplot(ax=ax[0], x=two_in_x, y=two_in_y, data='two_corrected', scatter_kws={'s':2}, line_kws={'color': 'black'})
+stats_two = stats.pearsonr(two_in_x, two_in_y)
+formated_r_two = ("{:.4f}".format(stats_two[0]))
+formated_p_two = ("{:.4f}".format(stats_two[1]))
+shape_two = two_corrected.shape[0]
+at_two = AnchoredText(s=f"R2: {formated_r_two} \n P: {formated_p_two} \n Key: {freq} \n n: {shape_two}", loc='upper left')
+ax[0].add_artist(at_two)
+ax[0].set_title('All 2in SMS vs ESI')
 
-# #create a regplot based on eight_in values. 
-# plot3 = sns.regplot(eight_in_x, eight_in_y, scatter_kws={'s':2}, line_kws={'color': 'black'})
-# stats3 = stats.pearsonr(eight_in_x, eight_in_y)
-# r2 = stats[0]
-# p_value = stats[1]
-# format_r2 = '{0:.3f}'.format(r2)
-# format_p = '{0:6f}'.format(p_value)
-# shape = eight_corrected.shape[0]
-# at = AnchoredText(s=f"R2: {format_r2} \n P: {format_p} \n Key: {freq} \n n: {shape}", loc='upper left')
-# plot.add_artist(at)
+#here is the subplot for four inch data
+sns.regplot(ax=ax[1], x=four_in_x, y=four_in_y, data='four_corrected', scatter_kws={'s':2}, line_kws={'color': 'black'})
+stats_four = stats.pearsonr(four_in_x, four_in_y)
+formated_r_four = ("{:.4f}".format(stats_four[0]))
+formated_p_four = ("{:.4f}".format(stats_four[1]))
+shape_four = four_corrected.shape[0]
+at_four = AnchoredText(s=f"R2: {formated_r_four} \n P: {formated_p_four} \n Key: {freq} \n n: {shape_four}", loc='upper left')
+ax[1].add_artist(at_four)
+ax[1].set_title('All 4in SMS vs ESI')
 
-# #create a regplot based on twenty_in values. 
-# plot4 = sns.regplot(twenty_in_x, twenty_in_y, scatter_kws={'s':2}, line_kws={'color': 'black'})
-# stats4 = stats.pearsonr(twenty_in_x, twenty_in_y)
-# r2 = stats[0]
-# p_value = stats[1]
-# format_r2 = '{0:.3f}'.format(r2)
-# format_p = '{0:6f}'.format(p_value)
-# shape = twenty_corrected.shape[0]
-# at = AnchoredText(s=f"R2: {format_r2} \n P: {format_p} \n Key: {freq} \n n: {shape}", loc='upper left')
-# plot.add_artist(at)
+#here is the subplot for eight inch data
+sns.regplot(ax=ax[2], x=eight_in_x, y=eight_in_y, data='two_corrected', scatter_kws={'s':2}, line_kws={'color': 'black'})
+stats_eight = stats.pearsonr(eight_in_x, eight_in_y)
+formated_r_eight = ("{:.4f}".format(stats_eight[0]))
+formated_p_eight = ("{:.4f}".format(stats_eight[1]))
+shape_eight = eight_corrected.shape[0]
+at_eight = AnchoredText(s=f"R2: {formated_r_eight} \n P: {formated_p_eight} \n Key: {freq} \n n: {shape_eight}", loc='upper left')
+ax[2].add_artist(at_eight)
+ax[2].set_title('All 8in SMS vs ESI')
 
-# #create a regplot based on forty_in values. 
-# plot5 = sns.regplot(forty_in_x, forty_in_y, scatter_kws={'s':2}, line_kws={'color': 'black'})
-# stats5 = stats.pearsonr(forty_in_x, forty_in_y)
-# r2 = stats[0]
-# p_value = stats[1]
-# format_r2 = '{0:.3f}'.format(r2)
-# format_p = '{0:6f}'.format(p_value)
-# shape = forty_corrected.shape[0]
-# at = AnchoredText(s=f"R2: {format_r2} \n P: {format_p} \n Key: {freq} \n n: {shape}", loc='upper left')
-# plot.add_artist(at)
+#here is the subplot for twenty inch data
+sns.regplot(ax=ax[3], x=twenty_in_x, y=twenty_in_y, data='four_corrected', scatter_kws={'s':2}, line_kws={'color': 'black'})
+stats_twenty = stats.pearsonr(twenty_in_x, twenty_in_y)
+formated_r_twenty = ("{:.4f}".format(stats_twenty[0]))
+formated_p_twenty = ("{:.4f}".format(stats_twenty[1]))
+shape_twenty = twenty_corrected.shape[0]
+at_twenty = AnchoredText(s=f"R2: {formated_r_twenty} \n P: {formated_p_twenty} \n Key: {freq} \n n: {shape_twenty}", loc='upper left')
+ax[3].add_artist(at_twenty)
+ax[3].set_title('All 20in SMS vs ESI')
 
 
-# #lets try a grid plot to look at individual station stats. 
-# g2 = sns.lmplot(x='ESI', y='SMS-2.0in_mean', data=corrected, col='station', height=6, col_wrap=3)
+# #here is the subplot for forty inch data
+sns.regplot(ax=ax[4], x=forty_in_x, y=forty_in_y, data='four_corrected', scatter_kws={'s':2}, line_kws={'color': 'black'})
+stats_forty = stats.pearsonr(forty_in_x, forty_in_y)
+formated_r_forty = ("{:.4f}".format(stats_forty[0]))
+formated_p_forty = ("{:.4f}".format(stats_forty[1]))
+shape_forty = forty_corrected.shape[0]
+at_forty = AnchoredText(s=f"R2: {formated_r_forty} \n P: {formated_p_forty} \n Key: {freq} \n n: {shape_twenty}", loc='upper left')
+ax[4].add_artist(at_forty)
+ax[4].set_title('All 40in SMS vs ESI')
 
-# def annotate(data, **kws):
-#     r, p =sp.stats.pearsonr(data['ESI'], data['SMS-2.0in_mean'])
-#     shape2 = data.shape[0]
-#     ax = plt.gca()
-#     ax.text(-2, 50, s='r={:.2f}, \n p={:.2g},\n n={shape2}'.format(r, p, shape2=shape2))
+plt.tight_layout()
 
-# g2.map_dataframe(annotate)
-# plt.show()
+# #lets try a grid plot to look at individual station stats for each depth. 
+
+stations_two = sns.lmplot(x='ESI', y='SMS-2.0in_mean', data=two_corrected, col='station', height=6, col_wrap=3)
+stations_two.fig.suptitle('ESI (y-axis) by Individual Alabama USDA 2in SMS (x-axis)')
+
+stations_four = sns.lmplot(x='ESI', y='SMS-4.0in_mean', data=four_corrected, col='station', height=6, col_wrap=3)
+stations_four.fig.suptitle('ESI (y-axis) by Individual Alabama USDA 4in SMS (x-axis)')
+
+stations_eight = sns.lmplot(x='ESI', y='SMS-8.0in_mean', data=eight_corrected, col='station', height=6, col_wrap=3)
+stations_eight.fig.suptitle('ESI (y-axis) by Individual Alabama USDA 8in SMS (x-axis)')
+
+stations_twenty = sns.lmplot(x='ESI', y='SMS-20.0in_mean', data=twenty_corrected, col='station', height=6, col_wrap=3)
+stations_twenty.fig.suptitle('ESI (y-axis) by Individual Alabama USDA 20in SMS (x-axis)')
+
+stations_forty = sns.lmplot(x='ESI', y='SMS-40.0in_mean', data=forty_corrected, col='station', height=6, col_wrap=3)
+stations_forty.fig.suptitle('ESI (y-axis) by Individual Alabama USDA 40in SMS (x-axis)')
+
+#create the figure functons to annotate the appropriate stats for each graph. 
+def annotate_two(data, **kws):
+    r_2, p_2 = stats.pearsonr(data['ESI'], data['SMS-2.0in_mean'])
+    shape2 = data.shape[0]
+    ax = plt.gca()
+    ax.text(-2, 50, s='r={:.4f}, \n p={:.4g},\n n={shape}'.format(r_2, p_2, shape=shape2))
+
+def annotate_four(data, **kws):
+    r_4, p_4 = stats.pearsonr(data['ESI'], data['SMS-4.0in_mean'])
+    shape4 = data.shape[0]
+    ax = plt.gca()
+    ax.text(-2, 50, s='r={:.4f}, \n p={:.4g},\n n={shape}'.format(r_4, p_4, shape=shape4))
+
+def annotate_eight(data, **kws):
+    r_8, p_8 = stats.pearsonr(data['ESI'], data['SMS-8.0in_mean'])
+    shape8 = data.shape[0]
+    ax = plt.gca()
+    ax.text(-2, 50, s='r={:.4f}, \n p={:.4g},\n n={shape}'.format(r_8, p_8, shape=shape8))
+ 
+def annotate_twenty(data, **kws):
+    r_20, p_20 = stats.pearsonr(data['ESI'], data['SMS-20.0in_mean'])
+    shape20 = data.shape[0]
+    ax = plt.gca()
+    ax.text(-2, 50, s='r={:.4f}, \n p={:.4g},\n n={shape}'.format(r_20, p_20, shape=shape20))
+
+def annotate_forty(data, **kws):
+    r_40, p_40 = stats.pearsonr(data['ESI'], data['SMS-40.0in_mean'])
+    shape40 = data.shape[0]
+    ax = plt.gca()
+    ax.text(-2, 50, s='r={:.4f}, \n p={:.4g},\n n={shape}'.format(r_40, p_40, shape=shape40))
+    
+#show all the individual figures so that they can be saved. 
+stations_two.map_dataframe(annotate_two)
+stations_four.map_dataframe(annotate_four)
+stations_eight.map_dataframe(annotate_eight)
+stations_twenty.map_dataframe(annotate_twenty)
+stations_forty.map_dataframe(annotate_forty)
+
+plt.show()
+plt.tight_layout()
+
+
 
