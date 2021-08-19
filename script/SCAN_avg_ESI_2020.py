@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 from scipy import stats
 import warnings 
 
-
 #ignore warnings that are thrown. 
 warnings.filterwarnings('ignore')
 
@@ -31,7 +30,6 @@ key_codes = pd.DataFrame({'Weekday': ['Sunday', 'Monday', 'Tuesday', 'Wednesday'
 print(f" \n\n Here is a key of the way you can group the data by week: \n\n {key_codes}")
 freq = input("Input the desired grouping frequency: ")
 
-
 #create an input variable for the merge
 sms_grp = sms.groupby(['station', pd.Grouper(key='Date', freq=str(freq))]).agg(['mean', 'count'])
 
@@ -42,13 +40,19 @@ sms_grp.columns = sms_grp.columns.map('_'.join)
 #reset the index so that the columns are formatted correctly. 
 sms_grp = sms_grp.reset_index()
 
+#create averages for sliced data. 
+sms_grp['SMS-all-avg'] = (sms_grp['SMS-2.0in_mean'] + sms_grp['SMS-4.0in_mean'] + sms_grp['SMS-8.0in_mean'] + sms_grp['SMS-20.0in_mean'] + sms_grp['SMS-40.0in_mean']) / 5
+sms_grp['SMS-2.0+4.0_avg'] = (sms_grp['SMS-2.0in_mean'] + sms_grp['SMS-4.0in_mean']) / 2
+sms_grp['SMS-4.0+8.0_avg'] = (sms_grp['SMS-4.0in_mean'] + sms_grp['SMS-8.0in_mean']) / 2
+sms_grp['SMS-8.0+20.0_avg'] = (sms_grp['SMS-8.0in_mean'] + sms_grp['SMS-20.0in_mean']) / 2
+sms_grp['SMS-20.0+40.0_avg'] = (sms_grp['SMS-20.0in_mean'] + sms_grp['SMS-40.0in_mean']) / 2
+
 #create groups by station, date, depth and count.
 two_in = sms_grp[['station', 'Date', 'SMS-2.0in_mean', 'SMS-2.0in_count']]
 four_in = sms_grp[['station', 'Date', 'SMS-4.0in_mean', 'SMS-4.0in_count']]
 eight_in = sms_grp[['station', 'Date', 'SMS-8.0in_mean', 'SMS-8.0in_count']]
 twenty_in = sms_grp[['station', 'Date', 'SMS-20.0in_mean', 'SMS-20.0in_count']]
 forty_in = sms_grp[['station', 'Date', 'SMS-40.0in_mean', 'SMS-40.0in_count']]
-
 
 #now, we filter to get just the weeks that produced a mean from 7 values. 
 sms_2in_index = two_in[two_in['SMS-2.0in_count'] == 7]
@@ -57,12 +61,14 @@ sms_8in_index = eight_in[eight_in['SMS-8.0in_count']== 7]
 sms_20in_index = twenty_in[twenty_in['SMS-20.0in_count']== 7]
 sms_40in_index = forty_in[forty_in['SMS-40.0in_count']== 7]
 
+
 #merge the ESI with the sms index at each group.
 two_in_merge_sms_esi = pd.merge(left=esi, right=sms_2in_index, on=['Date', 'station'], how='outer', indicator='how').reset_index()
 four_in_merge_sms_esi = pd.merge(left=esi, right=sms_4in_index, on=['Date', 'station'], how='outer', indicator='how').reset_index()
 eight_in_merge_sms_esi = pd.merge(left=esi, right=sms_8in_index, on=['Date', 'station'], how='outer', indicator='how').reset_index()
 twenty_in_merge_sms_esi = pd.merge(left=esi, right=sms_20in_index, on=['Date', 'station'], how='outer', indicator='how').reset_index()
 forty_in_merge_sms_esi = pd.merge(left=esi, right=sms_40in_index, on=['Date', 'station'], how='outer', indicator='how').reset_index()
+
 
 
 #index the dataframes and get only the values where both SMS AND ESI have a real value. 
