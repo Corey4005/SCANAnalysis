@@ -211,65 +211,126 @@ at_slice20 = AnchoredText(s=f"R2: {formated_r_slice20} \n P: {formated_p_slice20
 ax[1, 4].add_artist(at_slice20)
 ax[1, 4].set_title('20in_40in_slice SMS vs ESI')
 
-plt.tight_layout()
+#seting context for the plots.
 sns.set_context("paper")
+sns.set_style('whitegrid')
 
-# # #lets try a grid plot to look at individual station stats for each depth. 
+# #lets try a grid plot to look at individual station stats for each depth. 
+variable_y = 1.0
 
-# stations_two = sns.lmplot(x='ESI', y='2in_rolling_mean', data=two_corrected, col='station', height=6, col_wrap=3)
-# stations_two.fig.suptitle('ESI (y-axis) by Individual Alabama USDA 2in SMS (x-axis)')
+stations_two = sns.lmplot(x='ESI', y='2in_rolling_mean', data=two_corrected, col='station', height=6, col_wrap=3)
+stations_two.fig.suptitle('ESI (y-axis) by Individual Alabama USDA 2in SMS (x-axis)', y=variable_y)
 
-# stations_four = sns.lmplot(x='ESI', y='4in_rolling_mean', data=four_corrected, col='station', height=6, col_wrap=3)
-# stations_four.fig.suptitle('ESI (y-axis) by Individual Alabama USDA 4in SMS (x-axis)')
+stations_four = sns.lmplot(x='ESI', y='4in_rolling_mean', data=four_corrected, col='station', height=6, col_wrap=3)
+stations_four.fig.suptitle('ESI (y-axis) by Individual Alabama USDA 4in SMS (x-axis)', y=variable_y)
 
-# stations_eight = sns.lmplot(x='ESI', y='8in_rolling_mean', data=eight_corrected, col='station', height=6, col_wrap=3)
-# stations_eight.fig.suptitle('ESI (y-axis) by Individual Alabama USDA 8in SMS (x-axis)')
+stations_eight = sns.lmplot(x='ESI', y='8in_rolling_mean', data=eight_corrected, col='station', height=6, col_wrap=3)
+stations_eight.fig.suptitle('ESI (y-axis) by Individual Alabama USDA 8in SMS (x-axis)', y=variable_y)
 
-# stations_twenty = sns.lmplot(x='ESI', y='20in_rolling_mean', data=twenty_corrected, col='station', height=6, col_wrap=3)
-# stations_twenty.fig.suptitle('ESI (y-axis) by Individual Alabama USDA 20in SMS (x-axis)')
+stations_twenty = sns.lmplot(x='ESI', y='20in_rolling_mean', data=twenty_corrected, col='station', height=6, col_wrap=3)
+stations_twenty.fig.suptitle('ESI (y-axis) by Individual Alabama USDA 20in SMS (x-axis)', y=variable_y)
 
-# stations_forty = sns.lmplot(x='ESI', y='40in_rolling_mean', data=forty_corrected, col='station', height=6, col_wrap=3)
-# stations_forty.fig.suptitle('ESI (y-axis) by Individual Alabama USDA 40in SMS (x-axis)')
+stations_forty = sns.lmplot(x='ESI', y='40in_rolling_mean', data=forty_corrected, col='station', height=6, col_wrap=3)
+stations_forty.fig.suptitle('ESI (y-axis) by Individual Alabama USDA 40in SMS (x-axis)', y=variable_y)
 
-# #create the figure functons to annotate the appropriate stats for each graph. 
-# def annotate_two(data, **kws):
-#     r_2, p_2 = stats.pearsonr(data['ESI'], data['2in_rolling_mean'])
-#     shape2 = data.shape[0]
-#     ax = plt.gca()
-#     ax.text(-2, 50, s='r={:.4f}, \n p={:.4g},\n n={shape}'.format(r_2, p_2, shape=shape2))
+stations_all = sns.lmplot(x='ESI', y='SMS-all-avg', data=all_avg_corrected, col='station', height=6, col_wrap=3)
+stations_all.fig.suptitle('ESI (y-axis) by Individual Alabama USDA all-depths avg SMS (x-axis)', y=variable_y)
 
-# def annotate_four(data, **kws):
-#     r_4, p_4 = stats.pearsonr(data['ESI'], data['4in_rolling_mean'])
-#     shape4 = data.shape[0]
-#     ax = plt.gca()
-#     ax.text(-2, 50, s='r={:.4f}, \n p={:.4g},\n n={shape}'.format(r_4, p_4, shape=shape4))
+stations_two_four = sns.lmplot(x='ESI', y='SMS-2.0+4.0_avg', data=two_in_four_in_corrected, col='station', height=6, col_wrap=3)
+stations_two_four.fig.suptitle('ESI (y-axis) by Individual Alabama USDA two_in_four_in slice avg SMS (x-axis)', y=variable_y)
 
-# def annotate_eight(data, **kws):
-#     r_8, p_8 = stats.pearsonr(data['ESI'], data['8in_rolling_mean'])
-#     shape8 = data.shape[0]
-#     ax = plt.gca()
-#     ax.text(-2, 50, s='r={:.4f}, \n p={:.4g},\n n={shape}'.format(r_8, p_8, shape=shape8))
+stations_four_eight = sns.lmplot(x='ESI', y='SMS-4.0+8.0_avg', data=four_in_eight_in_corrected, col='station', height=6, col_wrap=3)
+stations_four_eight.fig.suptitle('ESI (y-axis) by Individual Alabama USDA four_in_eight_in slice avg SMS (x-axis)', y=variable_y)
+
+stations_eight_twenty = sns.lmplot(x='ESI', y='SMS-8.0+20.0_avg', data=eight_in_twenty_in_corrected, col='station', height=6, col_wrap=3)
+stations_eight_twenty.fig.suptitle('ESI (y-axis) by Individual Alabama USDA eight_in_twenty_in slice avg SMS (x-axis)', y=variable_y)
+
+stations_twenty_forty = sns.lmplot(x='ESI', y='SMS-20.0+40.0_avg', data=twenty_in_forty_in_corrected, col='station', height=6, col_wrap=3)
+stations_twenty_forty.fig.suptitle('ESI (y-axis) by Individual Alabama USDA twenty_in_forty_in slice avg SMS (x-axis)', y=variable_y)
+
+#create the figure functons to annotate the appropriate stats for each graph. 
+def annotate_two(data, **kws):
+    r_2, p_2 = stats.pearsonr(data['ESI'], data['2in_rolling_mean'])
+    shape2 = data.shape[0]
+    ax.text(-2.5, 50, s='r={:.4f}, \n p={:.4g},\n n={shape}'.format(r_2, p_2, shape=shape2))
+
+def annotate_four(data, **kws):
+    r_4, p_4 = stats.pearsonr(data['ESI'], data['4in_rolling_mean'])
+    shape4 = data.shape[0]
+    ax = plt.gca()
+    ax.text(-2.5, 50, s='r={:.4f}, \n p={:.4g},\n n={shape}'.format(r_4, p_4, shape=shape4))
+
+def annotate_eight(data, **kws):
+    r_8, p_8 = stats.pearsonr(data['ESI'], data['8in_rolling_mean'])
+    shape8 = data.shape[0]
+    ax = plt.gca()
+    ax.text(-2.5, 50, s='r={:.4f}, \n p={:.4g},\n n={shape}'.format(r_8, p_8, shape=shape8))
  
-# def annotate_twenty(data, **kws):
-#     r_20, p_20 = stats.pearsonr(data['ESI'], data['20in_rolling_mean'])
-#     shape20 = data.shape[0]
-#     ax = plt.gca()
-#     ax.text(-2, 50, s='r={:.4f}, \n p={:.4g},\n n={shape}'.format(r_20, p_20, shape=shape20))
+def annotate_twenty(data, **kws):
+    r_20, p_20 = stats.pearsonr(data['ESI'], data['20in_rolling_mean'])
+    shape20 = data.shape[0]
+    ax = plt.gca()
+    ax.text(-2.5, 50, s='r={:.4f}, \n p={:.4g},\n n={shape}'.format(r_20, p_20, shape=shape20))
 
-# def annotate_forty(data, **kws):
-#     r_40, p_40 = stats.pearsonr(data['ESI'], data['40in_rolling_mean'])
-#     shape40 = data.shape[0]
-#     ax = plt.gca()
-#     ax.text(-2, 50, s='r={:.4f}, \n p={:.4g},\n n={shape}'.format(r_40, p_40, shape=shape40))
+def annotate_forty(data, **kws):
+    r_40, p_40 = stats.pearsonr(data['ESI'], data['40in_rolling_mean'])
+    shape40 = data.shape[0]
+    ax = plt.gca()
+    ax.text(-2.5, 50, s='r={:.4f}, \n p={:.4g},\n n={shape}'.format(r_40, p_40, shape=shape40))
     
-# #show all the individual figures so that they can be saved. 
-# stations_two.map_dataframe(annotate_two)
-# stations_four.map_dataframe(annotate_four)
-# stations_eight.map_dataframe(annotate_eight)
-# stations_twenty.map_dataframe(annotate_twenty)
-# stations_forty.map_dataframe(annotate_forty)
+def annotate_all(data, **kws):
+    r_all, p_all = stats.pearsonr(data['ESI'], data['SMS-all-avg'])
+    shapeall = data.shape[0]
+    ax = plt.gca()
+    ax.text(-2.5, 50, s='r={:.4f}, \n p={:.4g},\n n={shape}'.format(r_all, p_all, shape=shapeall))
+    
+def annotate_two_four(data, **kws):
+    r_two_four, p_two_four = stats.pearsonr(data['ESI'], data['SMS-2.0+4.0_avg'])
+    shape_two_four = data.shape[0]
+    ax = plt.gca()
+    ax.text(-2.5, 50, s='r={:.4f}, \n p={:.4g},\n n={shape}'.format(r_two_four, p_two_four, shape=shape_two_four))
+    
+def annotate_four_eight(data, **kws):
+    r_four_eight, p_four_eight = stats.pearsonr(data['ESI'], data['SMS-4.0+8.0_avg'])
+    shape_four_eight = data.shape[0]
+    ax = plt.gca()
+    ax.text(-2.5, 50, s='r={:.4f}, \n p={:.4g},\n n={shape}'.format(r_four_eight, p_four_eight, shape=shape_four_eight))
 
-# plt.show()
+def annotate_eight_twenty(data, **kws):
+    r_eight_twenty, p_eight_twenty = stats.pearsonr(data['ESI'], data['SMS-8.0+20.0_avg'])
+    shape_eight_twenty = data.shape[0]
+    ax = plt.gca()
+    ax.text(-2.5, 50, s='r={:.4f}, \n p={:.4g},\n n={shape}'.format(r_eight_twenty, p_eight_twenty, shape=shape_eight_twenty))
+    
+def annotate_twenty_forty(data, **kws):
+    r_twenty_forty, p_twenty_forty = stats.pearsonr(data['ESI'], data['SMS-20.0+40.0_avg'])
+    shape_twenty_forty = data.shape[0]
+    ax = plt.gca()
+    ax.text(-2.5, 50, s='r={:.4f}, \n p={:.4g},\n n={shape}'.format(r_twenty_forty, p_twenty_forty, shape=shape_twenty_forty))
+
+#show all the individual figures so that they can be saved. 
+stations_two.map_dataframe(annotate_two)
+stations_four.map_dataframe(annotate_four)
+stations_eight.map_dataframe(annotate_eight)
+stations_twenty.map_dataframe(annotate_twenty)
+stations_forty.map_dataframe(annotate_forty)
+stations_all.map_dataframe(annotate_all)
+stations_two_four.map_dataframe(annotate_two_four)
+stations_four_eight.map_dataframe(annotate_four_eight)
+stations_eight_twenty.map_dataframe(annotate_eight_twenty)
+stations_twenty_forty.map_dataframe(annotate_twenty_forty)
+
+stations_two.savefig('stations_two.pdf')
+stations_four.savefig('stations_four.pdf')
+stations_eight.savefig('stations_eight.pdf')
+stations_twenty.savefig('stations_twenty.pdf')
+stations_forty.savefig('stations_forty.pdf')
+stations_two_four.savefig('stations_two_four.pdf')
+stations_four_eight.savefig('stations_four_eight.pdf')
+stations_eight_twenty.savefig('stations_eight_twenty.pdf')
+stations_twenty_forty.savefig('stations_twenty_forty.pdf')
+
+plt.show()
 
 
 
