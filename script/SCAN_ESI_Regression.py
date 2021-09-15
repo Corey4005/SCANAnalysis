@@ -33,49 +33,120 @@ sms['20in_rolling_mean'] = sms['SMS-20.0in'].rolling(7, min_periods=3).mean()
 sms['40in_rolling_mean'] = sms['SMS-40.0in'].rolling(7, min_periods=3).mean()
 
 #create rolling sums for each level of soil moisture
+sms['2in_rolling_sum'] = sms['SMS-2.0in'].rolling(7, min_periods=3).sum()
+sms['4in_rolling_sum'] = sms['SMS-4.0in'].rolling(7, min_periods=3).sum()
+sms['8in_rolling_sum'] = sms['SMS-8.0in'].rolling(7, min_periods=3).sum()
+sms['20in_rolling_sum'] = sms['SMS-20.0in'].rolling(7, min_periods=3).sum()
+sms['40in_rolling_sum'] = sms['SMS-40.0in'].rolling(7, min_periods=3).sum()
 
 
-#create averages for sliced data
+#create averages for sliced mean data
 sms['SMS-all-avg'] = (sms['2in_rolling_mean'] + sms['4in_rolling_mean'] + sms['8in_rolling_mean'] + sms['20in_rolling_mean'] + sms['40in_rolling_mean']) / 5
 sms['SMS-2.0+4.0_avg'] = (sms['2in_rolling_mean'] + sms['4in_rolling_mean']) / 2
 sms['SMS-4.0+8.0_avg'] = (sms['4in_rolling_mean'] + sms['8in_rolling_mean']) / 2
 sms['SMS-8.0+20.0_avg'] = (sms['8in_rolling_mean'] + sms['20in_rolling_mean']) / 2
 sms['SMS-20.0+40.0_avg'] = (sms['20in_rolling_mean'] + sms['40in_rolling_mean']) /2
 
-#look at three layers sliced data
+#create averages for sliced sum data
+sms['SMS-all-sum'] = (sms['2in_rolling_sum'] + sms['4in_rolling_sum'] + sms['8in_rollng_sum'] + sms['20in_rolling_sum'] + sms['40in_rolling_sum'])
+sms['SMS-2.0+4.0-sum'] = (sms['2in_rolling_sum'] + sms['4in_rolling_sum']) 
+sms['SMS-4.0+8.0-sum'] = (sms['4in_rolling_sum'] + sms['8in_rolling_sum']) 
+sms['SMS-8.0+20.0-sum'] = (sms['8in_rolling_sum'] + sms['20in_rolling_sum']) 
+sms['SMS-20.0+40.0-sum'] = (sms['20in_rolling_sum'] + sms['40in_rolling_sum']) 
+
+#create three layers sliced mean data
 sms['SMS-2.0+4.0+8.0_avg'] = (sms['2in_rolling_mean'] + sms['4in_rolling_mean'] + sms['8in_rolling_mean']) / 3
 sms['SMS-4.0+8.0+20.0_avg'] = (sms['4in_rolling_mean'] + sms['8in_rolling_mean'] + sms['20in_rolling_mean']) / 3
 sms['SMS-8.0+20.0+40.0_avg'] = (sms['8in_rolling_mean'] + sms['20in_rolling_mean'] + sms['40in_rolling_mean']) / 3
 
-#subset sms for each group
+#create averages for three layers sliced sum data
+sms['SMS-2.0+4.0+8.0-sum'] = (sms['2in_rolling_sum'] + sms['4in_rolling_sum'] + sms['8in_rolling_sum']) 
+sms['SMS-4.0+8.0+20.0-sum'] = (sms['4in_rolling_sum'] + sms['8in_rolling_sum'] + sms['20in_rolling_sum']) 
+sms['SMS-8.0+20.0+40.0-sum'] = (sms['8in_rolling_sum'] + sms['20in_rolling_sum'] + sms['40in_rolling_sum']) 
+
+#subset sms for each single group mean by station
 two_in = sms[['station', 'Date', '2in_rolling_mean']]
 four_in = sms[['station', 'Date', '4in_rolling_mean']]
 eight_in = sms[['station', 'Date', '8in_rolling_mean']]
 twenty_in = sms[['station', 'Date', '20in_rolling_mean']]
 forty_in = sms[['station', 'Date', '40in_rolling_mean']]
+
+#subset SMS for all data averaged together.
 all_avg = sms[['station', 'Date', 'SMS-all-avg']]
+
+#subset sms for each single group sum by station
+two_in_sum = sms[['station', 'Date', '2in_rolling_sum']]
+four_in_sum = sms[['station', 'Date', '4in_rolling_sum']]
+eight_in_sum = sms[['station', 'Date', '8in_rolling_sum']]
+twenty_in_sum = sms[['station', 'Date', '20in_rolling_sum']]
+forty_in_sum = sms[['station', 'Date', '40in_rolling_sum']]
+
+#subset SMS for all data summed together. 
+all_sum = sms[['station', 'Date', 'SMS-all-sum']]
+
+#subset the sms for each two layers sliced mean groups by station
 two_in_four_in_avg = sms[['station', 'Date', 'SMS-2.0+4.0_avg']]
 four_in_eight_in_avg = sms[['station', 'Date', 'SMS-4.0+8.0_avg']]
 eight_in_twenty_in_avg = sms[['station', 'Date','SMS-8.0+20.0_avg']]
 twenty_in_forty_in_avg = sms[['station', 'Date', 'SMS-20.0+40.0_avg']]
+
+#subset the sms for each two layers sliced sum groups by station 
+two_four_sum = sms[['station', 'Date', 'SMS-2.0+4.0-sum']]
+four_eight_sum = sms[['station', 'Date', 'SMS-4.0+8.0-sum',]]
+eight_twenty_sum = sms[['station', 'Date', 'SMS-8.0+20.0-sum']]
+twenty_forty_sum = sms[['station', 'Date', 'SMS-20.0+40.0-sum']]
+
+#subset the sms for each three layers sliced  mean groups by station
 two_four_eight_in_avg = sms[['station', 'Date', 'SMS-2.0+4.0+8.0_avg']]
 four_eight_twenty_in_avg = sms[['station', 'Date', 'SMS-4.0+8.0+20.0_avg']]
 eight_twenty_forty_in_avg = sms[['station', 'Date', 'SMS-8.0+20.0+40.0_avg']]
 
-#merge ESI and SMS
+#subset the sms for each three layers sliced sum groups by station
+two_four_eight_sum = sms[['station', 'Date', 'SMS-2.0+4.0+8.0-sum']]
+four_eight_twenty_sum = sms[['station', 'Date', 'SMS-4.0+8.0+20.0-sum']]
+eight_twenty_forty_sum = sms[['station', 'Date', 'SMS-8.0+20.0+40.0-sum']]
+
+#merge ESI and SMS on single groups mean
 two_in_merge = pd.merge(left=esi, right=two_in, on=['Date', 'station'], how='outer')
 four_in_merge = pd.merge(left=esi, right=four_in, on=['Date', 'station'], how='outer')
 eight_in_merge = pd.merge(left=esi, right=eight_in, on=['Date', 'station'], how='outer')
 twenty_in_merge = pd.merge(left=esi, right=twenty_in, on=['Date', 'station'], how='outer')
 forty_in_merge = pd.merge(left=esi, right=forty_in, on=['Date', 'station'], how='outer')
+
+#merge ESI and SMS on all data averaged 
 all_avg_merge = pd.merge(left=esi, right=all_avg, on=['Date', 'station'], how='outer')
+
+#merge ESI and SMS on single groups sum 
+two_in_sum_merge = pd.merge(left=esi, right=two_in_sum, on=['Date', 'station'], how='outer')
+four_in_sum_merge = pd.merge(left=esi, right=four_in_sum, on=['Date', 'station'], how='outer')
+eight_in_sum_merge = pd.merge(left=esi, right=eight_in_sum, on=['Date', 'station'], how='outer')
+twenty_in_sum_merge = pd.merge(left=esi, right=twenty_in_sum, on=['Date', 'station'], how='outer')
+forty_in_sum_merge = pd.merge(left=esi, right=forty_in_sum, on=['Date', 'station'], how='outer')
+
+#merge ESI on SMS and all data summed
+all_sum_merge = pd.merge(left=esi, right=all_sum, on=['Date', 'station'], how='outer')
+
+#merge ESI and SMS on two groups mean 
 two_in_four_in_merge = pd.merge(left=esi, right=two_in_four_in_avg, on=['Date', 'station'], how='outer')
 four_in_eight_in_merge = pd.merge(left=esi, right=four_in_eight_in_avg, on=['Date', 'station'], how='outer')
 eight_in_twenty_in_merge = pd.merge(left=esi, right=eight_in_twenty_in_avg, on=['Date', 'station'], how='outer')
 twenty_in_forty_in_merge = pd.merge(left=esi, right=twenty_in_forty_in_avg, on=['Date', 'station'], how='outer')
+
+#merge ESI and SMS on two groups summed
+two_four_sum_merge = pd.merge(left=esi, right=two_four_sum, on=['Date', 'station'], how='outer')
+four_eight_sum_merge = pd.merge(left=esi, right=four_eight_sum, on=['Date', 'station'], how='outer')
+eight_twenty_sum_merge = pd.merge(left=esi, right=eight_twenty_sum, on=['Date', 'station'], how='outer')
+twenty_forty_sum_merge = pd.merge(left=esi, right=twenty_forty_sum, on=['Date', 'station'], how='outer')
+
+#merge ESI and SMS on three groups mean 
 two_four_eight_in_merge = pd.merge(left=esi, right=two_four_eight_in_avg, on=['Date', 'station'], how='outer')
 four_eight_twenty_in_merge = pd.merge(left=esi, right=four_eight_twenty_in_avg, on=['Date', 'station'], how='outer')
 eight_twenty_forty_in_merge = pd.merge(left=esi, right=eight_twenty_forty_in_avg, on=['Date', 'station'], how='outer')
+
+#merge ESI and SMS on three groups summed 
+two_four_eight_sum_merge = pd.merge(left=esi, right=two_four_eight_sum, on=['Date', 'station'], how='outer')
+four_eight_twenty_sum_merge = pd.merge(left=esi, right=four_eight_twenty_sum, on=['Date', 'station'], how='outer')
+eight_twenty_forty_sum_merge = pd.merge(left=esi, right=eight_twenty_forty_sum, on=['Date', 'station'], how='outer')
 
 #correct the indexes to get rid of ESI values where there is a bad reading and drop all NaNs. 
 two_corrected = two_in_merge[two_in_merge['ESI'] != -9999].dropna()
