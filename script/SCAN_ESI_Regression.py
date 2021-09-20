@@ -148,20 +148,41 @@ two_four_eight_sum_merge = pd.merge(left=esi, right=two_four_eight_sum, on=['Dat
 four_eight_twenty_sum_merge = pd.merge(left=esi, right=four_eight_twenty_sum, on=['Date', 'station'], how='outer')
 eight_twenty_forty_sum_merge = pd.merge(left=esi, right=eight_twenty_forty_sum, on=['Date', 'station'], how='outer')
 
-#correct the indexes to get rid of ESI values where there is a bad reading and drop all NaNs. 
+#correct the single mean indexes to get rid of ESI values where there is a bad reading and drop all NaNs. 
 two_corrected = two_in_merge[two_in_merge['ESI'] != -9999].dropna()
 four_corrected = four_in_merge[four_in_merge['ESI'] != -9999].dropna()
 eight_corrected = eight_in_merge[eight_in_merge['ESI']!= -9999].dropna()
 twenty_corrected = twenty_in_merge[twenty_in_merge['ESI'] != -9999].dropna()
 forty_corrected = forty_in_merge[forty_in_merge['ESI'] != -9999].dropna()
 all_avg_corrected = all_avg_merge[all_avg_merge['ESI'] != -9999].dropna()
+
+
+#correct the double mean indexes to get rid of ESI values where there is a bad reading and drop all NaNs. 
 two_in_four_in_corrected = two_in_four_in_merge[two_in_four_in_merge['ESI'] != -9999].dropna()
 four_in_eight_in_corrected = four_in_eight_in_merge[four_in_eight_in_merge['ESI'] != -9999].dropna()
 eight_in_twenty_in_corrected = eight_in_twenty_in_merge[eight_in_twenty_in_merge['ESI'] != -9999].dropna()
 twenty_in_forty_in_corrected = twenty_in_forty_in_merge[twenty_in_forty_in_merge['ESI'] != -9999].dropna()
+
+#correct the triple mean indexes to get rid of ESI values where there is a bad reading and drop all NaNs. 
 two_four_eight_in_corrected = two_four_eight_in_merge[two_four_eight_in_merge['ESI'] != -9999].dropna()
 four_eight_twenty_in_corrected = four_eight_twenty_in_merge[four_eight_twenty_in_merge['ESI'] != -9999].dropna()
 eight_twenty_forty_in_corrected = eight_twenty_forty_in_merge[eight_twenty_forty_in_merge['ESI'] != -9999].dropna()
+
+#correct the rolling sum single indexes to get rid of ESI values where there is a bad reading and drop all NaNs.
+two_in_sum_corrected = two_in_sum_merge[two_in_sum_merge['ESI'] != -9999].dropna()
+four_in_sum_corrected = four_in_sum_merge[four_in_sum_merge['ESI'] != -9999].dropna()
+eight_in_sum_corrected = eight_in_sum_merge [eight_in_sum_merge['ESI'] != -9999].dropna()
+twenty_in_sum_corrected = twenty_in_sum_merge[twenty_in_sum_merge['ESI'] != -9999].dropna()
+forty_in_sum_corrected = forty_in_sum_merge[forty_in_sum_merge['ESI'] != -9999].dropna()
+
+#correct the rolling sum double indexes to get rid of ESI values where there is a bad reading and drop all NaNs. 
+two_four_sum_corrected = two_four_sum_merge[two_four_sum_merge['ESI'] != -9999].dropna()
+four_eight_sum_corrected = four_eight_sum_merge[four_eight_sum_merge['ESI'] != -9999].dropna()
+eight_twenty_sum_corrected = eight_twenty_sum_merge[eight_twenty_sum_merge['ESI'] != -9999].dropna()
+twenty_forty_sum_corrected = twenty_forty_sum_merge[twenty_forty_sum_merge['ESI'] != -9999].dropna()
+
+#correct the rolling sum triple indexes to get rid of ESI values where there is a bad reading and drop all NaNs
+ 
 
 # #create x and y values for eaach group plot.
 two_in_x = two_corrected['ESI']
