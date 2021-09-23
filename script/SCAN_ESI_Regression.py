@@ -257,7 +257,7 @@ twenty_forty_sum_y = twenty_forty_sum_corrected['SMS-20.0+40.0-sum']
 fig, ax = plt.subplots(nrows=1, ncols=6, figsize=(25,10))
 fig.suptitle('Alabama SCAN Soil Moisture Stations (SMS) at Different Depths vs Alexi Sattelite Environmental Stress Index (ESI)')
 
-#here is the subplot for two in data.
+#here is the subplot for two in mean data.
 sns.regplot(ax=ax[0], x=two_in_x, y=two_in_y, data='two_corrected', scatter_kws={'s':2}, line_kws={'color': 'black'})
 stats_two = stats.pearsonr(two_in_x, two_in_y)
 formated_r_two = ("{:.4f}".format(stats_two[0]))
@@ -267,7 +267,7 @@ at_two = AnchoredText(s=f"R2: {formated_r_two} \n P: {formated_p_two} \n n: {sha
 ax[0].add_artist(at_two)
 ax[0].set_title('All 2in Mean SMS vs ESI')
 
-#here is the subplot for four inch data
+#here is the subplot for four inch mean data
 sns.regplot(ax=ax[1], x=four_in_x, y=four_in_y, data='four_corrected', scatter_kws={'s':2}, line_kws={'color': 'black'})
 stats_four = stats.pearsonr(four_in_x, four_in_y)
 formated_r_four = ("{:.4f}".format(stats_four[0]))
@@ -277,7 +277,7 @@ at_four = AnchoredText(s=f"R2: {formated_r_four} \n P: {formated_p_four} \n n: {
 ax[1].add_artist(at_four)
 ax[1].set_title('All 4in Mean SMS vs ESI')
 
-#here is the subplot for eight inch data
+#here is the subplot for eight inch mean data
 sns.regplot(ax=ax[2], x=eight_in_x, y=eight_in_y, data='eight_corrected', scatter_kws={'s':2}, line_kws={'color': 'black'})
 stats_eight = stats.pearsonr(eight_in_x, eight_in_y)
 formated_r_eight = ("{:.4f}".format(stats_eight[0]))
@@ -287,7 +287,7 @@ at_eight = AnchoredText(s=f"R2: {formated_r_eight} \n P: {formated_p_eight} \n n
 ax[2].add_artist(at_eight)
 ax[2].set_title('All 8in Mean SMS vs ESI')
 
-#here is the subplot for twenty inch data
+#here is the subplot for twenty inch mean data
 sns.regplot(ax=ax[3], x=twenty_in_x, y=twenty_in_y, data='twenty_corrected', scatter_kws={'s':2}, line_kws={'color': 'black'})
 stats_twenty = stats.pearsonr(twenty_in_x, twenty_in_y)
 formated_r_twenty = ("{:.4f}".format(stats_twenty[0]))
@@ -297,7 +297,7 @@ at_twenty = AnchoredText(s=f"R2: {formated_r_twenty} \n P: {formated_p_twenty} \
 ax[3].add_artist(at_twenty)
 ax[3].set_title('All 20in Mean SMS vs ESI')
 
-#here is the subplot for forty inch data
+#here is the subplot for forty inch mean data
 sns.regplot(ax=ax[4], x=forty_in_x, y=forty_in_y, data='forty_corrected', scatter_kws={'s':2}, line_kws={'color': 'black'})
 stats_forty = stats.pearsonr(forty_in_x, forty_in_y)
 formated_r_forty = ("{:.4f}".format(stats_forty[0]))
@@ -307,7 +307,7 @@ at_forty = AnchoredText(s=f"R2: {formated_r_forty} \n P: {formated_p_forty} \n n
 ax[4].add_artist(at_forty)
 ax[4].set_title('All 40in Mean SMS vs ESI')
 
-#here is the subplot for the all average data
+#here is the subplot for the all levels mean data
 sns.regplot(ax=ax[5], x=all_avg_x, y=all_avg_y, data='all_avg_corrected', scatter_kws={'s':2}, line_kws={'color': 'black'})
 stats_all = stats.pearsonr(all_avg_x, all_avg_y)
 formated_r_all_avg = ("{:.4f}".format(stats_all[0]))
@@ -396,7 +396,7 @@ formated_p_slice_248 = ("{:.4f}".format(stats_slice_248[1]))
 shape_slice_248 = two_four_eight_in_corrected.shape[0]
 at_slice_248 = AnchoredText(s=f"R2: {formated_r_slice_248} \n P: {formated_p_slice_248} \n n: {shape_slice_248}", loc='upper left')
 ax3[0].add_artist(at_slice_248)
-ax3[0].set_title('two_four_eight_in slice vs ESI')
+ax3[0].set_title('two_four_eight_in Mean slice vs ESI')
 
 #here is the plot for the four_eight_twenty slice
 sns.regplot(ax=ax3[1], x=four_eight_twenty_in_x, y=four_eight_twenty_in_y, data='four_eight_twenty_in_corrected', scatter_kws={'s':2}, line_kws={'color': 'black'})
@@ -406,7 +406,7 @@ formated_p_slice_4820 = ("{:.4f}".format(stats_slice_4820[1]))
 shape_slice_4820= four_eight_twenty_in_corrected.shape[0]
 at_slice_4820 = AnchoredText(s=f"R2: {formated_r_slice_4820} \n P: {formated_p_slice_4820} \n n: {shape_slice_4820}", loc='upper left')
 ax3[1].add_artist(at_slice_4820)
-ax3[1].set_title('four_eight_twenty_in slice vs ESI')
+ax3[1].set_title('four_eight_twenty_in Mean slice vs ESI')
 
 #here is the plot for the eight_twenty_forty slice. 
 sns.regplot(ax=ax3[2], x=eight_twenty_forty_in_x, y=eight_twenty_forty_in_y, data='eight_twenty_forty_in_corrected', scatter_kws={'s':2}, line_kws={'color': 'black'})
@@ -416,7 +416,7 @@ formated_p_slice_82040 = ("{:.4f}".format(stats_slice_82040[1]))
 shape_slice_82040 = eight_twenty_forty_in_corrected.shape[0]
 at_slice_82040 = AnchoredText(s=f"R2: {formated_r_slice_82040} \n P: {formated_p_slice_82040} \n n: {shape_slice_82040}", loc='upper left')
 ax3[2].add_artist(at_slice_82040)
-ax3[2].set_title('eight_twenty_forty_in slice vs ESI')
+ax3[2].set_title('eight_twenty_forty_in Mean slice vs ESI')
 
 #here is the overall plot for the sum single groups. 
 fig4, ax4 = plt.subplots(nrows=1, ncols=6, figsize=(25, 10))
@@ -436,7 +436,7 @@ sns.regplot(ax=ax4[1], x=four_in_sum_x, y=four_in_sum_y, data='four_in_sum_corre
 stats_sum4 = stats.pearsonr(four_in_sum_x, four_in_sum_y)
 formated_r_sum4 = ("{:.4f}".format(stats_sum4[0]))
 formated_p_sum4 = ("{:.4f}".format(stats_sum4[1]))
-shape_sum4 = two_in_sum_corrected.shape[0]
+shape_sum4 = four_in_sum_corrected.shape[0]
 at_sum4 = AnchoredText(s=f"R2: {formated_r_sum4} \n P: {formated_p_sum4} \n n: {shape_sum4}", loc='upper left')
 ax4[1].add_artist(at_sum4)
 ax4[1].set_title('All 4in SMS Sum vs ESI')
@@ -446,17 +446,70 @@ sns.regplot(ax=ax4[2], x=eight_in_sum_x, y=eight_in_sum_y, data='eight_in_sum_co
 stats_sum8 = stats.pearsonr(eight_in_sum_x, eight_in_sum_y)
 formated_r_sum8 = ("{:.4f}".format(stats_sum8[0]))
 formated_p_sum8 = ("{:.4f}".format(stats_sum8[1]))
-shape_sum8 = two_in_sum_corrected.shape[0]
+shape_sum8 = eight_in_sum_corrected.shape[0]
 at_sum8 = AnchoredText(s=f"R2: {formated_r_sum8} \n P: {formated_p_sum8} \n n: {shape_sum8}", loc='upper left')
 ax4[2].add_artist(at_sum8)
 ax4[2].set_title('All 8in SMS Sum vs ESI')
 
+#here is the plot for all 20in sum data
+sns.regplot(ax=ax4[3], x=twenty_in_sum_x, y=twenty_in_sum_y, data='twenty_in_sum_corrected', scatter_kws={'s':2}, line_kws={'color': 'black'})
+stats_sum20 = stats.pearsonr(twenty_in_sum_x, twenty_in_sum_y)
+formated_r_sum20 = ("{:.4f}".format(stats_sum20[0]))
+formated_p_sum20 = ("{:.4f}".format(stats_sum20[1]))
+shape_sum20 = twenty_in_sum_corrected.shape[0]
+at_sum20 = AnchoredText(s=f"R2: {formated_r_sum20} \n P: {formated_p_sum20} \n n: {shape_sum20}", loc='upper left')
+ax4[3].add_artist(at_sum20)
+ax4[3].set_title('All 20in SMS Sum vs ESI')
+
+#here is the plot for all forty in sum data
+sns.regplot(ax=ax4[4], x=forty_in_sum_x, y=forty_in_sum_y, data='forty_in_sum_corrected', scatter_kws={'s':2}, line_kws={'color': 'black'})
+stats_sum40 = stats.pearsonr(twenty_in_sum_x, twenty_in_sum_y)
+formated_r_sum40 = ("{:.4f}".format(stats_sum40[0]))
+formated_p_sum40 = ("{:.4f}".format(stats_sum40[1]))
+shape_sum40 = forty_in_sum_corrected.shape[0]
+at_sum40 = AnchoredText(s=f"R2: {formated_r_sum40} \n P: {formated_p_sum40} \n n: {shape_sum40}", loc='upper left')
+ax4[4].add_artist(at_sum40)
+ax4[4].set_title('All 40in SMS Sum vs ESI')
+
+#here is the plot for all sum data averaged together. 
+sns.regplot(ax=ax4[5], x=all_sum_x, y=all_sum_y, data='all_sum_corrected', scatter_kws={'s':2}, line_kws={'color': 'black'})
+stats_all_sum = stats.pearsonr(all_sum_x, all_sum_y)
+formated_r_all_sum = ("{:.4f}".format(stats_all_sum[0]))
+formated_p_all_sum = ("{:.4f}".format(stats_all_sum[1]))
+shape_all_sum = all_sum_corrected.shape[0]
+at_all_sum = AnchoredText(s=f"R2: {formated_r_all_sum} \n P: {formated_p_all_sum} \n n: {shape_all_sum}", loc='upper left')
+ax4[5].add_artist(at_all_sum)
+ax4[5].set_title('All Depths SMS Sum vs ESI')
+
+#here is the overall plot for the sum double groups
+fig5, ax5 = plt.subplots(nrows=1, ncols=4, figsize=(25, 10))
+
+#here is the double group plot for 2in_4in sum
+sns.regplot(ax=ax5[0], x=two_four_sum_x, y=two_four_sum_y, data='two_four_sum_corrected', scatter_kws={'s':2}, line_kws={'color': 'black'})
+stats_two_four_sum = stats.pearsonr(two_four_sum_x, two_four_sum_y)
+formated_r_two_four_sum = ("{:.4f}".format(stats_two_four_sum[0]))
+formated_p_two_four_sum = ("{:.4f}".format(stats_two_four_sum[1]))
+shape_two_four_sum = two_four_sum_corrected.shape[0]
+at_two_four_sum = AnchoredText(s=f"R2: {formated_r_two_four_sum} \n P: {formated_p_two_four_sum} \n n: {shape_two_four_sum}", loc='upper left')
+ax5[0].add_artist(at_two_four_sum)
+ax5[0].set_title('2in_4in slice Sum vs ESI')
+
+#here is the double group plot for 4in_8in sum
+sns.regplot(ax=ax5[1], x=four_eight_sum_x, y=four_eight_sum_y, data='four_eight_sum_corrected', scatter_kws={'s':2}, line_kws={'color': 'black'})
+stats_four_eight_sum = stats.pearsonr(four_eight_sum_x, four_eight_sum_y)
+formated_r_four_eight_sum = ("{:.4f}".format(stats_four_eight_sum[0]))
+formated_p_four_eight_sum = ("{:.4f}".format(stats_four_eight_sum[1]))
+shape_four_eight_sum = four_eight_sum_corrected.shape[0]
+at_two_four_sum = AnchoredText(s=f"R2: {formated_r_four_eight_sum} \n P: {formated_p_four_eight_sum} \n n: {shape_four_eight_sum}", loc='upper left')
+ax5[1].add_artist(at_two_four_sum)
+ax5[1].set_title('4in_8in slice Sum vs ESI')
+
 # #lets try a grid plot to look at individual station stats for each depth. 
 variable_y = 1.0
 
+#here are the individual stations for single group means 
 stations_two = sns.lmplot(x='ESI', y='2in_rolling_mean', data=two_corrected, col='station', height=6, col_wrap=3)
 stations_two.fig.suptitle('ESI (y-axis) by Individual Alabama USDA 2in SMS (x-axis)', y=variable_y)
-
 
 stations_four = sns.lmplot(x='ESI', y='4in_rolling_mean', data=four_corrected, col='station', height=6, col_wrap=3)
 stations_four.fig.suptitle('ESI (y-axis) by Individual Alabama USDA 4in SMS (x-axis)', y=variable_y)
@@ -473,6 +526,7 @@ stations_forty.fig.suptitle('ESI (y-axis) by Individual Alabama USDA 40in SMS (x
 stations_all = sns.lmplot(x='ESI', y='SMS-all-avg', data=all_avg_corrected, col='station', height=6, col_wrap=3)
 stations_all.fig.suptitle('ESI (y-axis) by Individual Alabama USDA all-depths avg SMS (x-axis)', y=variable_y)
 
+#here are the individual stations for double group means 
 stations_two_four = sns.lmplot(x='ESI', y='SMS-2.0+4.0_avg', data=two_in_four_in_corrected, col='station', height=6, col_wrap=3)
 stations_two_four.fig.suptitle('ESI (y-axis) by Individual Alabama USDA two_in_four_in slice avg SMS (x-axis)', y=variable_y)
 
@@ -485,6 +539,7 @@ stations_eight_twenty.fig.suptitle('ESI (y-axis) by Individual Alabama USDA eigh
 stations_twenty_forty = sns.lmplot(x='ESI', y='SMS-20.0+40.0_avg', data=twenty_in_forty_in_corrected, col='station', height=6, col_wrap=3)
 stations_twenty_forty.fig.suptitle('ESI (y-axis) by Individual Alabama USDA twenty_in_forty_in slice avg SMS (x-axis)', y=variable_y)
 
+#here are the individual stations for triple group means
 stations_two_four_eight = sns.lmplot(x='ESI', y='SMS-2.0+4.0+8.0_avg', data=two_four_eight_in_corrected, col='station', height=6, col_wrap=3)
 stations_two.fig.suptitle('ESI (y-axis) by Individual Alabama USDA two_four_eight_in slice SMS (x-axis)', y=variable_y)
 
@@ -493,6 +548,9 @@ stations_two.fig.suptitle('ESI (y-axis) by Individual Alabama USDA four_eight_tw
 
 stations_eight_twenty_forty = sns.lmplot(x='ESI', y='SMS-8.0+20.0+40.0_avg', data=eight_twenty_forty_in_corrected, col='station', height=6, col_wrap=3)
 stations_two.fig.suptitle('ESI (y-axis) by Individual Alabama USDA eight_twenty_forty_in slice SMS (x-axis)', y=variable_y)
+
+
+
 
 
 #create the figure functons to annotate the appropriate stats for each graph. 
