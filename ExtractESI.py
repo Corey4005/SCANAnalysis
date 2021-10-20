@@ -11,7 +11,7 @@ Note:
     data they would like. 
 
     
-author: Corey 
+author: Corey Walker - University of Alabama at Huntsville
 
 """
 import rasterio
@@ -21,16 +21,17 @@ import pandas as pd
 import geopandas as gpd
 
 #read in the filepath and metadata
-filepath = r'C:\\Users\cwalker\Desktop\Data\ESI_Data\esi_1wk_tif\2020'
+
+filepath = r'C:\\Users\cwalker\Desktop\Data\ESI_Data\esi_1wk_tif\2006'
 metadata = r'C:\\Users\cwalker\Desktop\Data\Metadata\SCAN_Metadata_AL.csv'
 
 #look for all files in filepath
 files = glob2.glob(filepath + '/*.tif')
 
 #read int the metadata
-import_csv = pd.read_csv(metadata)
-df = pd.DataFrame(import_csv)
-gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.longitude, df.latitude))
+meta_df = pd.read_csv(metadata)
+gdf = gpd.GeoDataFrame(meta_df, geometry=gpd.points_from_xy(meta_df.longitude, meta_df.latitude))
+
         
 #extract the ESI, datestring, lon and lat for file in filepath
 def ExtractESI(files):
@@ -53,13 +54,9 @@ def ExtractESI(files):
             Date.append(when)
             Lon.append(x)
             Lat.append(y)
-    df = pd.DataFrame(data={'ESI':ESI, 'Latitude':Lat, 'Longitude':Lon, 'Date':Date})
-    print(df)
+    ESI_data = pd.DataFrame(data={'ESI':ESI, 'Latitude':Lat, 'Longitude':Lon, 'Date':Date})
     #df.to_csv('/Users/cwalker/Desktop/Data/Processed_ESI/1_wk_ESI_2020.csv')
-    return
+    return ESI_data
+
+ESI_data = ExtractESI(files)
         
-def main():
-    ExtractESI(files)
-    
-if __name__ == '__main__':
-    main()
