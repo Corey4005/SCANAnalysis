@@ -3,7 +3,7 @@
 """
 Created on Wed Sep 29 15:01:33 2021
 
-@author: ellenbw
+@author: Lee Ellenburg, Corey Walker
 """
 
 import pandas as pd
@@ -13,6 +13,53 @@ import matplotlib.pyplot as plt
 from scipy import stats
 from matplotlib.offsetbox import AnchoredText
 import sys
+
+#create the function we need to apply effective sm conversion
+def convert(df, column='string', OC=None, FE=None, Db=None, Kpa=None): 
+    '''
+    
+    Parameters: 
+    
+    :df: (Pandas Dataframe). Pass a panadas dataframe corresponding to the 
+    USDA scan site data. 
+    
+    :column: (string). Pass a string that corresponds to the column that you 
+    wish to be converted to effective soil moisture. Ex: 'SMS-2.0in'
+    
+    :OC: (Int). Pass an organic content measure for the soil provided from 
+    your respective USDA SCAN site soil report. Ex: 1.1 (units: mm / kg)
+    
+    :FE: (Int). Pass an FE content measure for the soil provided from your 
+    respective USDA SCAN site soil report. Ex: 2.4 (units: mm / kg)
+    
+    :Kpa: (Int) Pass a pressure value provided by the soil report at 1500 Kpa. 
+    Ex: 13.5 (units: Kpa)
+    '''
+    #set up the df with the column you want to convert
+    df = df
+    convert_column = df[column] 
+    
+    
+    #The knowns for the equations 
+    Dp1 = 1.4
+    Dp2 = 4.2 
+    Dp3 = 2.65
+    Db = Db
+    
+    #Calculate particle density 
+    Dp = 100 / (((1.7 * OC) / Dp1) + ((1.6 * FE)/Dp2) + ((100 - ((1/7 * OC) + (1.6 * FE)))/ Dp3))
+    
+    #Calculate Porosity 
+    Porosity = 100 - (100 * Db/Dp)
+    
+    #Theta R 
+    theta_r = 0.35 * Kpa
+    
+    #esm
+    df[column + '_'+ 'esm'] = (convert_column - theta_r)/(Porosity - theta_r)
+                          
+    return df
+
 
 #set up the station you want to run the query for
 st = '2053:AL:SCAN'
@@ -35,30 +82,47 @@ sms['Date'] = pd.to_datetime(sms['Date'])
 sms.set_index('Date', inplace=True)
 sms_station_2053 = sms[sms['station'] == st]
 
-#drop the station column because we do not need it anymore and convert to effective soil moisture 
-sms_station_2053 = sms_station_2053.drop('station', axis = 1)
-sms_station_2053['2in_esm'] = (sms_station_2053['SMS-2.0in']-0.07)/(0.45-0.07)
+#do the functions to convert to effective sm for each SM column
 
+#2in 2053
+convert(sms_station_2053, 'SMS-2.0in', OC=1.9, FE=2.3, Db=1.53, Kpa=13.5)
+
+#4in 2053
+convert(sms_station_2053, 'SMS-4.0in', OC=1.1, FE=1.5, Db=1.55, Kpa=10.4)
+
+#8in 2053
+convert(sms_station_2053, 'SMS-8.0in', OC=1.1, FE=1.5, Db=1.55, Kpa=10.4)
+
+#20in 2053
+convert(sms_station_2053, 'SMS-20.0in', OC=0.2, FE=2.2, Db=1.39, Kpa=15.2)
+
+#40in 2053
+convert(sms_station_2053, 'SMS-40.0in', OC=0.2, FE=3.8, Db=1.49, Kpa=20.7)
 
 #sort the station info to make sure it is in correct order
 sms_station_2053 = sms_station_2053.sort_index()
 
-#convert df to a rolling mean
-mean_sms_station_2053 = sms_station_2053.rolling('7D', min_periods=3).mean()
+
+#get the appropriate dataframe for just esm now
+esm_2053 = sms_station_2053[['SMS-2.0in_esm', 'SMS-4.0in_esm', 
+                             'SMS-8.0in_esm', 'SMS-20.0in_esm', 
+                             'SMS-40.0in_esm',]]
+
+#convert df to a rolling weekly mean
+esm_2053 = esm_2053.rolling('7D', min_periods=3).mean()
 
 #get the julian day for each date in index
-sms_station_2053['jday'] = sms_station_2053.index.strftime('%j')
+esm_2053['jday'] = esm_2053.index.strftime('%j')
 
-#create a mean for all weeks for the entire dataset and standard deviation. 
-day_mean = sms_station_2053.groupby([sms_station_2053.jday]).mean()
-day_std = sms_station_2053.groupby([sms_station_2053.jday]).std()
+##create a mean for all weeks for the entire dataset and standard deviation. 
+day_mean = esm_2053.groupby([esm_2053.jday]).mean()
+day_std = esm_2053.groupby([esm_2053.jday]).std()
 
-drought_year_sms = sms_station_2053[(sms_station_2053.index.year >= 2006) & (sms_station_2053.index.year <=2008)]
+#index for specific years
+i_years = esm_2053[(esm_2053.index.year >= 2006) & (esm_2053.index.year <=2008)]
 
-#drought_year_sms['root_zone'] = (((drought_year_sms['SMS-4.0in']+drought_year_sms['SMS-2.0in'])/2*2+((drought_year_sms['SMS-8.0in']+drought_year_sms['SMS-4.0in'])/2)*4
-#                       #+((drought_year_sms['SMS-20.0in']+drought_year_sms['SMS-8.0in'])/2)*12+((drought_year_sms['SMS-20.0in']+drought_year_sms['SMS-40.0in'])/2)*20))/38 
-
-
+i_years['root_zone'] = (((i_years['SMS-4.0in_esm']+i_years['SMS-2.0in_esm'])/2*2+((i_years['SMS-8.0in_esm']+i_years['SMS-4.0in_esm'])/2)*4
+                      +((i_years['SMS-20.0in_esm']+i_years['SMS-8.0in_esm'])/2)*12+((i_years['SMS-20.0in_esm']+i_years['SMS-40.0in_esm'])/2)*20))/38 
 
 
 # #drought_year_sms.reset_index()[day_mean.columns]
