@@ -14,8 +14,10 @@ from scipy import stats
 from matplotlib.offsetbox import AnchoredText
 import sys
 
+#set up the station you want to run the query for
 st = '2053:AL:SCAN'
 
+#set up and read in the ESI data
 esi_path = '../data/ESI_1wk_tif2select_pt.csv'
 esi = pd.read_csv(esi_path)
 esi['Date'] = pd.to_datetime(esi['Date'])
@@ -29,50 +31,37 @@ scan = pd.read_csv(scan_path)
 sms = scan[['Date', 'station','SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-20.0in','SMS-40.0in']].copy()
 sms['Date'] = pd.to_datetime(sms['Date'])
 
+# set the index for the columns we are interested in. 
 sms.set_index('Date', inplace=True)
 sms_station_2053 = sms[sms['station'] == st]
 
+#drop the station column because we do not need it anymore and convert to effective soil moisture 
 sms_station_2053 = sms_station_2053.drop('station', axis = 1)
-
-sms_station_2053.index = pd.to_datetime(sms_station_2053.index)
-
-sms_station_2053 = (sms_station_2053-0.072)/(0.477-0.072)
+sms_station_2053['2in_esm'] = (sms_station_2053['SMS-2.0in']-0.07)/(0.45-0.07)
 
 
-
-
-# sms_station_2053['root_zone'] = (((sms_station_2053['SMS-4.0in']+sms_station_2053['SMS-2.0in'])/2*2+((sms_station_2053['SMS-8.0in']+sms_station_2053['SMS-4.0in'])/2)*4
-#                       +((sms_station_2053['SMS-20.0in']+sms_station_2053['SMS-8.0in'])/2)*12+((sms_station_2053['SMS-20.0in']+sms_station_2053['SMS-40.0in'])/2)*20))/38
-
-# sms_station_2053['root_zone_top'] = (((sms_station_2053['SMS-4.0in']+sms_station_2053['SMS-2.0in'])/2*2+((sms_station_2053['SMS-8.0in']+sms_station_2053['SMS-4.0in'])/2)*4
-#                       +((sms_station_2053['SMS-20.0in']+sms_station_2053['SMS-8.0in'])/2)*12))/18
-
-# sms_station_2053['root_zone_bot'] = ((((sms_station_2053['SMS-20.0in']+sms_station_2053['SMS-8.0in'])/2)*12+((sms_station_2053['SMS-20.0in']+sms_station_2053['SMS-40.0in'])/2)*20))/32 
-
+#sort the station info to make sure it is in correct order
 sms_station_2053 = sms_station_2053.sort_index()
 
-year_i = sms_station_2053[(sms_station_2053.index.year >= 2006) & (sms_station_2053.index.year <=2006)].index
+#convert df to a rolling mean
+mean_sms_station_2053 = sms_station_2053.rolling('7D', min_periods=3).mean()
 
-
-
-sms_station_2053 = sms_station_2053.rolling('7D', min_periods=3).mean()
-
-
-
+#get the julian day for each date in index
 sms_station_2053['jday'] = sms_station_2053.index.strftime('%j')
 
+#create a mean for all weeks for the entire dataset and standard deviation. 
 day_mean = sms_station_2053.groupby([sms_station_2053.jday]).mean()
 day_std = sms_station_2053.groupby([sms_station_2053.jday]).std()
 
 drought_year_sms = sms_station_2053[(sms_station_2053.index.year >= 2006) & (sms_station_2053.index.year <=2008)]
 
 #drought_year_sms['root_zone'] = (((drought_year_sms['SMS-4.0in']+drought_year_sms['SMS-2.0in'])/2*2+((drought_year_sms['SMS-8.0in']+drought_year_sms['SMS-4.0in'])/2)*4
-                      #+((drought_year_sms['SMS-20.0in']+drought_year_sms['SMS-8.0in'])/2)*12+((drought_year_sms['SMS-20.0in']+drought_year_sms['SMS-40.0in'])/2)*20))/38 
+#                       #+((drought_year_sms['SMS-20.0in']+drought_year_sms['SMS-8.0in'])/2)*12+((drought_year_sms['SMS-20.0in']+drought_year_sms['SMS-40.0in'])/2)*20))/38 
 
 
 
 
-#drought_year_sms.reset_index()[day_mean.columns]
+# #drought_year_sms.reset_index()[day_mean.columns]
 
 # day_mean.index = range(0,len(day_mean))
 # day_std.index = range(0,len(day_std))
