@@ -58,7 +58,7 @@ def convert(df, column='string', OC=None, FE=None, Db=None, Kpa=None):
     #esm
     df[column + '_'+ 'esm'] = (convert_column - theta_r)/(Porosity - theta_r)
                           
-    return df
+    return df, Porosity
 
 
 #set up the station you want to run the query for
@@ -121,17 +121,33 @@ esm_2053['jday'] = esm_2053.index.strftime('%j')
 
 ##create a mean for all weeks for the entire dataset and standard deviation. 
 day_mean = esm_2053.groupby([esm_2053.jday]).mean()
+day_mean = day_mean[day_mean.index != '366']
+
 day_std = esm_2053.groupby([esm_2053.jday]).std()
 
-#index for specific years
-i_years = esm_2053[(esm_2053.index.year >= 2006) & (esm_2053.index.year <=2008)]
+#index for specific years and insert values when the dates are off. 
+i_years = esm_2053[(esm_2053.index.year >= 2006) & 
+                   (esm_2053.index.year <=2015)].asfreq('D')
 
+#drop the 366 days because we dont want leap years.
+i_years = i_years[i_years['jday'] != '366']
 
-i_years = i_years.reset_index()[day_mean.columns]
+#get rid of jday so that we can subtract correct shapes
+i_years.drop(columns='jday', inplace=True)
 
-day_mean.index = range(0,len(day_mean))
-day_std.index = range(0,len(day_std))
-i_years_anom = (i_years.reset_index()[day_mean.columns]-day_mean)
+#create a length based on years that will be used for the subtraction for anomaly. 
+years = len(i_years.index.year.unique())
+day_mean_final = pd.concat([day_mean]*years)
+
+#create the df that will subtract from i_years to create anomaly. 
+i_years_anom = (i_years.values-day_mean_final.values)        
+
+#create a new df for anom
+anom = pd.DataFrame(i_years_anom)
+
+#name the columns and the index. 
+anom.columns = i_years.columns
+anom.index = i_years.index
 
 # station_2053_esi_og = esi[esi['station'] == st]
 
