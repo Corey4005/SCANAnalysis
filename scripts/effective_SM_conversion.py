@@ -36,7 +36,7 @@ def convert(df, column='string', OC=None, FE=None, Db=None, Kpa=None):
     Ex: 13.5 (units: Kpa)
     '''
     #set up the df with the column you want to convert
-    df = df
+
     convert_column = df[column] 
     
     
@@ -108,6 +108,11 @@ esm_2053 = sms_station_2053[['SMS-2.0in_esm', 'SMS-4.0in_esm',
                              'SMS-8.0in_esm', 'SMS-20.0in_esm', 
                              'SMS-40.0in_esm',]]
 
+#create the root_zone calculations
+esm_2053['root_zone'] = (((esm_2053['SMS-4.0in_esm']+esm_2053['SMS-2.0in_esm'])/2*2+((esm_2053['SMS-8.0in_esm']+esm_2053['SMS-4.0in_esm'])/2)*4
+                      +((esm_2053['SMS-20.0in_esm']+esm_2053['SMS-8.0in_esm'])/2)*12+((esm_2053['SMS-20.0in_esm']+esm_2053['SMS-40.0in_esm'])/2)*20))/38 
+
+
 #convert df to a rolling weekly mean
 esm_2053 = esm_2053.rolling('7D', min_periods=3).mean()
 
@@ -121,15 +126,12 @@ day_std = esm_2053.groupby([esm_2053.jday]).std()
 #index for specific years
 i_years = esm_2053[(esm_2053.index.year >= 2006) & (esm_2053.index.year <=2008)]
 
-i_years['root_zone'] = (((i_years['SMS-4.0in_esm']+i_years['SMS-2.0in_esm'])/2*2+((i_years['SMS-8.0in_esm']+i_years['SMS-4.0in_esm'])/2)*4
-                      +((i_years['SMS-20.0in_esm']+i_years['SMS-8.0in_esm'])/2)*12+((i_years['SMS-20.0in_esm']+i_years['SMS-40.0in_esm'])/2)*20))/38 
 
+i_years = i_years.reset_index()[day_mean.columns]
 
-# #drought_year_sms.reset_index()[day_mean.columns]
-
-# day_mean.index = range(0,len(day_mean))
-# day_std.index = range(0,len(day_std))
-# drought_year_sms_anom = (drought_year_sms.reset_index()[day_mean.columns]-day_mean)
+day_mean.index = range(0,len(day_mean))
+day_std.index = range(0,len(day_std))
+i_years_anom = (i_years.reset_index()[day_mean.columns]-day_mean)
 
 # station_2053_esi_og = esi[esi['station'] == st]
 
