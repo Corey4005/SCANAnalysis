@@ -14,6 +14,7 @@ from scipy import stats
 from matplotlib.offsetbox import AnchoredText
 import sys
 
+
 #create the function we need to apply effective sm conversion
 def convert(df, column='string', OC=None, FE=None, Db=None, Kpa=None): 
     '''
@@ -58,7 +59,7 @@ def convert(df, column='string', OC=None, FE=None, Db=None, Kpa=None):
     #esm
     df[column + '_'+ 'esm'] = (convert_column - theta_r)/(Porosity - theta_r)
                           
-    return df, Porosity
+    return df
 
 
 #set up the station you want to run the query for
@@ -148,6 +149,8 @@ anom = pd.DataFrame(i_years_anom)
 #name the columns and the index. 
 anom.columns = i_years.columns
 anom.index = i_years.index
+
+
 
 # station_2053_esi_og = esi[esi['station'] == st]
 
