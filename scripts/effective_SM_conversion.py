@@ -61,12 +61,19 @@ def convert(df, column='string', OC=None, FE=None, Db=None, Kpa=None):
                           
     return df
 
+#set up date range you are interested in
+print('Enter a year you want the plots to begin with:')
+start_year = int(input())
+
+
+print('Enter a year you want the plots to end with:')
+end_year = int(input())
 
 #set up the station you want to run the query for
 st = '2053:AL:SCAN'
 
 #set up and read in the ESI data
-esi_path = '../data/ESI_1wk_tif2select_pt.csv'
+esi_path = '../data/ESI_1wk_from_tif.csv'
 esi = pd.read_csv(esi_path)
 esi['Date'] = pd.to_datetime(esi['Date'])
 esi.set_index('Date', inplace=True)
@@ -103,6 +110,12 @@ convert(sms_station_2053, 'SMS-40.0in', OC=0.2, FE=3.8, Db=1.49, Kpa=20.7)
 #sort the station info to make sure it is in correct order
 sms_station_2053 = sms_station_2053.sort_index()
 
+#Set a dataframe just for the raw data
+sms_station_2053_raw = sms_station_2053[['SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-20.0in',
+       'SMS-40.0in']]
+
+#Subset the raw data for comparison later
+sms_station_2053_raw = sms_station_2053[(sms_station_2053_raw.index.year >= start_year) & (sms_station_2053_raw.index.year <=end_year)]
 
 #get the appropriate dataframe for just esm now
 esm_2053 = sms_station_2053[['SMS-2.0in_esm', 'SMS-4.0in_esm', 
@@ -127,8 +140,8 @@ day_mean = day_mean[day_mean.index != '366']
 day_std = esm_2053.groupby([esm_2053.jday]).std()
 
 #index for specific years and insert values when the dates are off. 
-i_years = esm_2053[(esm_2053.index.year >= 2006) & 
-                   (esm_2053.index.year <=2015)].asfreq('D')
+i_years = esm_2053[(esm_2053.index.year >= start_year) & 
+                   (esm_2053.index.year <= end_year)].asfreq('D')
 
 #drop the 366 days because we dont want leap years.
 i_years = i_years[i_years['jday'] != '366']
@@ -150,13 +163,36 @@ anom = pd.DataFrame(i_years_anom)
 anom.columns = i_years.columns
 anom.index = i_years.index
 
+#lets get all the data for the esi station in question for the tif files 
+station_2053_esi_1wk_tif = esi[esi['station'] == st]
 
+#we need to subset the tif data by the start and end year
+station_2053_esi_1wk_tif = station_2053_esi_1wk_tif[(station_2053_esi_1wk_tif.index.year >= start_year) & (station_2053_esi_1wk_tif.index.year <=end_year) & (station_2053_esi_1wk_tif['ESI'] > -9999.0)]
 
-# station_2053_esi_og = esi[esi['station'] == st]
+#create the 4wk Climate Serve Data Frame
+station_2053_esi_4wk_CS = pd.read_csv('../data/ESI_4wk_CS.csv', index_col = [0], infer_datetime_format = True, parse_dates = True)
 
-# station_2053_esi = pd.read_csv('../../esi_cs.csv', index_col = [0], infer_datetime_format = True, parse_dates = True)
+#subset the Climate Serve Data with the start and end year
+station_2053_esi_4wk_CS = station_2053_esi_4wk_CS[(station_2053_esi_4wk_CS.index.year >= start_year) & (station_2053_esi_4wk_CS.index.year <=end_year) & (station_2053_esi_4wk_CS['Timeseries'] > -9999.0)]
 
+#make the sm plot comparing raw data to esm
+fig, ax = plt.subplots(ncols=2, figsize=(20,10))
+ax[0].xaxis_date()
+ax[1].xaxis_date()
 
+ax[0].plot(anom['SMS-2.0in_esm'], label='2in ESM')
+ax[0].plot(anom['SMS-4.0in_esm'], label='4in ESM')
+ax[0].plot(anom['SMS-8.0in_esm'], label='8in ESM')
+ax[0].legend()
+ax[0].title.set_text('2,4,8 in Effective Soil Moisture Station 2053')
+
+ax[1].plot(sms_station_2053_raw['SMS-2.0in'], label='2in Raw')
+ax[1].plot(sms_station_2053_raw['SMS-4.0in'], label='4in Raw')
+ax[1].plot(sms_station_2053_raw['SMS-8.0in'], label='8in Raw')
+ax[1].title.set_text('2,4,8 in Raw Soil Moisture Station 2053')
+ax[1].legend()
+
+fig.autofmt_xdate()
 
 # drought_year_esi = station_2053_esi[station_2053_esi['ESI'] > -9999.0]
 # #drought_year_esi = station_2053_esi_og[(station_2053_esi_og.index.year >= 2006) & (station_2053_esi_og.index.year <=2006) & (station_2053_esi_og['ESI'] > -9999.0)]
