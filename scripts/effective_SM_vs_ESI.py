@@ -212,9 +212,9 @@ ax2.legend(loc=3)
 ax1.set_title('1 Week GOES and 4 Week MODIS ESI vs 4in Effective SM')
 
 #create a correlation matrix
-merged = pd.merge(anom['SMS-4.0in_esm'], station_2053_esi_1wk_tif['ESI'],left_index=True, right_index=True)
-dropped = merged.dropna()
-sns.heatmap(dropped.corr(), annot=True, cmap='magma')
+#merged = pd.merge(anom['SMS-4.0in_esm'], station_2053_esi_1wk_tif['ESI'],left_index=True, right_index=True)
+#dropped = merged.dropna()
+#sns.heatmap(dropped.corr(), annot=True, cmap='magma')
 
 
 
