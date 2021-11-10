@@ -8,12 +8,8 @@ Created on Wed Sep 29 15:01:33 2021
 
 import pandas as pd
 import seaborn as sns
-from matplotlib.offsetbox import AnchoredText
 import matplotlib.pyplot as plt
-from scipy import stats
-from matplotlib.offsetbox import AnchoredText
-import sys
-
+from matplotlib.backends.backend_pdf import PdfPages
 
 #create the function we need to apply effective sm conversion
 def convert(df, column='string', OC=None, FE=None, Db=None, Kpa=None): 
@@ -184,45 +180,111 @@ ax[0].plot(anom['SMS-2.0in_esm'], label='2in ESM')
 ax[0].plot(anom['SMS-4.0in_esm'], label='4in ESM')
 ax[0].plot(anom['SMS-8.0in_esm'], label='8in ESM')
 ax[0].legend()
-ax[0].title.set_text('2,4,8 in Effective Soil Moisture Station 2053')
+ax[0].set_title(f'2,4,8 in Effective Soil Moisture Station 2053 \n Years: {start_year} - {end_year}'.format(start_year, end_year))
 
 ax[1].plot(sms_station_2053_raw['SMS-2.0in'], label='2in Raw')
 ax[1].plot(sms_station_2053_raw['SMS-4.0in'], label='4in Raw')
 ax[1].plot(sms_station_2053_raw['SMS-8.0in'], label='8in Raw')
-ax[1].title.set_text('2,4,8 in Raw Soil Moisture Station 2053')
+ax[1].set_title(f'2,4,8 in Raw Soil Moisture Station 2053 \n Years: {start_year} - {end_year}'.format(start_year, end_year))
 ax[1].legend()
 
 fig.autofmt_xdate()
 
-#create the plot comparing ESI 1wk tif to ESI Modis and 4in ESM
-fig1, ax1 = plt.subplots(figsize=(15,10))
-ax1.plot(station_2053_esi_4wk_CS['Timeseries'], label='4wk Climate Serve ESI MODIS', color='green')
+#create the plot comparing ESI Modis and ESM
+fig1, ax1 = plt.subplots(figsize=(20,10))
+ax1.plot(station_2053_esi_4wk_CS['Timeseries'], label='4wk Climate Serve ESI MODIS', color='blue')
 ax1.set_xlabel('Date')
 ax1.set_ylabel('ESI Anomaly % 20 Year Mean')
-ax1.plot(station_2053_esi_1wk_tif['ESI'], label='1wk .tif ESI GOES', color='blue')
 ax1.legend(loc=4)
 
-ax2 = ax1.twinx()
-ax2.set_ylabel('4in Effective Soil Moisture Anomaly % of 20 Year Mean', color='red')
-#plot the second 4 in plot so that it is on the same anomaly scale. 
-ax2.plot(anom['SMS-4.0in_esm']*10, label='4in ESM Station 2053', color='red', linestyle='--')
-ax2.tick_params(axis='y', labelcolor='red')
-ax2.legend(loc=3)
+#create a twinx for the 4in sm anomaly. 
+ax_twin = ax1.twinx()
+ax_twin.set_ylabel('4in Effective Soil Moisture Anomaly % of 20 Year Mean', color='red')
 
-ax1.set_title('1 Week GOES and 4 Week MODIS ESI vs 4in Effective SM')
+#plot the second 4in plot so that it is on the same anomaly scale. 
+ax_twin.plot(anom['SMS-4.0in_esm']*10, label='4in ESM Station 2053', color='red', linestyle='--')
+ax_twin.tick_params(axis='y', labelcolor='red')
+ax_twin.legend(loc=3)
+ax1.set_title('4 Week MODIS ESI vs 4in Effective SM')
 
-#create a correlation matrix
+#create the plot comparing ESI GOES and ESM
+figg, axg = plt.subplots(figsize=(20,10))
+axg.plot(station_2053_esi_1wk_tif['ESI'], label='1wk .tif ESI GOES', color='blue')
+axg.set_xlabel('Date')
+axg.set_ylabel('ESI Anomaly % 20 Year Mean')
+axg.legend(loc=4)
+
+#create a twinx for the 4in sm anomaly. 
+ax_twin2 = axg.twinx()
+ax_twin2.set_ylabel('4in Effective Soil Moisture Anomaly % of 20 Year Mean', color='red')
+
+#create a twinx for the 4in sm anomaly
+ax_twin2.plot(anom['SMS-4.0in_esm']*10, label='4in ESM Station 2053', color='red', linestyle='--')
+ax_twin2.tick_params(axis='y', labelcolor='red')
+ax_twin2.legend(loc=3)
+axg.set_title('1 Week GOES ESI vs 4in Effective SM')
+
+#create a correlation matrix for 4in vs GOES ESI
+fig2, ax2 = plt.subplots(figsize=(15,10))
 merged = pd.merge(anom['SMS-4.0in_esm'], station_2053_esi_1wk_tif['ESI'],left_index=True, right_index=True)
+merged = merged.rename(columns={'ESI':'GOES ESI .tif'})
 dropped = merged.dropna()
-sns.heatmap(dropped.corr(), annot=True, cmap='magma')
+ax2 = sns.heatmap(dropped.corr(), annot=True, cmap='magma')
+ax2.set_title(f".tif ESI vs 4in SCAN 2053 \n Years: {start_year} - {end_year}".format(start_year, end_year))
+
+#create a correlation matrix for 4 in vs MODIS ESI
+fig3, ax3 = plt.subplots(figsize=(15,10))
+merged2 = pd.merge(anom['SMS-4.0in_esm'], station_2053_esi_4wk_CS['Timeseries'],left_index=True, right_index=True)
+merged2 = merged2.rename(columns={'Timeseries':'MODIS ESI Climate Serve'})
+dropped2 = merged2.dropna()
+ax3 = sns.heatmap(dropped2.corr(), annot=True, cmap='magma')
+ax3.set_title(f"Climate Serve ESI vs 4in SCAN 2053 \n Years: {start_year} - {end_year}".format(start_year, end_year))
 
 
+#create an empty list 
+li = [] 
 
+for i in merged['SMS-4.0in_esm']:
+    if i > 0.0:
+        x = 'high'
+    else:
+        x = 'low'
+        
+    li.append(x)
+    
+li2 = []
 
+for i in merged2['SMS-4.0in_esm']:
+    if i > 0.0:
+        x = 'high'
+    else:
+        x = 'low'
+        
+    li2.append(x)
+#add the high or low values to the station dataframes
+merged['Moisture Class'] = li
+merged2['Moisture Class'] = li2
 
+#create scatter plots
+fig4, ax4 = plt.subplots()
+ax4 = sns.scatterplot(data=merged, x='GOES ESI .tif', y=merged['SMS-4.0in_esm']*10, hue='Moisture Class')
+ax4.set_title(f"GOES ESI .tif vs 4in ESM SCAN 2053 \n Years: {start_year} - {end_year}".format(start_year, end_year))
+ax4.axhline(0.0, color='red', linestyle='--')
+ax4.axvline(0.0, color='red', linestyle='--')
 
+fig5, ax5 = plt.subplots()
+ax5 = sns.scatterplot(data=merged2, x='MODIS ESI Climate Serve', y=merged2['SMS-4.0in_esm']*10, hue='Moisture Class')
+ax5.set_title(f"MODIS ESI Climate Serve vs 4in SCAN 2053 \n Years: {start_year} - {end_year}".format(start_year, end_year))
+ax5.axhline(0.0, color='red', linestyle='--')
+ax5.axvline(0.0, color='red', linestyle='--')
 
-
-
-
+pp = PdfPages(st[0:4]+'_'+f'{start_year}_{end_year}.pdf'.format(start_year, end_year))
+pp.savefig(fig)
+pp.savefig(figg)
+pp.savefig(fig1)
+pp.savefig(fig2)
+pp.savefig(fig3)
+pp.savefig(fig4)
+pp.savefig(fig5)
+pp.close()
 
