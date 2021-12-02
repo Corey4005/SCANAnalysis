@@ -1,16 +1,28 @@
 # -*- coding: utf-8 -*-
 """
-Parameters:
-    filepath is set to my local computer. 
-    metadata is set to my local computer. 
-
-Note: 
-    if you want the files to work on your computer, set the path variables to your local machine. I am working on 
-    a couple of sys.argv arguments in a few days to make the files work more fluidly with different filepaths. 
-    My next goal is to figure out a way to allow people to key in certain years and be able to pull down whichever
-    data they would like. 
-
+Important Parameters:
+    filepath:
     
+    The file path is the location of the year sub-directories you want to grab 
+    GOES .tif files from. The filepath in this script is set to my local 
+    computer. 
+    
+    metadata: 
+    
+    This is the file from USDA SCAN contatining the 
+    station info for sites you are interested in comparing ESI from GOES too. 
+    Example metadata columns:
+    (['actonId', 'beginDate', 'countyName', 'elevation', 'endDate',
+       'fipsCountryCd', 'fipsCountyCd', 'fipsStateNumber', 'huc', 'hud',
+       'latitude', 'longitude', 'name', 'shefId', 'stationDataTimeZone',
+       'stationTimeZone', 'stationTriplet', 'START_Date', 'geometry'],
+      dtype='object')
+
+Note:
+    This script uses lat, lon and stationTriplet for each ESI pixel you are
+    interested in grabing to compare to known soil moisture. 
+
+   
 author: Corey Walker - University of Alabama at Huntsville
 
 """
@@ -19,31 +31,61 @@ import glob2
 import datetime as dt
 import pandas as pd
 import geopandas as gpd
+import os
+import itertools
 
 #read in the filepath and metadata
 
-filepath = r'C:\\Users\cwalker\Desktop\Data\ESI_Data\esi_1wk_tif\2006'
+filepath = r'C:\\Users\cwalker\Desktop\Data\ESI_Data\esi_1wk_tif'
 metadata = r'C:\\Users\cwalker\Desktop\Data\Metadata\SCAN_Metadata_AL.csv'
 
-#look for all files in filepath
-files = glob2.glob(filepath + '/*.tif')
 
-#read int the metadata
+#read int the metadata and make a geodataframe
 meta_df = pd.read_csv(metadata)
 gdf = gpd.GeoDataFrame(meta_df, geometry=gpd.points_from_xy(meta_df.longitude, meta_df.latitude))
 
-        
-#extract the ESI, datestring, lon and lat for file in filepath
+#create a list of filepaths to extract the ESI data from
+lis = [glob2.glob(root + '/*.tif') for (root, dirs, files) in os.walk(filepath)]
+flat_list = itertools.chain(*lis)
+files = list(flat_list)
+
+#extract the ESI, datestring, lon and lat for files in the list
 def ExtractESI(files):
+    """
+    Parameters: files - (list). This is the list of filepaths you want to 
+    iterate over. The filepaths must be raster files (.tif) to work. 
+    
+    Note: This function requires a global 'gdf' variable. Sample code to make 
+    a gdf variable yourself: 
+        
+        # bring in pandas and GeoPandas
+        import pandas as pd
+        import geopandas as gpd
+        
+        # set the metadata filepath
+        metadata = r'C:\\Users\cwalker\Desktop\Data\Metadata\SCAN_Metadata_AL.csv'
+        
+        #create the metadata dataframe
+        meta_df = pd.read_csv(metadata)
+        
+        #make geometric points to use as an index for reading .tif files
+        gdf = gpd.GeoDataFrame(meta_df, geometry=gpd.points_from_xy(meta_df.longitude, meta_df.latitude))
+    
+    Output: Returns a dataframe containing ESI, Lat, Lon, Date and 
+    StationTriplet associated with Pixel. 
+    
+    """
     ESI = []
     Date = []
     Lat = []
     Lon = []
+    Station = []
     for file in files:
         file_split = file.split('_')
         file_date = file_split[5].split('.tif')[0]
         when = dt.datetime.strptime(file_date, '%Y%j').date()
         raster = rasterio.open(file)
+        print('processesing:', file)
         for point in gdf['geometry']:
             x = point.xy[0][0]
             y = point.xy[1][0]
@@ -54,9 +96,11 @@ def ExtractESI(files):
             Date.append(when)
             Lon.append(x)
             Lat.append(y)
-    ESI_data = pd.DataFrame(data={'ESI':ESI, 'Latitude':Lat, 'Longitude':Lon, 'Date':Date})
-    #df.to_csv('/Users/cwalker/Desktop/Data/Processed_ESI/1_wk_ESI_2020.csv')
+        for station in gdf['stationTriplet']:
+            Station.append(station)
+    ESI_data = pd.DataFrame(data={'ESI':ESI, 'Latitude':Lat, 'Longitude':Lon, 'Date':Date, 'StationTriplet':Station})
+    ESI_data.to_csv('/Users/cwalker/Desktop/Data/Processed_ESI/1_wk_ESI_all.csv')
+    print('Job Done!')
     return ESI_data
 
-ESI_data = ExtractESI(files)
-        
+DataFrame = ExtractESI(files)
