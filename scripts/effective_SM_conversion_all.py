@@ -33,19 +33,24 @@ def SoilType(SMS):
     dict_list = []
     for i in SMS['station']:
         if i == '2057:AL:SCAN':
-            soil_dict = {'two':'silty clay loam', 'four':'silty clay loam', 
-                         'eight':'silty clay loam', 'twenty':'silty clay loam', 
-                         'forty':'silty clay loam', 'OC2in': 1.9, 'OC4in': 1.1, 
-                         'OC8in': 1.1, 'OC20in': 0.2, 'OC40in': 0.2, 'FE2in': 2.3,
-                         'FE4in': 1.5, 'FE8in': 1.5, 'FE20in': 2.2, 'FE40in': 3.8, 
-                         'Db2in': 1.53, 'Db4in': 1.55, 'Db8in': 1.55, 'Db20in': 1.39,
-                         'Db40in': 1.49, 'Kpa2in': 13.5, 'Kpa4in': 10.4, 
-                         'Kpa8in': 10.4, 'Kpa20in': 15.2, 'Kpa40in': 20.7}
+            soil_dict = {'two':'SICL', 'four':'SICL', 
+                         'eight':'SICL', 'twenty':'SICL', 
+                         'forty':'SICL', 'OC2in': 2.5, 'OC4in': 2.5, 
+                         'OC8in': 0.4, 'OC20in': 0.2, 'OC40in': 0.2, 'FE2in': 3.1,
+                         'FE4in': 3.1, 'FE8in': 2.4, 'FE20in': 3.2, 'FE40in': 4.3, 
+                         'Db2in': 1.03, 'Db4in': 1.03, 'Db8in': 1.42, 'Db20in': 1.44,
+                         'Db40in': 1.32, 'Kpa2in': 11.4, 'Kpa4in': 11.4, 
+                         'Kpa8in': 13.2, 'Kpa20in': 16.9, 'Kpa40in': 21.6}
             dict_list.append(soil_dict)
         elif i == '2078:AL:SCAN':
-            soil_dict = {'two':'silty clay loam', 'four':'silty clay', 
-                         'eight':'clay', 'twenty':'clay', 
-                         'forty':'clay'}
+            soil_dict = {'two':'SIC', 'four':'SIC', 
+                         'eight':'C', 'twenty':'C', 
+                         'forty':'C', 'OC2in':0.8 , 'OC4in': 0.8, 
+                         'OC8in': 0.4, 'OC20in': 0.2, 'OC40in': 0.2, 'FE2in': 2.9,
+                         'FE4in': 2.9, 'FE8in': 3.5, 'FE20in': 3.8, 'FE40in': 3.8, 
+                         'Db2in': np.nan, 'Db4in': np.nan, 'Db8in': np.nan, 'Db20in': np.nan,
+                         'Db40in': np.nan, 'Kpa2in': 12.7, 'Kpa4in': 12.7, 
+                         'Kpa8in': 17.7, 'Kpa20in': 19.6, 'Kpa40in': 19.6}
             dict_list.append(soil_dict)
         elif i == '2177:AL:SCAN':
             #used lab measurements because field were missing from Pedon. 
@@ -83,8 +88,14 @@ def CalculateESM(SMS):
     Dp1 = 1.4
     Dp2 = 4.2 
     Dp3 = 2.65
+    SMS.set_index('Date', inplace=True)
+    SMS = SMS.sort_index()
+    
+    #create some storage lists for the dataframe
     lis_dict = []
     station = []
+    
+    
     #station is an object and will not be preserved in numerical calculations
     #therefore we will store it in a list to append it back to df later
     for i in SMS['station']:
@@ -155,11 +166,19 @@ def CalculateESM(SMS):
         SMS['20in_esm'] = (SMS['SMS-20.0in'] - theta_r_twenty)/(P20in - theta_r_twenty)
         SMS['40in_esm'] = (SMS['SMS-40.0in'] - theta_r_forty)/(P40in - theta_r_forty)
     
+    #calculate the mean ESM for each week 
     SMS['station'] = station
     SMS['Soil Dictionary'] = lis_dict
-    NEW_DF = SMS[['Date', 'station', 'Soil Dictionary', '2in_esm', '4in_esm', '8in_esm', '20in_esm', '40in_esm']]
+    
+    #sort the index to date, sort and calculate mean
+    SMS = SMS[['2in_esm', '4in_esm', '8in_esm',
+       '20in_esm', '40in_esm']]
+    NEW_DF = SMS.rolling('7D', min_periods=3).mean()
+    
+    # #append the stations back after numerical calculations as well as soil dictionary
+    NEW_DF['station'] = station
+    NEW_DF['Soil Dictionary'] = lis_dict
     return NEW_DF
-        
         
     
     
