@@ -21,16 +21,11 @@ SMS = SCAN_READ[['Date', 'station','SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-2
 SMS['Date'] = pd.to_datetime(SMS['Date'])
 
 #create a test variable to run the code on to see if it works 
-TEST = SMS[SMS['station'] == '2057:AL:SCAN']
-#TEST.dropna(inplace=True)
+TEST = SMS[(SMS['station'] == '2057:AL:SCAN') | (SMS['station'] == '2113:AL:SCAN')]
 
-# #effective SM
-# (convert_column - theta_r)/(Porosity - theta_r)
-
-#Calculate particle density 
-#Dp = 100 / (((1.7 * OC) / Dp1) + ((1.6 * FE)/Dp2) + ((100 - ((1/7 * OC) + (1.6 * FE)))/ Dp3))
 def SoilType(SMS):
     dict_list = []
+    
     for i in SMS['station']:
         if i == '2057:AL:SCAN':
             soil_dict = {'two':'SICL', 'four':'SICL', 
@@ -42,27 +37,17 @@ def SoilType(SMS):
                          'Db40in': 1.32, 'Kpa2in': 11.4, 'Kpa4in': 11.4, 
                          'Kpa8in': 13.2, 'Kpa20in': 16.9, 'Kpa40in': 21.6}
             dict_list.append(soil_dict)
-        elif i == '2078:AL:SCAN':
-            soil_dict = {'two':'SIC', 'four':'SIC', 
-                         'eight':'C', 'twenty':'C', 
-                         'forty':'C', 'OC2in':0.8 , 'OC4in': 0.8, 
-                         'OC8in': 0.4, 'OC20in': 0.2, 'OC40in': 0.2, 'FE2in': 2.9,
-                         'FE4in': 2.9, 'FE8in': 3.5, 'FE20in': 3.8, 'FE40in': 3.8, 
-                         'Db2in': np.nan, 'Db4in': np.nan, 'Db8in': np.nan, 'Db20in': np.nan,
-                         'Db40in': np.nan, 'Kpa2in': 12.7, 'Kpa4in': 12.7, 
-                         'Kpa8in': 17.7, 'Kpa20in': 19.6, 'Kpa40in': 19.6}
-            dict_list.append(soil_dict)
-        elif i == '2177:AL:SCAN':
-            #used lab measurements because field were missing from Pedon. 
-            soil_dict = {'two':'silty clay', 'four':'silty clay', 
-                         'eight':'silty clay', 'twenty':'clay', 
-                         'forty':'clay'}
-            dict_list.append(soil_dict)
+    
         elif i == '2113:AL:SCAN':
             #two in and four in are fine sandy loam
-            soil_dict = {'two':'sandy loam', 'four':'sandy loam', 
-                         'eight':'sandy loam', 'twenty':'loam', 
-                         'forty':'loam'}
+            soil_dict = {'two':'FSL', 'four':'FSL', 
+                         'eight':'FSL', 'twenty':'L', 
+                         'forty':'L',  'OC2in': 1.3, 'OC4in': 1.3, 
+                         'OC8in': 0.4, 'OC20in': 0.2, 'OC40in': 0.1, 'FE2in': 0.5,
+                         'FE4in': 0.5, 'FE8in': 0.9, 'FE20in': 1.9, 'FE40in': 2.6, 
+                         'Db2in': 1.57, 'Db4in': 1.57, 'Db8in': 1.54, 'Db20in': 1.68,
+                         'Db40in': 1.62, 'Kpa2in': 5.6, 'Kpa4in': 5.6, 
+                         'Kpa8in': 6.2, 'Kpa20in': 10.2, 'Kpa40in': 10.8}
             dict_list.append(soil_dict)
         elif i == '2174:AL:SCAN':
             #This station does not have soil classification data on USDA SCAN. 
@@ -88,99 +73,154 @@ def CalculateESM(SMS):
     Dp1 = 1.4
     Dp2 = 4.2 
     Dp3 = 2.65
-    SMS.set_index('Date', inplace=True)
-    SMS = SMS.sort_index()
     
     #create some storage lists for the dataframe
-    lis_dict = []
     station = []
-    
+    lis_dict = []
+    Date = []
     
     #station is an object and will not be preserved in numerical calculations
     #therefore we will store it in a list to append it back to df later
     for i in SMS['station']:
         station.append(i)
+    
+    for i in SMS['Date']:
+        Date.append(i)
+        
+    for i in SMS['Soil Class Dictionary']:
+        lis_dict.append(i)
         
     for i in SMS['Soil Class Dictionary']:
         #get all the variables we need for soil column calculations
+        #two inch
         OC2in = i.get('OC2in')
-        OC4in = i.get('OC4in')
-        OC8in = i.get('OC8in')
-        OC20in = i.get('OC20in')
-        OC40in = i.get('OC40in')
         FE2in = i.get('FE2in')
-        FE4in = i.get('FE4in')
-        FE8in = i.get('FE8in')
-        FE20in = i.get('FE20in')
-        FE40in = i.get('FE40in')
         Kpa2in = i.get('Kpa2in')
-        Kpa4in = i.get('Kpa4in')
-        Kpa8in = i.get('Kpa8in')
-        Kpa20in = i.get('Kpa20in')
-        Kpa40in = i.get('Kpa40in')
         Db2in = i.get('Db2in')
-        Db4in = i.get('Db4in')
-        Db8in = i.get('Db8in')
-        Db20in = i.get('Db20in')
-        Db40in = i.get('Db40in')
-        
-        #we need to preserve the soil class dictionary for later as well so 
-        #that it is not lost
-        lis_dict.append(i)
-        
         
         #calculate particle density for each level in soil column 
         Dp2in = 100 / (((1.7 * OC2in) / Dp1) + ((1.6 * FE2in)/Dp2) + 
                      ((100 - ((1/7 * OC2in) + (1.6 * FE2in)))/ Dp3))
         
+        #calculate porosity two inch
+        P2in = 100 - (100 * Db2in/Dp2in)
+        
+        #calculate Theta R two inch
+        theta_r_two = 0.35 * Kpa2in
+        
+        #make the new column
+        SMS['2in_esm'] = (SMS['SMS-2.0in'] - theta_r_two)/(P2in - theta_r_two)
+    
+    #now we make the four in column 
+    for i in SMS['Soil Class Dictionary']:
+        #four inch
+        OC4in = i.get('OC4in')
+        FE4in = i.get('FE4in')
+        Kpa4in = i.get('Kpa4in')
+        Db4in = i.get('Db4in')
+        
+        #particle density four inch
         Dp4in = 100 / (((1.7 * OC4in) / Dp1) + ((1.6 * FE4in)/Dp2) + 
                      ((100 - ((1/7 * OC4in) + (1.6 * FE4in)))/ Dp3))
         
+        #porosity four in
+        P4in = 100 - (100 * Db4in/Dp4in)
+        
+        #theta r four in
+        theta_r_four = 0.35 * Kpa4in
+        
+        #make the column four in 
+        SMS['4in_esm'] = (SMS['SMS-4.0in'] - theta_r_four)/(P4in - theta_r_four)
+        
+    #now we make the eight in column 
+    for i in SMS['Soil Class Dictionary']:
+    
+        #eight inch
+        OC8in = i.get('OC8in')
+        FE8in = i.get('FE8in')
+        Db8in = i.get('Db8in')
+        Kpa8in = i.get('Kpa8in')
+        
+        #particle density eight in 
         Dp8in = 100 / (((1.7 * OC8in) / Dp1) + ((1.6 * FE8in)/Dp2) + 
                      ((100 - ((1/7 * OC8in) + (1.6 * FE8in)))/ Dp3))
         
+        #porosity eight in 
+        P8in = 100 - (100 * Db8in/Dp8in)
+        
+        #theta r eight in 
+        theta_r_eight = 0.35 * Kpa8in 
+        
+        #new column eight 
+        SMS['8in_esm'] = (SMS['SMS-8.0in'] - theta_r_eight)/(P8in - theta_r_eight)
+    
+    #now the twenty in column 
+    for i in SMS['Soil Class Dictionary']:
+        
+        #twenty inch
+        OC20in = i.get('OC20in')
+        FE20in = i.get('FE20in')
+        Db20in = i.get('Db20in')
+        Kpa20in = i.get('Kpa20in')
+        
+        #particle density 
         Dp20in = 100 / (((1.7 * OC20in) / Dp1) + ((1.6 * FE20in)/Dp2) + 
                      ((100 - ((1/7 * OC20in) + (1.6 * FE20in)))/ Dp3))
         
+        #porosity twenty 
+        P20in = 100 - (100 * Db20in/Dp20in)
+        
+        #theta r twenty 
+        theta_r_twenty = 0.35 * Kpa20in 
+        
+        #new column twenty 
+        SMS['20in_esm'] = (SMS['SMS-20.0in'] - theta_r_twenty)/(P20in - theta_r_twenty)
+        
+    for i in SMS['Soil Class Dictionary']:
+        
+        #forty inch
+        OC40in = i.get('OC40in')
+        FE40in = i.get('FE40in')
+        Db40in = i.get('Db40in')
+        Kpa40in = i.get('Kpa40in')
+        
+        #particle density 
         Dp40in = 100 / (((1.7 * OC40in) / Dp1) + ((1.6 * FE40in)/Dp2) + 
                      ((100 - ((1/7 * OC40in) + (1.6 * FE40in)))/ Dp3))
         
-        #calculate porosity for each level
-        #Calculate Porosity
-        P2in = 100 - (100 * Db2in/Dp2in)
-        P4in = 100 - (100 * Db4in/Dp4in)
-        P8in = 100 - (100 * Db8in/Dp8in)
-        P20in = 100 - (100 * Db20in/Dp20in)
+        #porosity forty 
         P40in = 100 - (100 * Db40in/Dp40in)
-        #calculate thetar for each level in soil column
-        theta_r_two = 0.35 * Kpa2in
-        theta_r_four = 0.35 * Kpa4in
-        theta_r_eight = 0.35 * Kpa8in 
-        theta_r_twenty = 0.35 * Kpa20in 
+        
+        #theta r forty 
         theta_r_forty = 0.35 * Kpa40in 
         
-        #calculate esm 
-        SMS['2in_esm'] = (SMS['SMS-2.0in'] - theta_r_two)/(P2in - theta_r_two)
-        SMS['4in_esm'] = (SMS['SMS-4.0in'] - theta_r_four)/(P4in - theta_r_four)
-        SMS['8in_esm'] = (SMS['SMS-8.0in'] - theta_r_eight)/(P8in - theta_r_eight)
-        SMS['20in_esm'] = (SMS['SMS-20.0in'] - theta_r_twenty)/(P20in - theta_r_twenty)
+        #new column forty 
         SMS['40in_esm'] = (SMS['SMS-40.0in'] - theta_r_forty)/(P40in - theta_r_forty)
-    
-    #calculate the mean ESM for each week 
+        
+       
+    #put the 
     SMS['station'] = station
     SMS['Soil Dictionary'] = lis_dict
+    SMS['Date'] = Date
     
-    #sort the index to date, sort and calculate mean
-    SMS = SMS[['2in_esm', '4in_esm', '8in_esm',
-       '20in_esm', '40in_esm']]
-    NEW_DF = SMS.rolling('7D', min_periods=3).mean()
+    #create the new df
+    SMS = SMS[['Date', 'station', 'Soil Dictionary', '2in_esm', '4in_esm', '8in_esm',
+        '20in_esm', '40in_esm']]
+   
     
     # #append the stations back after numerical calculations as well as soil dictionary
-    NEW_DF['station'] = station
-    NEW_DF['Soil Dictionary'] = lis_dict
-    return NEW_DF
+    return SMS
         
     
+def ESM_mean(SMS): 
+    df_dict = {}
+    for i in SMS['station'].unique():
+        DF = SMS[SMS['station'] == i]
+        DF.set_index('Date', inplace=True)
+        NEW_DF = DF.sort_index()
+        MEAN_DF = NEW_DF.rolling('7D', min_periods=3).mean()
+        df_dict[i] = MEAN_DF
+    return df_dict
     
     
     
@@ -196,3 +236,8 @@ def CalculateESM(SMS):
 # 2115:AL:SCAN
 # 2175:AL:SCAN
 # 2053:AL:SCAN
+
+#stations that need assumptions 
+#2078 - missing bulk density measurments 
+#2177 - pedon report measurements overestimate effective soil moisture by 2
+
