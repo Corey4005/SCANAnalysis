@@ -16,9 +16,11 @@ GOES_READ = pd.read_csv(GOES_ESI_ALL)
 SCAN_ALL = '../data/SCAN_DEPTHS_ALL.csv'
 SCAN_READ = pd.read_csv(SCAN_ALL)
 
+#create the mean anomaly for 
+
 # Just get the columns we are interested in and convert dates to datetime
 SMS = SCAN_READ[['Date', 'station','SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-20.0in','SMS-40.0in']].copy()
-SMS['Date'] = pd.to_datetime(SMS['Date'])
+SMS['Date'] = pd.to_datetime(SMS['Date'], format='%m/%d/%y')
 
 #create a test variable to run the code on to see if it works 
 TEST = SMS[(SMS['station'] == '2057:AL:SCAN') | (SMS['station'] == '2113:AL:SCAN') 
@@ -216,16 +218,53 @@ def CalculateESM(SMS):
     
 def ESM_mean(SMS): 
     df_dict = {}
+    station = []
     for i in SMS['station'].unique():
         DF = SMS[SMS['station'] == i]
         DF.set_index('Date', inplace=True)
         NEW_DF = DF.sort_index()
+        for s in NEW_DF['station']:
+            station.append(s)
+        #create a 7 day rolling mean for the dataset 
         MEAN_DF = NEW_DF.rolling('7D', min_periods=3).mean()
-        df_dict[i] = MEAN_DF
+        
+        MEAN_DF = MEAN_DF.asfreq('D')
+        
+        #create a julian day column for the dataset 
+        MEAN_DF['jday'] = MEAN_DF.index.strftime('%j')
+        MEAN_DF.reset_index(inplace=True)
+        
+        #drop jday 366
+        MASK = MEAN_DF.loc[MEAN_DF['jday'] == '366'].index
+        MEAN_DF = MEAN_DF.drop(MASK)
+        
+        
+        #create a mean for all weeks in the dataset by julian day
+        DAY_MEAN = MEAN_DF.groupby([MEAN_DF.jday]).mean()
+        
+        # # #insert the station back into the dataset
+        # stn_i = [x for x in station if x == i]
+        # DAY_MEAN['station'] = stn_i
+        
+        NEW = MEAN_DF.merge(DAY_MEAN, on='jday', how='left', sort=False)
+        NEW.set_index('Date', inplace=True)
+        NEW.sort_index()
+        
+        NEW['ANOM_2in'] = NEW['2in_esm_x'] - NEW['2in_esm_y']
+        NEW['ANOM_4in'] = NEW['4in_esm_x'] - NEW['4in_esm_y']
+        NEW['ANOM_8in']
+        NEW['ANOM_20in']
+        NEW['ANOM_40in']
+        df_dict[i] = NEW
+        
     return df_dict
     
     
-    
+def merge_func(df_dict): 
+    for i in df_dict:
+        i.reset_index()
+        i.merge(GOES_READ, how='outer', )
+        
 # 2173:AL:SCAN
 # 2180:AL:SCAN
 # 2114:AL:SCAN
