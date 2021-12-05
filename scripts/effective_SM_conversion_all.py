@@ -21,7 +21,8 @@ SMS = SCAN_READ[['Date', 'station','SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-2
 SMS['Date'] = pd.to_datetime(SMS['Date'])
 
 #create a test variable to run the code on to see if it works 
-TEST = SMS[(SMS['station'] == '2057:AL:SCAN') | (SMS['station'] == '2113:AL:SCAN')]
+TEST = SMS[(SMS['station'] == '2057:AL:SCAN') | (SMS['station'] == '2113:AL:SCAN') 
+           | (SMS['station'] == '2055:AL:SCAN')]
 
 def SoilType(SMS):
     dict_list = []
@@ -49,18 +50,19 @@ def SoilType(SMS):
                          'Db40in': 1.62, 'Kpa2in': 5.6, 'Kpa4in': 5.6, 
                          'Kpa8in': 6.2, 'Kpa20in': 10.2, 'Kpa40in': 10.8}
             dict_list.append(soil_dict)
-        elif i == '2174:AL:SCAN':
-            #This station does not have soil classification data on USDA SCAN. 
-            soil_dict = {'two': np.nan, 'four': np.nan, 
-                         'eight': np.nan, 'twenty': np.nan, 
-                         'forty': np.nan}
-            dict_list.append(soil_dict)
+    
         elif i == '2055:AL:SCAN':
             #two and four in are gravelly
-            soil_dict = {'two': 'silt loam', 'four': 'silt loam', 
-                         'eight':'silt loam', 'twenty': 'silty clay', 
-                         'forty': 'silty clay'}
+            soil_dict = {'two': 'GR-SIL', 'four': 'GR-SIL', 
+                         'eight':'GR-SIL', 'twenty': 'SICL', 
+                         'forty': 'SICL', 'OC2in': 3.0, 'OC4in': 3.0, 
+                         'OC8in': 0.4, 'OC20in': 0.2, 'OC40in': 0.2, 'FE2in': 0.7,
+                         'FE4in': 0.7, 'FE8in': 1.5, 'FE20in': 3.6, 'FE40in': 3.8, 
+                         'Db2in': 1.20, 'Db4in': 1.20, 'Db8in': 1.34, 'Db20in': 1.29,
+                         'Db40in': 1.15, 'Kpa2in': 9.8, 'Kpa4in': 9.8, 
+                         'Kpa8in': 8.9, 'Kpa20in': 22.4, 'Kpa40in': 23.1}
             dict_list.append(soil_dict)
+            
         elif i == '2173:AL:SCAN':
             soil_dict = {}
             dict_list.append(soil_dict)
@@ -240,4 +242,5 @@ def ESM_mean(SMS):
 #stations that need assumptions 
 #2078 - missing bulk density measurments 
 #2177 - pedon report measurements overestimate effective soil moisture by 2
+#2174 - pedon report missing
 
