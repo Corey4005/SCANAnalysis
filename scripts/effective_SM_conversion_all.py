@@ -7,6 +7,8 @@ Created on Thu Dec  2 12:30:50 2021
 # import packages
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 #read in the ESI data
 GOES_ESI_ALL = '../data/1_wk_ESI_all.csv'
@@ -16,18 +18,44 @@ GOES_READ = pd.read_csv(GOES_ESI_ALL)
 SCAN_ALL = '../data/SCAN_DEPTHS_ALL.csv'
 SCAN_READ = pd.read_csv(SCAN_ALL)
 
+CLIMATE_SERVE_ALL = '../../ESIExtractProject/data/ESI_1wk_tif2select_pt.csv'
+CLIMATE_SERVE_READ = pd.read_csv(CLIMATE_SERVE_ALL)
+
 #create the mean anomaly for 
 
 # Just get the columns we are interested in and convert dates to datetime
 SMS = SCAN_READ[['Date', 'station','SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-20.0in','SMS-40.0in']].copy()
 SMS['Date'] = pd.to_datetime(SMS['Date'], format='%m/%d/%y')
+GOES_READ['Date'] = pd.to_datetime(GOES_READ['Date'])
 
 #create a test variable to run the code on to see if it works 
-TEST = SMS[(SMS['station'] == '2057:AL:SCAN') | (SMS['station'] == '2113:AL:SCAN') 
-           | (SMS['station'] == '2055:AL:SCAN')]
+TEST = SMS[(SMS['station'] == '2057:AL:SCAN') | 
+           (SMS['station'] == '2113:AL:SCAN') 
+           | (SMS['station'] == '2055:AL:SCAN') | 
+           (SMS['station'] == '2180:AL:SCAN')]
 
-def SoilType(SMS):
+
+def SOIL_TYPE(SMS):
     dict_list = []
+    
+#stations to work on still
+
+# 2114:AL:SCAN
+# 2178:AL:SCAN
+# 2181:AL:SCAN
+# 2182:AL:SCAN
+# 2176:AL:SCAN
+# 2056:AL:SCAN
+# 2179:AL:SCAN
+# 2115:AL:SCAN
+# 2175:AL:SCAN
+# 2053:AL:SCAN
+
+#stations that need assumptions 
+#2078 - missing bulk density measurments 
+#2177 - lab, pedon report measurements overestimate effective soil moisture by 2
+#2174 - pedon report missing
+#2173 - lab
     
     for i in SMS['station']:
         if i == '2057:AL:SCAN':
@@ -65,14 +93,26 @@ def SoilType(SMS):
                          'Kpa8in': 8.9, 'Kpa20in': 22.4, 'Kpa40in': 23.1}
             dict_list.append(soil_dict)
             
-        elif i == '2173:AL:SCAN':
-            soil_dict = {}
+        elif i == '2180:AL:SCAN':
+            soil_dict = {'two': 'SL', 'four': 'SL', 
+                         'eight':'SL', 'twenty': 'SL', 
+                         'forty': 'SCL','OC2in': 0.9, 'OC4in': 0.9, 
+                         'OC8in': 0.9, 'OC20in': 0.2, 'OC40in': 0.1,'FE2in': 0.7,
+                         'FE4in': 0.7, 'FE8in': 0.7, 'FE20in': 1.6, 'FE40in': 2.5, 
+                         'Db2in': 1.67, 'Db4in': 1.67, 'Db8in': 1.67, 'Db20in': 1.61,
+                         'Db40in': 1.70,'Kpa2in': 4.6, 'Kpa4in': 4.6, 
+                         'Kpa8in': 4.6, 'Kpa20in': 7.1, 'Kpa40in': 10.6}
+            
             dict_list.append(soil_dict)
         
+        # elif i == '2114:AL:SCAN':
+        #     soil_dict = {'two'
+        #         }
+            
     SMS['Soil Class Dictionary'] = dict_list
     return SMS
 
-def CalculateESM(SMS):
+def CALCULATE_ESM(SMS):
     #set some knowns for conversion
     Dp1 = 1.4
     Dp2 = 4.2 
@@ -216,15 +256,13 @@ def CalculateESM(SMS):
     return SMS
         
     
-def ESM_mean(SMS): 
+def ESM_ANOM(SMS): 
     df_dict = {}
-    station = []
     for i in SMS['station'].unique():
         DF = SMS[SMS['station'] == i]
         DF.set_index('Date', inplace=True)
         NEW_DF = DF.sort_index()
-        for s in NEW_DF['station']:
-            station.append(s)
+       
         #create a 7 day rolling mean for the dataset 
         MEAN_DF = NEW_DF.rolling('7D', min_periods=3).mean()
         
@@ -246,25 +284,80 @@ def ESM_mean(SMS):
         # stn_i = [x for x in station if x == i]
         # DAY_MEAN['station'] = stn_i
         
-        NEW = MEAN_DF.merge(DAY_MEAN, on='jday', how='left', sort=False)
-        NEW.set_index('Date', inplace=True)
-        NEW.sort_index()
+        #create the anomaly dataframe
+        ANOM = MEAN_DF.merge(DAY_MEAN, on='jday', how='left', sort=False)
+        ANOM.set_index('Date', inplace=True)
+        ANOM.sort_index()
         
-        NEW['ANOM_2in'] = NEW['2in_esm_x'] - NEW['2in_esm_y']
-        NEW['ANOM_4in'] = NEW['4in_esm_x'] - NEW['4in_esm_y']
-        NEW['ANOM_8in']
-        NEW['ANOM_20in']
-        NEW['ANOM_40in']
-        df_dict[i] = NEW
+        #create the anomaly calculations
+        ANOM['ANOM_2in'] = ANOM['2in_esm_x'] - ANOM['2in_esm_y']
+        ANOM['ANOM_4in'] = ANOM['4in_esm_x'] - ANOM['4in_esm_y']
+        ANOM['ANOM_8in'] = ANOM['8in_esm_x'] - ANOM['8in_esm_y']
+        ANOM['ANOM_20in'] = ANOM['20in_esm_x'] - ANOM['20in_esm_y']
+        ANOM['ANOM_40in'] = ANOM['40in_esm_x'] - ANOM['40in_esm_y']
+        
+        #create the new dataframe
+        ANOM = ANOM[['jday', 'ANOM_2in', 'ANOM_4in', 'ANOM_8in', 'ANOM_20in',
+       'ANOM_40in']]
+        
+        
+        #create a dictionary to store all ANOM dataframes
+        df_dict[i] = ANOM
         
     return df_dict
     
     
-def merge_func(df_dict): 
-    for i in df_dict:
-        i.reset_index()
-        i.merge(GOES_READ, how='outer', )
+def PLOT_ANOM(ANOM_dict):
+    for i in ANOM_dict:
+        obj = ANOM_dict.get(i)
+        obj.plot()
+        plt.show()
         
+def MERGE(ANOM_dict):
+    df_dic = {}
+    for i in ANOM_dict:
+        SMS = ANOM_dict.get(i)
+        SMS.reset_index(inplace=True)
+        GOES = GOES_READ[GOES_READ['StationTriplet'] == i]
+        MERGE = GOES.merge(SMS, on='Date', how='left')
+        MERGE = MERGE[['Date', 'StationTriplet', 'ESI','ANOM_2in', 'ANOM_4in',
+                       'ANOM_8in', 'ANOM_20in', 'ANOM_40in']]
+        MERGE.set_index('Date', inplace=True)
+        MASK_ESI = MERGE.loc[MERGE['ESI'] == -9999].index
+        MERGE = MERGE.drop(MASK_ESI)
+        MERGE = MERGE.dropna()
+        
+        #multiply anoms by 10 to get better scale
+        MERGE['ANOM_2in'] = MERGE['ANOM_2in']*10
+        MERGE['ANOM_4in'] = MERGE['ANOM_4in']*10
+        MERGE['ANOM_8in'] = MERGE['ANOM_8in']*10
+        MERGE['ANOM_20in'] = MERGE['ANOM_20in']*10
+        MERGE['ANOM_40in'] = MERGE['ANOM_40in']*10
+        df_dic[i] = MERGE
+        
+    return df_dic
+        
+def CORRELATE(MERGE_dic):
+    df_dic = {}
+    for i in MERGE_dic: 
+        STN = MERGE_dic.get(i)
+        DF = STN[STN['StationTriplet'] == i]
+        CORR = DF.corr()
+        CORR = pd.DataFrame(CORR['ESI'])
+        df_dic[i] = CORR
+        
+    return df_dic
+
+def ALL_FUNCTIONS(SMS):
+    SOILS = SOIL_TYPE(SMS)
+    ESM = CALCULATE_ESM(SOILS)
+    ANOM = ESM_ANOM(ESM)
+    MERGED = MERGE(ANOM)
+    CORR = CORRELATE(MERGED)
+    return CORR
+    
+    
+    
 # 2173:AL:SCAN
 # 2180:AL:SCAN
 # 2114:AL:SCAN
@@ -280,6 +373,7 @@ def merge_func(df_dict):
 
 #stations that need assumptions 
 #2078 - missing bulk density measurments 
-#2177 - pedon report measurements overestimate effective soil moisture by 2
+#2177 - lab, pedon report measurements overestimate effective soil moisture by 2
 #2174 - pedon report missing
+#2173 - lab
 
