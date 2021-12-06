@@ -1,0 +1,5 @@
+message: "if you use info from this repository, please cite it as below."
+authors: 
+	-family-names: Walker
+	-given-names: Corey
+title: "Linear Regression Analysis of South-East SCAN sites vs. 1-Week ESI"
