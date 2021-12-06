@@ -1,0 +1,17 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  A Script to Extract ESI from .tif Files Given SCAN
+  Site Metadata
+message: >-
+  Please cite my script in your work if it is used to
+  get ESI from .tif files at specific SCAN Site
+  location lat, lons. 
+type: dataset
+authors:
+  - given-names: Corey
+    family-names: Walker
+    email: cdw0063@uaah.edu
+    affiliation: University of Alabama Huntsville
