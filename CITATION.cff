@@ -1,0 +1,16 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  Linear Regression Analysis of South-East SCAN sites
+  vs. 1-Week ESI
+message: >-
+  Please cite this repository if discussing results
+  from my SCAN analysis. Thank you. 
+type: dataset
+authors:
+  - given-names: 'Corey '
+    family-names: Walker
+    email: cdw0063@uah.edu
+    affiliation: University of Alabama Huntsville
