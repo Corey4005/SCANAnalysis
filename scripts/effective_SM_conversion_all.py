@@ -8,6 +8,7 @@ Created on Thu Dec  2 12:30:50 2021
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 #read in the ESI data
@@ -338,15 +339,30 @@ def MERGE(ANOM_dict):
     return df_dic
         
 def CORRELATE(MERGE_dic):
-    df_dic = {}
+    COR_DIC = {}
     for i in MERGE_dic: 
         STN = MERGE_dic.get(i)
         DF = STN[STN['StationTriplet'] == i]
         CORR = DF.corr()
         CORR = pd.DataFrame(CORR['ESI'])
-        df_dic[i] = CORR
-        
-    return df_dic
+        CORR['station'] = i
+        COR_DIC[i] = CORR
+    return COR_DIC
+
+
+def UNSTACK_PLOT(COR_DIC):
+    DF = pd.concat(COR_DIC)
+    DF = DF.unstack(level=-1)['ESI']
+    DF = DF.drop(['ESI'], axis=1)
+    DF.reset_index(inplace=True)
+    TIDY = DF.melt(id_vars='index')
+    fig, ax = plt.subplots(figsize=(10,10))
+    PLOT = sns.barplot(x='index', y='value', hue='variable', data=TIDY, ax=ax)
+    ax.set_xlabel('Station')
+    ax.set_ylabel('R Value')
+    ax.set_title('Station Volumetric Soil Moisture Pairwise Correlations with GOES')
+    return PLOT
+    
 
 def ALL_FUNCTIONS(SMS):
     SOILS = SOIL_TYPE(SMS)
@@ -354,7 +370,8 @@ def ALL_FUNCTIONS(SMS):
     ANOM = ESM_ANOM(ESM)
     MERGED = MERGE(ANOM)
     CORR = CORRELATE(MERGED)
-    return CORR
+    PLOT = UNSTACK_PLOT(CORR)
+    return PLOT
     
     
     
