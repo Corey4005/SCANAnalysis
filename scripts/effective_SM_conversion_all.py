@@ -281,10 +281,6 @@ def ESM_ANOM(SMS):
         #create a mean for all weeks in the dataset by julian day
         DAY_MEAN = MEAN_DF.groupby([MEAN_DF.jday]).mean()
         
-        # # #insert the station back into the dataset
-        # stn_i = [x for x in station if x == i]
-        # DAY_MEAN['station'] = stn_i
-        
         #create the anomaly dataframe
         ANOM = MEAN_DF.merge(DAY_MEAN, on='jday', how='left', sort=False)
         ANOM.set_index('Date', inplace=True)
