@@ -326,14 +326,17 @@ def ESM_ANOM(SMS):
         NEW_DF['2in_mean'] = NEW_DF['2in_esm'].rolling('7D', min_periods=3).mean()
         NEW_DF['4in_mean'] = NEW_DF['4in_esm'].rolling('7D', min_periods=3).mean()
         NEW_DF['8in_mean'] = NEW_DF['8in_esm'].rolling('7D', min_periods=3).mean()
-        NEW_DF['10in_mean'] = NEW_DF['20in_esm'].rolling('7D', min_periods=3).mean()
         NEW_DF['20in_mean'] = NEW_DF['20in_esm'].rolling('7D', min_periods=3).mean()
         NEW_DF['40in_mean'] = NEW_DF['40in_esm'].rolling('7D', min_periods=3).mean()
         NEW_DF = NEW_DF.asfreq('D')
         
-        #create a julian day column for the dataset 
+        NEW_DF = NEW_DF[['2in_mean','4in_mean', '8in_mean', 
+                         '20in_mean', '40in_mean', 'Soil Dictionary']]
+        
+        # #create a julian day column for the dataset 
         NEW_DF['jday'] = NEW_DF.index.strftime('%j')
         NEW_DF.reset_index(inplace=True)
+    
         
         #drop jday 366
         MASK = NEW_DF.loc[NEW_DF['jday'] == '366'].index
@@ -348,17 +351,16 @@ def ESM_ANOM(SMS):
         ANOM.set_index('Date', inplace=True)
         ANOM.sort_index()
         
+        #create the anomaly calculations
+        ANOM['ANOM_2in'] = ANOM['2in_mean_x'] - ANOM['2in_mean_y']
+        ANOM['ANOM_4in'] = ANOM['4in_mean_x'] - ANOM['4in_mean_y']
+        ANOM['ANOM_8in'] = ANOM['8in_mean_x'] - ANOM['8in_mean_y']
+        ANOM['ANOM_20in'] = ANOM['20in_mean_x'] - ANOM['20in_mean_y']
+        ANOM['ANOM_40in'] = ANOM['40in_mean_x'] - ANOM['40in_mean_y']
         
-       #  #create the anomaly calculations
-       #  ANOM['ANOM_2in'] = ANOM['2in_esm_x'] - ANOM['2in_esm_y']
-       #  ANOM['ANOM_4in'] = ANOM['4in_esm_x'] - ANOM['4in_esm_y']
-       #  ANOM['ANOM_8in'] = ANOM['8in_esm_x'] - ANOM['8in_esm_y']
-       #  ANOM['ANOM_20in'] = ANOM['20in_esm_x'] - ANOM['20in_esm_y']
-       #  ANOM['ANOM_40in'] = ANOM['40in_esm_x'] - ANOM['40in_esm_y']
-        
-       #  #create the new dataframe
-       #  ANOM = ANOM[['jday', 'ANOM_2in', 'ANOM_4in', 'ANOM_8in', 'ANOM_20in',
-       # 'ANOM_40in']]
+        #create the new dataframe
+        ANOM = ANOM[['jday', 'ANOM_2in', 'ANOM_4in', 'ANOM_8in', 'ANOM_20in',
+        'ANOM_40in', 'Soil Dictionary']]
         
         
         #create a dictionary to store all ANOM dataframes
@@ -366,6 +368,11 @@ def ESM_ANOM(SMS):
         
     return df_dict
     
+def TEST_IT(SMS): 
+    SOILS = SOIL_TYPE(SMS)
+    ESM = CALCULATE_ESM(SOILS)
+    ANOM = ESM_ANOM(ESM)
+    return ANOM
     
 def PLOT_ANOM(ANOM_dict):
     for i in ANOM_dict:
