@@ -9,6 +9,10 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import tensorflow as tf
+import keras 
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, confusion_matrix
 
 
 #read in the ESI data
@@ -33,23 +37,17 @@ GOES_READ['Date'] = pd.to_datetime(GOES_READ['Date'])
 TEST = SMS[(SMS['station'] == '2057:AL:SCAN') | 
            (SMS['station'] == '2113:AL:SCAN') 
            | (SMS['station'] == '2055:AL:SCAN') | 
-           (SMS['station'] == '2180:AL:SCAN')]
-
+            (SMS['station'] == '2180:AL:SCAN') | 
+            (SMS['station'] == '2114:AL:SCAN') |
+            (SMS['station'] == '2056:AL:SCAN') |
+            (SMS['station'] == '2115:AL:SCAN') |
+            (SMS['station'] == '2053:AL:SCAN')]
 
 def SOIL_TYPE(SMS):
     dict_list = []
     
 #stations to work on still
 
-# 2114:AL:SCAN
-# 2178:AL:SCAN
-# 2181:AL:SCAN
-# 2182:AL:SCAN
-# 2176:AL:SCAN
-# 2056:AL:SCAN
-# 2179:AL:SCAN
-# 2115:AL:SCAN
-# 2175:AL:SCAN
 # 2053:AL:SCAN
 
 #stations that need assumptions 
@@ -57,6 +55,15 @@ def SOIL_TYPE(SMS):
 #2177 - lab, pedon report measurements overestimate effective soil moisture by 2
 #2174 - pedon report missing
 #2173 - lab
+#2178 - missing soil characterization 'field texture'
+#2181 - no field texture characterization
+#2182 - no pedon report 
+#2176 - no field texture characterization. 
+#2179 - missibg field texture characterization 
+#2175 - missing field texture characterization
+#
+
+
     
     for i in SMS['station']:
         if i == '2057:AL:SCAN':
@@ -105,10 +112,60 @@ def SOIL_TYPE(SMS):
                          'Kpa8in': 4.6, 'Kpa20in': 7.1, 'Kpa40in': 10.6}
             
             dict_list.append(soil_dict)
+            
+        elif i == '2114:AL:SCAN': 
+            soil_dict = {'two': 'SIL', 'four': 'SIC', 
+                         'eight':'C', 'twenty': 'C', 
+                         'forty': 'C','OC2in': 2.9, 'OC4in': 1.3, 
+                         'OC8in': 0.8, 'OC20in': 0.4, 'OC40in': 0.2,'FE2in': 1.4,
+                         'FE4in': 2.0, 'FE8in': 2.2, 'FE20in': 2.2, 'FE40in': 2.1, 
+                         'Db2in': 1.03, 'Db4in': 1.39, 'Db8in': 1.36, 'Db20in': 1.53,
+                         'Db40in': 1.61,'Kpa2in': 17.8, 'Kpa4in': 15.0, 
+                         'Kpa8in': 16.8, 'Kpa20in': 16.1, 'Kpa40in': 12.1}
+            
+            dict_list.append(soil_dict)
         
-        # elif i == '2114:AL:SCAN':
-        #     soil_dict = {'two'
-        #         }
+        elif i == '2056:AL:SCAN':
+            soil_dict = {'two': 'L', 'four': 'L', 
+                          'eight':'CL', 'twenty': 'C', 
+                          'forty': 'C','OC2in': 2.3, 'OC4in': 2.3, 
+                          'OC8in': 0.7, 'OC20in': 0.3, 'OC40in': 0.3,'FE2in': 1.2,
+                          'FE4in': 1.2, 'FE8in': 1.2, 'FE20in': 1.4, 'FE40in': 1.4, 
+                          'Db2in': 1.36, 'Db4in': 1.36, 'Db8in': 1.66, 'Db20in': 1.59,
+                          'Db40in': 1.59,'Kpa2in': 9.6, 'Kpa4in': 9.6, 
+                          'Kpa8in': 9.1, 'Kpa20in': 10.0, 'Kpa40in': 10.0}
+                
+            dict_list.append(soil_dict)
+            
+        elif i == '2115:AL:SCAN':
+            
+            #I would not trust the 2in soil moisture caluculations here for now because 
+            #np.nans in iron measurement. I am not sure how it still calculates, even when 2in FE is nan. 
+            
+            soil_dict = {'two': 'LS', 'four': 'LS', 
+                          'eight':'SL', 'twenty': 'SCL GR', 
+                          'forty': 'GR-CL','OC2in': 0.4, 'OC4in': 0.4, 
+                          'OC8in': 0.2, 'OC20in': 0.1, 'OC40in': 0.1,'FE2in': np.nan,
+                          'FE4in': np.nan, 'FE8in': 0.4, 'FE20in': 1.0, 'FE40in': 2.6, 
+                          'Db2in': 1.48, 'Db4in': 1.48, 'Db8in': 1.62, 'Db20in': 1.56,
+                          'Db40in': 1.62,'Kpa2in': 1.6, 'Kpa4in': 1.6, 
+                          'Kpa8in': 4.2, 'Kpa20in': 7.3, 'Kpa40in': 13.8}
+            
+            dict_list.append(soil_dict)
+            
+        elif i == '2053:AL:SCAN':
+            
+            soil_dict = {'two': 'SICL', 'four': 'SIL', 
+                          'eight':'SIL', 'twenty': 'SICL', 
+                          'forty': 'CL','OC2in': 1.9, 'OC4in': 1.1, 
+                          'OC8in': 1.1, 'OC20in': 0.2, 'OC40in': 0.2,'FE2in': 2.3,
+                          'FE4in': 1.5, 'FE8in': 1.5, 'FE20in': 2.2, 'FE40in': 3.8, 
+                          'Db2in': 1.53, 'Db4in': 1.55, 'Db8in': 1.55, 'Db20in': 1.39,
+                          'Db40in': 1.49,'Kpa2in': 13.5, 'Kpa4in': 10.4, 
+                          'Kpa8in': 10.4, 'Kpa20in': 15.2, 'Kpa40in': 20.7}
+        
+        
+            dict_list.append(soil_dict)
             
     SMS['Soil Class Dictionary'] = dict_list
     return SMS
@@ -258,6 +315,7 @@ def CALCULATE_ESM(SMS):
         
     
 def ESM_ANOM(SMS): 
+    #come back to here and fix the string issues where soil class is dropped. 
     df_dict = {}
     for i in SMS['station'].unique():
         DF = SMS[SMS['station'] == i]
@@ -265,37 +323,42 @@ def ESM_ANOM(SMS):
         NEW_DF = DF.sort_index()
        
         #create a 7 day rolling mean for the dataset 
-        MEAN_DF = NEW_DF.rolling('7D', min_periods=3).mean()
-        
-        MEAN_DF = MEAN_DF.asfreq('D')
+        NEW_DF['2in_mean'] = NEW_DF['2in_esm'].rolling('7D', min_periods=3).mean()
+        NEW_DF['4in_mean'] = NEW_DF['4in_esm'].rolling('7D', min_periods=3).mean()
+        NEW_DF['8in_mean'] = NEW_DF['8in_esm'].rolling('7D', min_periods=3).mean()
+        NEW_DF['10in_mean'] = NEW_DF['20in_esm'].rolling('7D', min_periods=3).mean()
+        NEW_DF['20in_mean'] = NEW_DF['20in_esm'].rolling('7D', min_periods=3).mean()
+        NEW_DF['40in_mean'] = NEW_DF['40in_esm'].rolling('7D', min_periods=3).mean()
+        NEW_DF = NEW_DF.asfreq('D')
         
         #create a julian day column for the dataset 
-        MEAN_DF['jday'] = MEAN_DF.index.strftime('%j')
-        MEAN_DF.reset_index(inplace=True)
+        NEW_DF['jday'] = NEW_DF.index.strftime('%j')
+        NEW_DF.reset_index(inplace=True)
         
         #drop jday 366
-        MASK = MEAN_DF.loc[MEAN_DF['jday'] == '366'].index
-        MEAN_DF = MEAN_DF.drop(MASK)
+        MASK = NEW_DF.loc[NEW_DF['jday'] == '366'].index
+        NEW_DF = NEW_DF.drop(MASK)
         
         
         #create a mean for all weeks in the dataset by julian day
-        DAY_MEAN = MEAN_DF.groupby([MEAN_DF.jday]).mean()
+        DAY_MEAN = NEW_DF.groupby([NEW_DF.jday]).mean()
         
         #create the anomaly dataframe
-        ANOM = MEAN_DF.merge(DAY_MEAN, on='jday', how='left', sort=False)
+        ANOM = NEW_DF.merge(DAY_MEAN, on='jday', how='left', sort=False)
         ANOM.set_index('Date', inplace=True)
         ANOM.sort_index()
         
-        #create the anomaly calculations
-        ANOM['ANOM_2in'] = ANOM['2in_esm_x'] - ANOM['2in_esm_y']
-        ANOM['ANOM_4in'] = ANOM['4in_esm_x'] - ANOM['4in_esm_y']
-        ANOM['ANOM_8in'] = ANOM['8in_esm_x'] - ANOM['8in_esm_y']
-        ANOM['ANOM_20in'] = ANOM['20in_esm_x'] - ANOM['20in_esm_y']
-        ANOM['ANOM_40in'] = ANOM['40in_esm_x'] - ANOM['40in_esm_y']
         
-        #create the new dataframe
-        ANOM = ANOM[['jday', 'ANOM_2in', 'ANOM_4in', 'ANOM_8in', 'ANOM_20in',
-       'ANOM_40in']]
+       #  #create the anomaly calculations
+       #  ANOM['ANOM_2in'] = ANOM['2in_esm_x'] - ANOM['2in_esm_y']
+       #  ANOM['ANOM_4in'] = ANOM['4in_esm_x'] - ANOM['4in_esm_y']
+       #  ANOM['ANOM_8in'] = ANOM['8in_esm_x'] - ANOM['8in_esm_y']
+       #  ANOM['ANOM_20in'] = ANOM['20in_esm_x'] - ANOM['20in_esm_y']
+       #  ANOM['ANOM_40in'] = ANOM['40in_esm_x'] - ANOM['40in_esm_y']
+        
+       #  #create the new dataframe
+       #  ANOM = ANOM[['jday', 'ANOM_2in', 'ANOM_4in', 'ANOM_8in', 'ANOM_20in',
+       # 'ANOM_40in']]
         
         
         #create a dictionary to store all ANOM dataframes
@@ -333,7 +396,14 @@ def MERGE(ANOM_dict):
         df_dic[i] = MERGE
         
     return df_dic
-        
+
+def UNPACK(df_dic): 
+    DF = pd.concat(df_dic)
+    DF = DF.unstack(level=-1)['ESI']
+    DF = DF.reset_index(inplace=True)
+    
+    return DF
+    
 def CORRELATE(MERGE_dic):
     COR_DIC = {}
     for i in MERGE_dic: 
@@ -352,7 +422,7 @@ def UNSTACK_PLOT(COR_DIC):
     DF = DF.drop(['ESI'], axis=1)
     DF.reset_index(inplace=True)
     TIDY = DF.melt(id_vars='index')
-    fig, ax = plt.subplots(figsize=(10,10))
+    fig, ax = plt.subplots(figsize=(12,10))
     PLOT = sns.barplot(x='index', y='value', hue='variable', data=TIDY, ax=ax)
     ax.set_xlabel('Station')
     ax.set_ylabel('R Value')
@@ -360,7 +430,7 @@ def UNSTACK_PLOT(COR_DIC):
     return PLOT
     
 
-def ALL_FUNCTIONS(SMS):
+def PLOT_ALL_CORR(SMS):
     SOILS = SOIL_TYPE(SMS)
     ESM = CALCULATE_ESM(SOILS)
     ANOM = ESM_ANOM(ESM)
@@ -368,25 +438,32 @@ def ALL_FUNCTIONS(SMS):
     CORR = CORRELATE(MERGED)
     PLOT = UNSTACK_PLOT(CORR)
     return PLOT
-    
-    
-    
-# 2173:AL:SCAN
-# 2180:AL:SCAN
-# 2114:AL:SCAN
-# 2178:AL:SCAN
-# 2181:AL:SCAN
-# 2182:AL:SCAN
-# 2176:AL:SCAN
-# 2056:AL:SCAN
-# 2179:AL:SCAN
-# 2115:AL:SCAN
-# 2175:AL:SCAN
-# 2053:AL:SCAN
 
-#stations that need assumptions 
-#2078 - missing bulk density measurments 
-#2177 - lab, pedon report measurements overestimate effective soil moisture by 2
-#2174 - pedon report missing
-#2173 - lab
+def MODEL_ESI(SMS):
+    SOILS = SOIL_TYPE(SMS)
+    ESM = CALCULATE_ESM(SOILS)
+    ANOM = ESM_ANOM(ESM)
+    MERGED = MERGE(ANOM)
+    DEPACK = UNPACK(MERGED)
+    return DEPACK
+    
+def CONVERT_IN_TO_CM(soil_inches = [2, 4, 8, 20, 40]):
+        """
+        FUNCTION INFO: function will convert inches to centimeters. 
+        
+        PARAMATERS: 
+            soil_inches (list) - A list of desired sensor depths in inches. 
+            Default argument is [2, 4, 8, 20, 40] for most but can be 
+            changed for desired depths. 
+            
+        OUTPUT: 
+            prints a conversion to centimeters for every inch argument in 
+            soil_inches parameter. 
+        
+
+        """
+        for i in soil_inches: 
+            print('{} inches is:'.format(i), i*2.54, 'centimeters')
+
+
 
