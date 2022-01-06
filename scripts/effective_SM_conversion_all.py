@@ -367,12 +367,7 @@ def ESM_ANOM(SMS):
         df_dict[i] = ANOM
         
     return df_dict
-    
-def TEST_IT(SMS): 
-    SOILS = SOIL_TYPE(SMS)
-    ESM = CALCULATE_ESM(SOILS)
-    ANOM = ESM_ANOM(ESM)
-    return ANOM
+
     
 def PLOT_ANOM(ANOM_dict):
     for i in ANOM_dict:
@@ -388,21 +383,17 @@ def MERGE(ANOM_dict):
         GOES = GOES_READ[GOES_READ['StationTriplet'] == i]
         MERGE = GOES.merge(SMS, on='Date', how='left')
         MERGE = MERGE[['Date', 'StationTriplet', 'ESI','ANOM_2in', 'ANOM_4in',
-                       'ANOM_8in', 'ANOM_20in', 'ANOM_40in']]
+                       'ANOM_8in', 'ANOM_20in', 'ANOM_40in', 'Soil Dictionary']]
         MERGE.set_index('Date', inplace=True)
         MASK_ESI = MERGE.loc[MERGE['ESI'] == -9999].index
         MERGE = MERGE.drop(MASK_ESI)
         MERGE = MERGE.dropna()
         
-        #multiply anoms by 10 to get better scale
-        MERGE['ANOM_2in'] = MERGE['ANOM_2in']*10
-        MERGE['ANOM_4in'] = MERGE['ANOM_4in']*10
-        MERGE['ANOM_8in'] = MERGE['ANOM_8in']*10
-        MERGE['ANOM_20in'] = MERGE['ANOM_20in']*10
-        MERGE['ANOM_40in'] = MERGE['ANOM_40in']*10
+
         df_dic[i] = MERGE
         
     return df_dic
+
 
 def UNPACK(df_dic): 
     DF = pd.concat(df_dic)
@@ -410,7 +401,14 @@ def UNPACK(df_dic):
     DF = DF.reset_index(inplace=True)
     
     return DF
-    
+
+def TEST_IT(SMS): 
+    SOILS = SOIL_TYPE(SMS)
+    ESM = CALCULATE_ESM(SOILS)
+    ANOM = ESM_ANOM(ESM)
+    MERGED = MERGE(ANOM)
+    return MERGED
+
 def CORRELATE(MERGE_dic):
     COR_DIC = {}
     for i in MERGE_dic: 
