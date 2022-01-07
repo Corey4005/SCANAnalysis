@@ -10,9 +10,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.callbacks import EarlyStopping
 import keras 
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
+
+import warnings
+warnings.filterwarnings("ignore")
 
 
 #read in the ESI data
@@ -63,7 +70,7 @@ def SOIL_TYPE(SMS):
 #2175 - missing field texture characterization
 #
 
-
+    print('Appending Soil Types by Station Now!')
     
     for i in SMS['station']:
         if i == '2057:AL:SCAN':
@@ -168,9 +175,12 @@ def SOIL_TYPE(SMS):
             dict_list.append(soil_dict)
             
     SMS['Soil Class Dictionary'] = dict_list
+    
+    print('Soil Type by Station Appended!')
     return SMS
 
 def CALCULATE_ESM(SMS):
+    print('Calculating Effective Soil Moisture by Station Now!')
     #set some knowns for conversion
     Dp1 = 1.4
     Dp2 = 4.2 
@@ -191,7 +201,8 @@ def CALCULATE_ESM(SMS):
         
     for i in SMS['Soil Class Dictionary']:
         lis_dict.append(i)
-        
+    
+
     for i in SMS['Soil Class Dictionary']:
         #get all the variables we need for soil column calculations
         #two inch
@@ -212,8 +223,9 @@ def CALCULATE_ESM(SMS):
         
         #make the new column
         SMS['2in_esm'] = (SMS['SMS-2.0in'] - theta_r_two)/(P2in - theta_r_two)
-    
+    print('.')
     #now we make the four in column 
+    
     for i in SMS['Soil Class Dictionary']:
         #four inch
         OC4in = i.get('OC4in')
@@ -233,7 +245,7 @@ def CALCULATE_ESM(SMS):
         
         #make the column four in 
         SMS['4in_esm'] = (SMS['SMS-4.0in'] - theta_r_four)/(P4in - theta_r_four)
-        
+    print('..')
     #now we make the eight in column 
     for i in SMS['Soil Class Dictionary']:
     
@@ -255,7 +267,7 @@ def CALCULATE_ESM(SMS):
         
         #new column eight 
         SMS['8in_esm'] = (SMS['SMS-8.0in'] - theta_r_eight)/(P8in - theta_r_eight)
-    
+    print('...')
     #now the twenty in column 
     for i in SMS['Soil Class Dictionary']:
         
@@ -277,7 +289,7 @@ def CALCULATE_ESM(SMS):
         
         #new column twenty 
         SMS['20in_esm'] = (SMS['SMS-20.0in'] - theta_r_twenty)/(P20in - theta_r_twenty)
-        
+    print('....')
     for i in SMS['Soil Class Dictionary']:
         
         #forty inch
@@ -298,7 +310,7 @@ def CALCULATE_ESM(SMS):
         
         #new column forty 
         SMS['40in_esm'] = (SMS['SMS-40.0in'] - theta_r_forty)/(P40in - theta_r_forty)
-        
+    print('.....')
        
     #put the 
     SMS['station'] = station
@@ -311,10 +323,12 @@ def CALCULATE_ESM(SMS):
    
     
     # #append the stations back after numerical calculations as well as soil dictionary
+    print('Effective Soil Moisture Calculation Finished!')
     return SMS
         
     
 def ESM_ANOM(SMS): 
+    print('Calculating the Effective Soil Moisture Anomaly Now!')
     #come back to here and fix the string issues where soil class is dropped. 
     df_dict = {}
     for i in SMS['station'].unique():
@@ -352,11 +366,11 @@ def ESM_ANOM(SMS):
         ANOM.sort_index()
         
         #create the anomaly calculations
-        ANOM['ANOM_2in'] = ANOM['2in_mean_x'] - ANOM['2in_mean_y']
-        ANOM['ANOM_4in'] = ANOM['4in_mean_x'] - ANOM['4in_mean_y']
-        ANOM['ANOM_8in'] = ANOM['8in_mean_x'] - ANOM['8in_mean_y']
-        ANOM['ANOM_20in'] = ANOM['20in_mean_x'] - ANOM['20in_mean_y']
-        ANOM['ANOM_40in'] = ANOM['40in_mean_x'] - ANOM['40in_mean_y']
+        ANOM['ANOM_2in'] = (ANOM['2in_mean_x'] - ANOM['2in_mean_y'])
+        ANOM['ANOM_4in'] = (ANOM['4in_mean_x'] - ANOM['4in_mean_y'])
+        ANOM['ANOM_8in'] = (ANOM['8in_mean_x'] - ANOM['8in_mean_y'])
+        ANOM['ANOM_20in'] = (ANOM['20in_mean_x'] - ANOM['20in_mean_y'])
+        ANOM['ANOM_40in'] = (ANOM['40in_mean_x'] - ANOM['40in_mean_y'])
         
         #create the new dataframe
         ANOM = ANOM[['jday', 'ANOM_2in', 'ANOM_4in', 'ANOM_8in', 'ANOM_20in',
@@ -365,7 +379,7 @@ def ESM_ANOM(SMS):
         
         #create a dictionary to store all ANOM dataframes
         df_dict[i] = ANOM
-        
+    print('Effective Soil Moisture Anomaly calculation DONE!')
     return df_dict
 
     
@@ -376,6 +390,7 @@ def PLOT_ANOM(ANOM_dict):
         plt.show()
         
 def MERGE(ANOM_dict):
+    print('Merging the Dataframe with ESI values now!')
     df_dic = {}
     for i in ANOM_dict:
         SMS = ANOM_dict.get(i)
@@ -391,23 +406,35 @@ def MERGE(ANOM_dict):
         
 
         df_dic[i] = MERGE
-        
+    print('Merging Done!')
     return df_dic
 
 
 def UNPACK(df_dic): 
-    DF = pd.concat(df_dic)
-    DF = DF.unstack(level=-1)['ESI']
-    DF = DF.reset_index(inplace=True)
-    
-    return DF
+    print('Unpacking Soil Classes!')
+    df_list = [v for k,v in df_dic.items()] 
+    df = pd.concat(df_list, axis=0)
+    two = lambda x: x.get('two')
+    four = lambda x: x.get('four')
+    eight = lambda x: x.get('eight')
+    twenty = lambda x: x.get('twenty')
+    forty = lambda x: x.get('forty')
+    df['SoilType_Two'] = df['Soil Dictionary'].apply(two)
+    df['SoilType_Four'] = df['Soil Dictionary'].apply(four)
+    df['SoilType_Eight'] = df['Soil Dictionary'].apply(eight)
+    df['SoilType_Twenty'] = df['Soil Dictionary'].apply(twenty)
+    df['SoilType_Forty'] = df['Soil Dictionary'].apply(forty)
+    df = df.drop('Soil Dictionary', axis=1)
+    print('Soil Classes Unpacked!')
+    return df
 
 def TEST_IT(SMS): 
     SOILS = SOIL_TYPE(SMS)
     ESM = CALCULATE_ESM(SOILS)
     ANOM = ESM_ANOM(ESM)
     MERGED = MERGE(ANOM)
-    return MERGED
+    UNPACKED = UNPACK(MERGED)
+    return UNPACKED
 
 def CORRELATE(MERGE_dic):
     COR_DIC = {}
@@ -444,13 +471,134 @@ def PLOT_ALL_CORR(SMS):
     PLOT = UNSTACK_PLOT(CORR)
     return PLOT
 
-def MODEL_ESI(SMS):
-    SOILS = SOIL_TYPE(SMS)
-    ESM = CALCULATE_ESM(SOILS)
-    ANOM = ESM_ANOM(ESM)
-    MERGED = MERGE(ANOM)
-    DEPACK = UNPACK(MERGED)
-    return DEPACK
+def MODEL_ESI_FROM_DF(df):
+    
+    #get the dummies for the model
+    dummies = pd.get_dummies(df[[ 'SoilType_Two', 'SoilType_Four', 
+                                'SoilType_Eight', 'SoilType_Twenty']], 
+                             drop_first=True)
+    
+    df = df.drop(['StationTriplet', 'SoilType_Two', 
+                 'SoilType_Four', 'SoilType_Eight', 
+                 'SoilType_Twenty', 'SoilType_Forty'], axis=1)
+    
+    df = pd.concat([df, dummies], axis=1)
+    
+    #set the values for the train test split 
+    SMS = df.drop('ESI', axis=1).values
+    SAT = df['ESI'].values
+    
+    
+    #train test split
+    SMS_train, SMS_test, SAT_train, SAT_test = train_test_split(SMS, SAT, test_size=0.3, 
+                                                        random_state=101)
+  
+    
+    
+    #scale the data from 0-1 before testing. 
+    scaler = MinMaxScaler()
+    SMS_train = scaler.fit_transform(SMS_train)
+    SMS_test = scaler.transform(SMS_test)
+    
+    
+    #create keras model
+    
+    mae = tf.keras.losses.MeanAbsoluteError()
+    model = Sequential()
+    
+    model.add(Dense(28, activation='relu'))
+    model.add(Dropout(0.5))
+              
+    model.add(Dense(14, activation='relu'))
+    model.add(Dropout(0.5))
+    
+    model.add(Dense(1))
+    
+    model.compile(optimizer='adam', loss=mae)
+    
+
+    early_stop = EarlyStopping(monitor='val_loss', mode='min',verbose=1, patience=25)
+
+
+    model.fit(x=SMS_train, y=SAT_train, validation_data=(SMS_test, SAT_test), 
+              epochs=500, verbose=True, callbacks=[early_stop])
+    
+    
+    loss = pd.DataFrame(model.history.history)
+    
+    predict_ESI = model.predict(SMS_test)
+    
+    plt.scatter(SAT_test, predict_ESI)
+    plt.plot(SAT_test, SAT_test, 'r')
+    
+    
+    #metrics analysis
+    
+    # loss = pd.DataFrame(model.history.history)
+
+    
+def MODEL_SM_FROM_DF(df): 
+    #get the dummies for the model
+    dummies = pd.get_dummies(df[[ 'SoilType_Two', 'SoilType_Four', 
+                                'SoilType_Eight', 'SoilType_Twenty']], 
+                             drop_first=True)
+    df = df.drop(['StationTriplet', 'SoilType_Two', 
+                 'SoilType_Four', 'SoilType_Eight', 
+                 'SoilType_Twenty', 'SoilType_Forty'], axis=1)
+    
+    df = pd.concat([df, dummies], axis=1)
+    
+    #set the values for the train test split 
+    X = df.drop(['ANOM_2in', 'ANOM_4in',
+    'ANOM_8in', 'ANOM_20in', 'ANOM_40in'], axis=1).values
+    
+    y = df['ANOM_2in', 'ANOM_4in',
+    'ANOM_8in', 'ANOM_20in', 'ANOM_40in'].values
+    
+    #train test split
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, 
+                                                        random_state=101)
+    
+    #scale the data from 0-1 before testing. 
+    scaler = MinMaxScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+    
+    #create keras model
+    
+    mae = tf.keras.losses.MeanAbsoluteError()
+    model = Sequential()
+    
+    model.add(Dense(28, activation='relu'))
+    model.add(Dropout(0.5))
+              
+    model.add(Dense(14, activation='relu'))
+    model.add(Dropout(0.5))
+    
+    model.add(Dense(5))
+    
+    model.compile(optimizer='adam', loss=mae)
+    
+
+    early_stop = EarlyStopping(monitor='val_loss', mode='min',verbose=1, patience=25)
+
+
+    model.fit(x=X_train, y=y_train, validation_data=(X_test, y_test), 
+              epochs=500, verbose=True, callbacks=[early_stop])
+    
+    predictions = model.predict(X_test)
+   
+   #metrics analysis
+    # cm = confusion_matrix(y_test, predictions)
+    # print(cm)
+    # cr = classification_report(y_test, predictions)
+    # print(cr)
+    loss = pd.DataFrame(model.history.history)
+    
+    return loss.plot()
+   
+    
+    
     
 def CONVERT_IN_TO_CM(soil_inches = [2, 4, 8, 20, 40]):
         """
