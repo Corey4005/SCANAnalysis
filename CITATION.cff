@@ -3,6 +3,7 @@
 
 cff-version: 1.2.0
 title: >-
+<<<<<<< HEAD
   Linear Regression Analysis of South-East SCAN sites
   vs. 1-Week ESI
 message: >-
@@ -12,5 +13,4 @@ type: dataset
 authors:
   - given-names: 'Corey '
     family-names: Walker
-    email: cdw0063@uah.edu
-    affiliation: University of Alabama Huntsville
+    email: cdw0063@uah.edue
