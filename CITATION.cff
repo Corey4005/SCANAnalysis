@@ -1,16 +1,21 @@
 # This CITATION.cff file was generated with cffinit.
 # Visit https://bit.ly/cffinit to generate yours today!
 
-cff-version: 1.2.0
-title: >-
-<<<<<<< HEAD
-  Linear Regression Analysis of South-East SCAN sites
-  vs. 1-Week ESI
-message: >-
-  Please cite this repository if discussing results
-  from my SCAN analysis. Thank you. 
+description:
+
+ This is a repository containg the scripts I used to compare
+ ESI to USDA scan sites across the Southeast. 
+
+message:
+
+ Please cite this repository if discussing results
+ from my SCAN analysis. Thank you.
+ 
 type: dataset
 authors:
-  - given-names: 'Corey '
-    family-names: Walker
-    email: cdw0063@uah.edue
+ given-names: Corey 
+ family-names: Walker
+ email: cdw0063@uah.edu
+ organizations:
+ National Oceanic and Atmospheric Administration
+ University of Alabama Huntsville
