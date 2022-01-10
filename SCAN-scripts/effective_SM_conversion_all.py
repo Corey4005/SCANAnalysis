@@ -15,8 +15,10 @@ from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.callbacks import EarlyStopping
 import keras 
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
+from sklearn import linear_model
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -30,7 +32,7 @@ GOES_READ = pd.read_csv(GOES_ESI_ALL)
 SCAN_ALL = '../data/SCAN_DEPTHS_ALL.csv'
 SCAN_READ = pd.read_csv(SCAN_ALL)
 
-CLIMATE_SERVE_ALL = '../../ESIExtractProject/data/ESI_1wk_tif2select_pt.csv'
+CLIMATE_SERVE_ALL = '../data/ESI_1wk_tif2select_pt.csv'
 CLIMATE_SERVE_READ = pd.read_csv(CLIMATE_SERVE_ALL)
 
 #create the mean anomaly for 
@@ -51,6 +53,31 @@ TEST = SMS[(SMS['station'] == '2057:AL:SCAN') |
             (SMS['station'] == '2053:AL:SCAN')]
 
 def SOIL_TYPE(SMS):
+    
+    '''
+    Purpose: 
+        Takes in a test dataframe containing volumetric soil moisture information 
+        by station and date and outputs soil parameters column. 
+        
+    Parameters: 
+        df containing the following station information (note - other stations will not work). 
+        - '2057:AL:SCAN'
+        - '2113:AL:SCAN'
+        - '2055:AL:SCAN'
+        - '2180:AL:SCAN'
+        - '2114:AL:SCAN'
+        - '2056:AL:SCAN'
+        - '2115:AL:SCAN'
+        - '2053:AL:SCAN'
+        
+    Example Usage: 
+        new_df = SOIL_TYPE(TEST)
+        
+    Returns: 
+        SMS - Pandas DataFrame containing the soil characteristics in the form 
+        of a dictonary for each of the six stations listed in parameters tag 
+        above. 
+    '''
     dict_list = []
     
 #stations to work on still
@@ -98,8 +125,8 @@ def SOIL_TYPE(SMS):
     
         elif i == '2055:AL:SCAN':
             #two and four in are gravelly
-            soil_dict = {'two': 'GR-SIL', 'four': 'GR-SIL', 
-                         'eight':'GR-SIL', 'twenty': 'SICL', 
+            soil_dict = {'two': 'GRSIL', 'four': 'GRSIL', 
+                         'eight':'GRSIL', 'twenty': 'SICL', 
                          'forty': 'SICL', 'OC2in': 3.0, 'OC4in': 3.0, 
                          'OC8in': 0.4, 'OC20in': 0.2, 'OC40in': 0.2, 'FE2in': 0.7,
                          'FE4in': 0.7, 'FE8in': 1.5, 'FE20in': 3.6, 'FE40in': 3.8, 
@@ -150,8 +177,8 @@ def SOIL_TYPE(SMS):
             #np.nans in iron measurement. I am not sure how it still calculates, even when 2in FE is nan. 
             
             soil_dict = {'two': 'LS', 'four': 'LS', 
-                          'eight':'SL', 'twenty': 'SCL GR', 
-                          'forty': 'GR-CL','OC2in': 0.4, 'OC4in': 0.4, 
+                          'eight':'SL', 'twenty': 'SCLGR', 
+                          'forty': 'GRCL','OC2in': 0.4, 'OC4in': 0.4, 
                           'OC8in': 0.2, 'OC20in': 0.1, 'OC40in': 0.1,'FE2in': np.nan,
                           'FE4in': np.nan, 'FE8in': 0.4, 'FE20in': 1.0, 'FE40in': 2.6, 
                           'Db2in': 1.48, 'Db4in': 1.48, 'Db8in': 1.62, 'Db20in': 1.56,
@@ -180,6 +207,25 @@ def SOIL_TYPE(SMS):
     return SMS
 
 def CALCULATE_ESM(SMS):
+    '''
+    Purpose: 
+        converts volumetric soil moisture columns to van ganuchin effective soil 
+        moisture into effective soil moisture for each level (2in, 4in, 8in, 20in, 40in)
+        
+    Parameters: 
+        Must input dataframe created by SOIL_TYPE() function in 
+        effective_SM_conversion_all.py module. 
+        
+    Example Usage: 
+        new_df = SOIL_TYPE(TEST)
+        ESM = CALCULATE_ESM(new_df)
+        
+    returns: 
+        SMS - Pandas Dataframe containing effective soil moisture calculations 
+        by column. 
+    '''
+    
+
     print('Calculating Effective Soil Moisture by Station Now!')
     #set some knowns for conversion
     Dp1 = 1.4
@@ -325,9 +371,38 @@ def CALCULATE_ESM(SMS):
     # #append the stations back after numerical calculations as well as soil dictionary
     print('Effective Soil Moisture Calculation Finished!')
     return SMS
+
+def RETURN_HIGH_LOW(value): 
+    '''
+    Purpose: 
+        applied in the ESM_ANOM() function to convert effective soil moisture
+        calculations as an internal function to appropriate 'high' / 'low' tags
+        for logistic regression modeling later. 
         
+    Parameters: 
+        None 
+    
+    Returns: 
+        Pandas Series containing 'high' / 'low' values for each effective 
+        soil moisture column. 
+    
+    '''
+    
+    if value > 0:
+        return 'high'
+    else:
+        return 'low'
     
 def ESM_ANOM(SMS): 
+    '''
+    Purpose: 
+
+    Returns
+    -------
+    df_dict : TYPE
+        DESCRIPTION.
+
+    '''
     print('Calculating the Effective Soil Moisture Anomaly Now!')
     #come back to here and fix the string issues where soil class is dropped. 
     df_dict = {}
@@ -372,24 +447,31 @@ def ESM_ANOM(SMS):
         ANOM['ANOM_20in'] = (ANOM['20in_mean_x'] - ANOM['20in_mean_y'])
         ANOM['ANOM_40in'] = (ANOM['40in_mean_x'] - ANOM['40in_mean_y'])
         
+        
+        FUNC = lambda x: RETURN_HIGH_LOW(x)
+        ANOM['2_highlow'] = ANOM['ANOM_2in'].apply(FUNC)
+        ANOM['4_highlow'] = ANOM['ANOM_4in'].apply(FUNC)
+        ANOM['8_highlow'] = ANOM['ANOM_8in'].apply(FUNC)
+        ANOM['20_highlow'] = ANOM['ANOM_20in'].apply(FUNC)
+        ANOM['40_highlow'] = ANOM['ANOM_40in'].apply(FUNC)
         #create the new dataframe
-        ANOM = ANOM[['jday', 'ANOM_2in', 'ANOM_4in', 'ANOM_8in', 'ANOM_20in',
+        ANOM = ANOM[['jday', '2_highlow', '4_highlow', '8_highlow', '20_highlow', 
+                     '40_highlow', 'ANOM_2in', 'ANOM_4in', 'ANOM_8in', 'ANOM_20in',
         'ANOM_40in', 'Soil Dictionary']]
         
         
         #create a dictionary to store all ANOM dataframes
         df_dict[i] = ANOM
-    print('Effective Soil Moisture Anomaly calculation DONE!')
+    print('Soil Moisture Anomaly Calculation and High-Low Classes Created')
     return df_dict
-
-    
-def PLOT_ANOM(ANOM_dict):
-    for i in ANOM_dict:
-        obj = ANOM_dict.get(i)
-        obj.plot()
-        plt.show()
         
 def MERGE(ANOM_dict):
+    
+    '''
+    Purpose: 
+        Merges ESI 1-week values with anomaly dataframe created by ESM_ANOM()
+        function in the 
+    '''
     print('Merging the Dataframe with ESI values now!')
     df_dic = {}
     for i in ANOM_dict:
@@ -398,7 +480,9 @@ def MERGE(ANOM_dict):
         GOES = GOES_READ[GOES_READ['StationTriplet'] == i]
         MERGE = GOES.merge(SMS, on='Date', how='left')
         MERGE = MERGE[['Date', 'StationTriplet', 'ESI','ANOM_2in', 'ANOM_4in',
-                       'ANOM_8in', 'ANOM_20in', 'ANOM_40in', 'Soil Dictionary']]
+                       '2_highlow', '4_highlow', '8_highlow', '20_highlow', 
+                       '40_highlow', 'ANOM_8in', 'ANOM_20in', 'ANOM_40in', 
+                       'Soil Dictionary']]
         MERGE.set_index('Date', inplace=True)
         MASK_ESI = MERGE.loc[MERGE['ESI'] == -9999].index
         MERGE = MERGE.drop(MASK_ESI)
@@ -428,7 +512,7 @@ def UNPACK(df_dic):
     print('Soil Classes Unpacked!')
     return df
 
-def TEST_IT(SMS): 
+def MAKE_DF(SMS): 
     SOILS = SOIL_TYPE(SMS)
     ESM = CALCULATE_ESM(SOILS)
     ANOM = ESM_ANOM(ESM)
@@ -447,6 +531,23 @@ def CORRELATE(MERGE_dic):
         COR_DIC[i] = CORR
     return COR_DIC
 
+def CORRELATE_BY_MONTH_ALL(x): 
+    
+    '''
+    FUNCTION NOT COMPLETE  - DONT USE YET
+    '''
+    corr_dic = {}
+    for i in x.index.year.unique(): 
+        new_df = x[x.index.year == i]
+        new_df.sort_index(ascending=True)
+        for j in new_df.index.month.unique().sort_values(): 
+            corr = new_df.corr()['ESI']
+            corr_df = pd.DataFrame(corr)
+            corr_df['month'] = j
+            corr_dic[j] = corr_df
+            
+    return corr_dic
+            
 
 def UNSTACK_PLOT(COR_DIC):
     DF = pd.concat(COR_DIC)
@@ -471,6 +572,16 @@ def PLOT_ALL_CORR(SMS):
     PLOT = UNSTACK_PLOT(CORR)
     return PLOT
 
+
+def CONVERT_PREDICTIONS(pred): 
+    #for low
+    if pred > 0.5: 
+        return 1
+    
+    #for high
+    else: 
+        return 0
+    
 def MODEL_ESI_FROM_DF(df):
     
     #get the dummies for the model
@@ -537,27 +648,45 @@ def MODEL_ESI_FROM_DF(df):
     # loss = pd.DataFrame(model.history.history)
 
     
-def MODEL_SM_FROM_DF(df): 
+def MODEL_2IN_HL_FROM_ESI(df): 
     #get the dummies for the model
-    dummies = pd.get_dummies(df[[ 'SoilType_Two', 'SoilType_Four', 
-                                'SoilType_Eight', 'SoilType_Twenty']], 
-                             drop_first=True)
-    df = df.drop(['StationTriplet', 'SoilType_Two', 
-                 'SoilType_Four', 'SoilType_Eight', 
-                 'SoilType_Twenty', 'SoilType_Forty'], axis=1)
     
+    dummies = pd.get_dummies(df[['SoilType_Two', 'SoilType_Four', 
+                                'SoilType_Eight', 'SoilType_Twenty', 
+                                'SoilType_Forty']], drop_first=True)
+    
+    
+    df = df.drop(['StationTriplet', 'SoilType_Two', 'SoilType_Four', 'SoilType_Eight', 
+                  'SoilType_Twenty', 'SoilType_Forty', 
+                  'ANOM_2in', 'ANOM_4in', 'ANOM_8in', 
+                  'ANOM_20in', 'ANOM_40in', '4_highlow', 
+                  '8_highlow', '20_highlow', '40_highlow'], axis=1)
+
     df = pd.concat([df, dummies], axis=1)
     
-    #set the values for the train test split 
-    X = df.drop(['ANOM_2in', 'ANOM_4in',
-    'ANOM_8in', 'ANOM_20in', 'ANOM_40in'], axis=1).values
+    df = df.drop(['SoilType_Four_GRSIL', 'SoilType_Four_L',
+    'SoilType_Four_LS', 'SoilType_Four_SIC', 'SoilType_Four_SICL',
+    'SoilType_Four_SIL', 'SoilType_Four_SL', 'SoilType_Eight_CL',
+    'SoilType_Eight_FSL', 'SoilType_Eight_GRSIL', 'SoilType_Eight_SICL',
+    'SoilType_Eight_SIL', 'SoilType_Eight_SL', 'SoilType_Twenty_L',
+    'SoilType_Twenty_SCLGR', 'SoilType_Twenty_SICL', 'SoilType_Twenty_SL',
+    'SoilType_Forty_CL', 'SoilType_Forty_GRCL', 'SoilType_Forty_L',
+    'SoilType_Forty_SCL', 'SoilType_Forty_SICL'], axis=1)
     
-    y = df['ANOM_2in', 'ANOM_4in',
-    'ANOM_8in', 'ANOM_20in', 'ANOM_40in'].values
+    
+    #set the values for the train test split 
+    X = df.drop(['2_highlow'], axis=1).values
+    y = df['2_highlow'].values
+    
+    
+    encoder = LabelEncoder()
+    encoded_y = encoder.fit_transform(y)
+
     
     #train test split
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, 
+    X_train, X_test, y_train, y_test = train_test_split(X, encoded_y, test_size=0.3, 
                                                         random_state=101)
+    
     
     #scale the data from 0-1 before testing. 
     scaler = MinMaxScaler()
@@ -565,41 +694,366 @@ def MODEL_SM_FROM_DF(df):
     X_test = scaler.transform(X_test)
     
     #create keras model
-    
-    mae = tf.keras.losses.MeanAbsoluteError()
     model = Sequential()
     
-    model.add(Dense(28, activation='relu'))
-    model.add(Dropout(0.5))
+    model.add(Dense(7, activation='relu', input_shape=(7, )))
+    model.add(Dropout(0.2))
               
-    model.add(Dense(14, activation='relu'))
-    model.add(Dropout(0.5))
+    model.add(Dense(4, activation='relu'))
+    model.add(Dropout(0.2))
     
-    model.add(Dense(5))
+    model.add(Dense(1, activation='sigmoid'))
     
-    model.compile(optimizer='adam', loss=mae)
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
     
 
-    early_stop = EarlyStopping(monitor='val_loss', mode='min',verbose=1, patience=25)
+    early_stop = EarlyStopping(monitor='accuracy', mode='max',verbose=1, patience=25)
 
 
     model.fit(x=X_train, y=y_train, validation_data=(X_test, y_test), 
-              epochs=500, verbose=True, callbacks=[early_stop])
+                epochs=500, verbose=True, callbacks=[early_stop])
     
     predictions = model.predict(X_test)
+    
+    out = list(map(CONVERT_PREDICTIONS, predictions))
+    
+    cm = confusion_matrix(y_test, out)
+    print(cm)
+    
+    cr = classification_report(y_test, out, output_dict=True)
+    print(cr)
    
-   #metrics analysis
-    # cm = confusion_matrix(y_test, predictions)
-    # print(cm)
-    # cr = classification_report(y_test, predictions)
-    # print(cr)
-    loss = pd.DataFrame(model.history.history)
+    return cr
     
-    return loss.plot()
+    
+def MODEL_4IN_HL_FROM_ESI(df): 
+    #get the dummies for the model
+    
+    dummies = pd.get_dummies(df[['SoilType_Two', 'SoilType_Four', 
+                                'SoilType_Eight', 'SoilType_Twenty', 
+                                'SoilType_Forty']], drop_first=True)
+    
+    
+    df = df.drop(['StationTriplet', 'SoilType_Two', 'SoilType_Four', 'SoilType_Eight', 
+                  'SoilType_Twenty', 'SoilType_Forty', 
+                  'ANOM_2in', 'ANOM_4in', 'ANOM_8in', 
+                  'ANOM_20in', 'ANOM_40in', '2_highlow', 
+                  '8_highlow', '20_highlow', '40_highlow'], axis=1)
+
+    df = pd.concat([df, dummies], axis=1)
+    
+    
+    df = df.drop(['SoilType_Two_LS', 'SoilType_Two_SICL', 'SoilType_Two_SIL',
+    'SoilType_Two_SL', 'SoilType_Eight_CL', 'SoilType_Two_GRSIL', 'SoilType_Two_L',
+    'SoilType_Eight_FSL', 'SoilType_Eight_GRSIL', 'SoilType_Eight_SICL',
+    'SoilType_Eight_SIL', 'SoilType_Eight_SL', 'SoilType_Twenty_L',
+    'SoilType_Twenty_SCLGR', 'SoilType_Twenty_SICL', 'SoilType_Twenty_SL',
+    'SoilType_Forty_CL', 'SoilType_Forty_GRCL', 'SoilType_Forty_L',
+    'SoilType_Forty_SCL', 'SoilType_Forty_SICL'], axis=1)
    
     
+    #set the values for the train test split 
+    X = df.drop(['4_highlow'], axis=1).values
+    y = df['4_highlow'].values
     
     
+    encoder = LabelEncoder()
+    encoded_y = encoder.fit_transform(y)
+
+    
+    #train test split
+    X_train, X_test, y_train, y_test = train_test_split(X, encoded_y, test_size=0.3, 
+                                                        random_state=101)
+    
+    
+    #scale the data from 0-1 before testing. 
+    scaler = MinMaxScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+    
+    #create keras model
+    model = Sequential()
+    
+    model.add(Dense(8, activation='relu', input_shape=(8, )))
+    model.add(Dropout(0.2))
+              
+    model.add(Dense(4, activation='relu'))
+    model.add(Dropout(0.2))
+    
+    model.add(Dense(1, activation='sigmoid'))
+    
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    
+
+    early_stop = EarlyStopping(monitor='accuracy', mode='max',verbose=1, patience=25)
+
+
+    model.fit(x=X_train, y=y_train, validation_data=(X_test, y_test), 
+                epochs=500, verbose=True, callbacks=[early_stop])
+    
+    predictions = model.predict(X_test)
+    
+    out = list(map(CONVERT_PREDICTIONS, predictions))
+    
+    cm = confusion_matrix(y_test, out)
+    print(cm)
+    
+   
+    cr = classification_report(y_test, out, output_dict=True)
+    print(cr)
+   
+    return cr
+    
+def MODEL_8IN_HL_FROM_ESI(df): 
+    #get the dummies for the model
+    
+    dummies = pd.get_dummies(df[['SoilType_Two', 'SoilType_Four', 
+                                'SoilType_Eight', 'SoilType_Twenty', 
+                                'SoilType_Forty']], drop_first=True)
+    
+    
+    df = df.drop(['StationTriplet', 'SoilType_Two', 'SoilType_Four', 'SoilType_Eight', 
+                  'SoilType_Twenty', 'SoilType_Forty', 
+                  'ANOM_2in', 'ANOM_4in', 'ANOM_8in', 
+                  'ANOM_20in', 'ANOM_40in', '2_highlow', '4_highlow', 
+                  '20_highlow', '40_highlow'], axis=1)
+
+    df = pd.concat([df, dummies], axis=1)
+    
+
+    df = df.drop(['SoilType_Two_GRSIL', 'SoilType_Two_L',
+           'SoilType_Two_LS', 'SoilType_Two_SICL', 'SoilType_Two_SIL',
+           'SoilType_Two_SL', 'SoilType_Four_GRSIL', 'SoilType_Four_L',
+           'SoilType_Four_LS', 'SoilType_Four_SIC', 'SoilType_Four_SICL',
+           'SoilType_Four_SIL', 'SoilType_Four_SL', 'SoilType_Twenty_L',
+           'SoilType_Twenty_SCLGR', 'SoilType_Twenty_SICL', 'SoilType_Twenty_SL',
+           'SoilType_Forty_CL', 'SoilType_Forty_GRCL', 'SoilType_Forty_L',
+           'SoilType_Forty_SCL', 'SoilType_Forty_SICL'], axis=1)
+    
+    #set the values for the train test split 
+    X = df.drop(['8_highlow'], axis=1).values
+    y = df['8_highlow'].values
+    
+    encoder = LabelEncoder()
+    encoded_y = encoder.fit_transform(y)
+
+    
+    #train test split
+    X_train, X_test, y_train, y_test = train_test_split(X, encoded_y, test_size=0.3, 
+                                                        random_state=101)
+    
+    
+    #scale the data from 0-1 before testing. 
+    scaler = MinMaxScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+    
+    #create keras model
+    model = Sequential()
+    
+    model.add(Dense(7, activation='relu', input_shape=(7, )))
+    model.add(Dropout(0.2))
+              
+    model.add(Dense(4, activation='relu'))
+    model.add(Dropout(0.2))
+    
+    model.add(Dense(1, activation='sigmoid'))
+    
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    
+
+    early_stop = EarlyStopping(monitor='accuracy', mode='max',verbose=1, patience=25)
+
+
+    model.fit(x=X_train, y=y_train, validation_data=(X_test, y_test), 
+                epochs=500, verbose=True, callbacks=[early_stop])
+    
+    predictions = model.predict(X_test)
+    
+    out = list(map(CONVERT_PREDICTIONS, predictions))
+    
+    cm = confusion_matrix(y_test, out)
+    print(cm)
+    
+    cr = classification_report(y_test, out, output_dict=True)
+    print(cr)
+    
+    return cr
+    
+def MODEL_20IN_HL_FROM_ESI(df): 
+    #get the dummies for the model
+    
+    dummies = pd.get_dummies(df[['SoilType_Two', 'SoilType_Four', 
+                                'SoilType_Eight', 'SoilType_Twenty', 
+                                'SoilType_Forty']], drop_first=True)
+    
+    
+    df = df.drop(['StationTriplet', 'SoilType_Two', 'SoilType_Four', 'SoilType_Eight', 
+                  'SoilType_Twenty', 'SoilType_Forty', 
+                  'ANOM_2in', 'ANOM_4in', 'ANOM_8in', 
+                  'ANOM_20in', 'ANOM_40in', '2_highlow', '4_highlow', 
+                  '8_highlow', '40_highlow'], axis=1)
+    
+    
+    df = pd.concat([df, dummies], axis=1)
+    
+    df = df.drop(['SoilType_Two_GRSIL', 'SoilType_Two_L',
+           'SoilType_Two_LS', 'SoilType_Two_SICL', 'SoilType_Two_SIL',
+           'SoilType_Two_SL', 'SoilType_Four_GRSIL', 'SoilType_Four_L',
+           'SoilType_Four_LS', 'SoilType_Four_SIC', 'SoilType_Four_SICL',
+           'SoilType_Four_SIL', 'SoilType_Four_SL', 'SoilType_Eight_CL',
+           'SoilType_Eight_FSL', 'SoilType_Eight_GRSIL', 'SoilType_Eight_SICL',
+           'SoilType_Eight_SIL', 'SoilType_Eight_SL','SoilType_Forty_CL', 'SoilType_Forty_GRCL', 'SoilType_Forty_L',
+           'SoilType_Forty_SCL', 'SoilType_Forty_SICL'], axis=1)
+    
+    
+    
+    #set the values for the train test split 
+    X = df.drop(['20_highlow'], axis=1).values
+    y = df['20_highlow'].values
+    
+    encoder = LabelEncoder()
+    encoded_y = encoder.fit_transform(y)
+
+    
+    #train test split
+    X_train, X_test, y_train, y_test = train_test_split(X, encoded_y, test_size=0.3, 
+                                                        random_state=101)
+    
+    
+    #scale the data from 0-1 before testing. 
+    scaler = MinMaxScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+    
+    #create keras model
+    model = Sequential()
+    
+    model.add(Dense(5, activation='relu', input_shape=(5, )))
+    model.add(Dropout(0.2))
+              
+    model.add(Dense(3, activation='relu'))
+    model.add(Dropout(0.2))
+    
+    model.add(Dense(1, activation='sigmoid'))
+    
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    
+
+    early_stop = EarlyStopping(monitor='accuracy', mode='max',verbose=1, patience=25)
+
+
+    model.fit(x=X_train, y=y_train, validation_data=(X_test, y_test), 
+                epochs=500, verbose=True, callbacks=[early_stop])
+    
+    predictions = model.predict(X_test)
+    
+    out = list(map(CONVERT_PREDICTIONS, predictions))
+    
+    cm = confusion_matrix(y_test, out)
+    print(cm)
+    
+    cr = classification_report(y_test, out, output_dict=True)
+    print(cr)
+    
+    return cr
+    
+def MODEL_40IN_HL_FROM_ESI(df): 
+    
+    #get the dummies for the model
+    dummies = pd.get_dummies(df[['SoilType_Two', 'SoilType_Four', 
+                                'SoilType_Eight', 'SoilType_Twenty', 
+                                'SoilType_Forty']], drop_first=True)
+    
+    
+    df = df.drop(['StationTriplet', 'SoilType_Two', 'SoilType_Four', 'SoilType_Eight', 
+                  'SoilType_Twenty', 'SoilType_Forty', 
+                  'ANOM_2in', 'ANOM_4in', 'ANOM_8in', 
+                  'ANOM_20in', 'ANOM_40in', '2_highlow', '4_highlow', 
+                  '8_highlow', '20_highlow'], axis=1)
+    
+    
+    df = pd.concat([df, dummies], axis=1)
+    
+    df = df.drop(['SoilType_Two_GRSIL', 'SoilType_Two_L',
+           'SoilType_Two_LS', 'SoilType_Two_SICL', 'SoilType_Two_SIL',
+           'SoilType_Two_SL', 'SoilType_Four_GRSIL', 'SoilType_Four_L',
+           'SoilType_Four_LS', 'SoilType_Four_SIC', 'SoilType_Four_SICL',
+           'SoilType_Four_SIL', 'SoilType_Four_SL', 'SoilType_Eight_CL',
+           'SoilType_Eight_FSL', 'SoilType_Eight_GRSIL', 'SoilType_Eight_SICL',
+           'SoilType_Eight_SIL', 'SoilType_Eight_SL', 'SoilType_Twenty_L',
+           'SoilType_Twenty_SCLGR', 'SoilType_Twenty_SICL', 'SoilType_Twenty_SL'], axis=1)
+    
+    print(df.columns)
+    
+    #set the values for the train test split 
+    X = df.drop(['40_highlow'], axis=1).values
+    y = df['40_highlow'].values
+    
+    encoder = LabelEncoder()
+    encoded_y = encoder.fit_transform(y)
+
+    
+    #train test split
+    X_train, X_test, y_train, y_test = train_test_split(X, encoded_y, test_size=0.3, 
+                                                        random_state=101)
+    
+    
+    #scale the data from 0-1 before testing. 
+    scaler = MinMaxScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+    
+    #create keras model
+    model = Sequential()
+    
+    model.add(Dense(6, activation='relu', input_shape=(6, )))
+    model.add(Dropout(0.2))
+              
+    model.add(Dense(3, activation='relu'))
+    model.add(Dropout(0.2))
+    
+    model.add(Dense(1, activation='sigmoid'))
+    
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    
+
+    early_stop = EarlyStopping(monitor='accuracy', mode='max',verbose=1, patience=25)
+
+
+    model.fit(x=X_train, y=y_train, validation_data=(X_test, y_test), 
+                epochs=500, verbose=True, callbacks=[early_stop])
+    
+    predictions = model.predict(X_test)
+    
+    out = list(map(CONVERT_PREDICTIONS, predictions))
+    
+    cm = confusion_matrix(y_test, out)
+    print(cm)
+    
+    cr = classification_report(y_test, out, output_dict=True)
+    print(cr)
+    
+    return cr
+def ALL_MODELS(df): 
+    two_in = MODEL_2IN_HL_FROM_ESI(df)
+    four_in = MODEL_4IN_HL_FROM_ESI(df)
+    eight_in = MODEL_8IN_HL_FROM_ESI(df)
+    twenty_in = MODEL_20IN_HL_FROM_ESI(df)
+    forty_in = MODEL_40IN_HL_FROM_ESI(df)
+    
+    two_acc = two_in.get('accuracy')
+    four_acc = four_in.get('accuracy')
+    eight_acc = eight_in.get('accuracy')
+    twenty_acc = twenty_in.get('accuracy')
+    forty_acc = forty_in.get('accuracy')
+    
+    models_list = ['two_in', 'four_in', 'eight_in', 'twenty_in', 'forty_in']
+    acc_list = [two_acc, four_acc, eight_acc, twenty_acc, forty_acc]
+    new_df = pd.DataFrame(models_list, columns=['models'])
+    new_df['accuracy'] = acc_list
+    
+    return new_df
 def CONVERT_IN_TO_CM(soil_inches = [2, 4, 8, 20, 40]):
         """
         FUNCTION INFO: function will convert inches to centimeters. 
