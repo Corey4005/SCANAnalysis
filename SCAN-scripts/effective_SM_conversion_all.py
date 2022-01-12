@@ -19,6 +19,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn import linear_model
+from textwrap import wrap
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -396,12 +397,13 @@ def RETURN_HIGH_LOW(value):
 def ESM_ANOM(SMS): 
     '''
     Purpose: 
-
-    Returns
-    -------
-    df_dict : TYPE
-        DESCRIPTION.
-
+        Converts daily soil moisture means to rolling seven day means. Then
+        subtracts this mean from the rolling mean from the all years average to get an 
+        anomaly. 
+    Parameters: Requires either the test 
+    Returnns: 
+        Dictionary containing the anomaly dataframe for each soil moisture station
+        
     '''
     print('Calculating the Effective Soil Moisture Anomaly Now!')
     #come back to here and fix the string issues where soil class is dropped. 
@@ -470,7 +472,9 @@ def MERGE(ANOM_dict):
     '''
     Purpose: 
         Merges ESI 1-week values with anomaly dataframe created by ESM_ANOM()
-        function in the 
+        function in the effective_SM_conversion_all.py module. 
+        
+    
     '''
     print('Merging the Dataframe with ESI values now!')
     df_dic = {}
@@ -531,24 +535,279 @@ def CORRELATE(MERGE_dic):
         COR_DIC[i] = CORR
     return COR_DIC
 
-def CORRELATE_BY_MONTH_ALL(x): 
+def CORRELATE_BY_MONTH_STN(df, station): 
     
     '''
-    FUNCTION NOT COMPLETE  - DONT USE YET
-    '''
-    corr_dic = {}
-    for i in x.index.year.unique(): 
-        new_df = x[x.index.year == i]
-        new_df.sort_index(ascending=True)
-        for j in new_df.index.month.unique().sort_values(): 
-            corr = new_df.corr()['ESI']
-            corr_df = pd.DataFrame(corr)
-            corr_df['month'] = j
-            corr_dic[j] = corr_df
-            
-    return corr_dic
-            
+    Parameters: 
+        Requires dataframe created by the MAKE_DF() function in the 
+        effective_SM_conversion_all.py
 
+        
+    Returns: 
+        Matplotlib plot of correlation of ESI vs Effective Soil Moisture for 
+        station of interest. 
+    
+    Usage: 
+        corr = CORRELATE_BY_MONTH_ALL(df, station)
+        
+        stations you can input as string: 
+            
+            - '2057:AL:SCAN'
+            - '2113:AL:SCAN'
+            - '2055:AL:SCAN'
+            - '2180:AL:SCAN'
+            - '2114:AL:SCAN'
+            - '2056:AL:SCAN'
+            - '2115:AL:SCAN'
+            - '2053:AL:SCAN'
+    '''
+    month_list = []
+    two_in_cor = []
+    four_in_cor = []
+    eight_in_cor = []
+    twenty_in_cor = []
+    forty_in_cor = []
+    station_trip = []
+    max_year_v = []
+    min_year_v = []
+
+    for i in df['StationTriplet'].unique(): 
+       new = df[df['StationTriplet'] == i]
+       
+       max_year = new.index.year.max()
+       min_year = new.index.year.min()
+    
+       
+       for j in new.index.month.unique():
+           station_trip.append(i)
+           max_year_v.append(max_year)
+           min_year_v.append(min_year)
+           
+           month_list.append(j)
+           month_df = new.loc[new.index.month == j]
+           corr = month_df.corr()['ESI']
+           #get two in 
+           two_in = corr.get('ANOM_2in')
+           two_in_cor.append(two_in)
+           
+           #get four in 
+           four_in = corr.get('ANOM_4in')
+           four_in_cor.append(four_in)
+           
+           #get eight in
+           eight_in = corr.get('ANOM_8in')
+           eight_in_cor.append(eight_in)
+           
+           #get twenty in
+           twenty_in = corr.get('ANOM_20in')
+           twenty_in_cor.append(twenty_in)
+           
+           #get forty in
+           forty_in = corr.get('ANOM_40in')
+           forty_in_cor.append(forty_in)
+           
+           
+           
+    corr_df = pd.DataFrame()
+    corr_df['max_year'] = max_year_v
+    corr_df['min_year'] = min_year_v
+    corr_df['station'] = station_trip
+    corr_df['month'] = month_list
+    corr_df['2in'] = two_in_cor
+    corr_df['4in'] = four_in_cor
+    corr_df['8in'] = eight_in_cor
+    corr_df['20in'] = twenty_in_cor
+    corr_df['40in'] = forty_in_cor
+    
+    #get station dataframe
+    station_info = corr_df[corr_df['station'] == station]
+    station_info.set_index('month', inplace=True)
+    station_info.sort_index(inplace=True)
+    
+    #get max year and min year for plot
+    max_year = station_info.iloc[0]['max_year']
+    min_year = station_info.iloc[0]['min_year']
+    
+    station_info.drop(['max_year', 'min_year'], inplace=True, axis=1)
+    
+    plt.figure(figsize=(10,15))
+    plot = station_info.plot()
+    plot.set_title('{}-{} USDA SCAN Site {} ES vs ESI by month'
+                   .format(min_year, max_year, station))
+    plot.set_ylabel('R Value')
+  
+
+def CORRELATE_BY_DAY_STN(df, station): 
+    
+    '''
+    Parameters: 
+        Requires dataframe created by the MAKE_DF() function in the 
+        effective_SM_conversion_all.py
+
+        
+    Returns: 
+        Matplotlib plot of correlation of ESI vs Effective Soil Moisture for 
+        station of interest by day. 
+    
+    Usage: 
+        corr = CORRELATE_BY_DAY(df, station)
+        
+        stations you can input as string: 
+            
+            - '2057:AL:SCAN'
+            - '2113:AL:SCAN'
+            - '2055:AL:SCAN'
+            - '2180:AL:SCAN'
+            - '2114:AL:SCAN'
+            - '2056:AL:SCAN'
+            - '2115:AL:SCAN'
+            - '2053:AL:SCAN'
+    '''
+    day_list = []
+    two_in_cor = []
+    four_in_cor = []
+    eight_in_cor = []
+    twenty_in_cor = []
+    forty_in_cor = []
+    station_trip = []
+    max_year_v = []
+    min_year_v = []
+    
+    for i in df['StationTriplet'].unique(): 
+       new = df[df['StationTriplet'] == i]
+       max_year = new.index.year.max()
+       min_year = new.index.year.min()
+       new['jday'] = new.index.strftime('%j')
+       new.reset_index(inplace=True)
+       for j in new['jday'].unique():
+           station_trip.append(i)
+           max_year_v.append(max_year)
+           min_year_v.append(min_year)
+           day_list.append(j)
+           day_df = new.loc[new['jday'] == j]
+           corr = day_df.corr()['ESI']
+           #get two in 
+           two_in = corr.get('ANOM_2in')
+           two_in_cor.append(two_in)
+           
+           #get four in 
+           four_in = corr.get('ANOM_4in')
+           four_in_cor.append(four_in)
+           
+           #get eight in
+           eight_in = corr.get('ANOM_8in')
+           eight_in_cor.append(eight_in)
+           
+           #get twenty in
+           twenty_in = corr.get('ANOM_20in')
+           twenty_in_cor.append(twenty_in)
+           
+           #get forty in
+           forty_in = corr.get('ANOM_40in')
+           forty_in_cor.append(forty_in)
+           
+    corr_df = pd.DataFrame()
+    corr_df['max_year'] = max_year_v
+    corr_df['min_year'] = min_year_v
+    corr_df['station'] = station_trip
+    corr_df['day'] = day_list
+    corr_df['2in'] = two_in_cor
+    corr_df['4in'] = four_in_cor
+    corr_df['8in'] = eight_in_cor
+    corr_df['20in'] = twenty_in_cor
+    corr_df['40in'] = forty_in_cor
+    
+    station_info = corr_df[corr_df['station'] == station]
+    station_info.set_index('day', inplace=True)
+    station_info.sort_index(inplace=True)
+    
+    #get max year and min year for plot
+    max_year = station_info.iloc[0]['max_year']
+    min_year = station_info.iloc[0]['min_year']
+    
+    station_info.drop(['max_year', 'min_year'], inplace=True, axis=1)
+    
+    plt.figure(figsize=(10,15))
+    plot = station_info.plot()
+    plot.set_title('{}-{} USDA SCAN Site {} ES vs ESI by jday'
+                   .format(min_year, max_year, station))
+
+    plot.set_ylabel('R Value')
+    
+
+def CORRELATE_BY_DAY_ALL(df): 
+    df_dict = {}
+    sites_list = list(df['StationTriplet'].unique())
+    for i in df['StationTriplet'].unique(): 
+       new = df[df['StationTriplet'] == i]
+       new.sort_index(inplace=True)
+       max_year = new.index.year.max()
+       min_year = new.index.year.min()
+       new['jday'] = new.index.strftime('%j')
+       new['max_year'] = max_year
+       new['min_year'] = min_year
+       new.reset_index(inplace=True)
+       df_dict[i] = new
+    
+    df_list = [v for k,v in df_dict.items()] 
+    df = pd.concat(df_list, axis=0)
+    
+    #set max and min year for plots 
+    max_year = df['max_year'].max()
+    min_year = df['min_year'].min()
+    
+    #set up the lists for the new df
+    two_in_cor = []
+    four_in_cor = []
+    eight_in_cor = []
+    twenty_in_cor = []
+    forty_in_cor = []
+    day_list = []
+    
+    for i in df['jday'].unique():
+        day_list.append(i)
+        day_df = df.loc[df['jday'] == i]
+        corr = day_df.corr()['ESI']
+        
+        two_in = corr.get('ANOM_2in')
+        two_in_cor.append(two_in)
+        
+        #get four in 
+        four_in = corr.get('ANOM_4in')
+        four_in_cor.append(four_in)
+        
+        #get eight in
+        eight_in = corr.get('ANOM_8in')
+        eight_in_cor.append(eight_in)
+        
+        #get twenty in
+        twenty_in = corr.get('ANOM_20in')
+        twenty_in_cor.append(twenty_in)
+        
+        #get forty in
+        forty_in = corr.get('ANOM_40in')
+        forty_in_cor.append(forty_in)
+        
+    corr_df = pd.DataFrame()
+    corr_df['jday'] = day_list
+    corr_df['2in'] = two_in_cor
+    corr_df['4in'] = four_in_cor
+    corr_df['8in'] = eight_in_cor
+    corr_df['20in'] = twenty_in_cor
+    corr_df['40in'] = forty_in_cor
+    
+    corr_df.set_index('jday', inplace=True)
+    corr_df.sort_index(inplace=True)
+    
+    
+    plot = corr_df.plot()
+    
+    stations = ', '.join(sites_list)
+    title = '{}-{} USDA SCAN Effective Saturation vs ALEXI ESI. Sites Included: {}'.format(min_year, max_year, stations)
+    
+    plot.set_title("\n".join(wrap(title)))
+    plot.set_ylabel('R Value')
+                   
 def UNSTACK_PLOT(COR_DIC):
     DF = pd.concat(COR_DIC)
     DF = DF.unstack(level=-1)['ESI']
