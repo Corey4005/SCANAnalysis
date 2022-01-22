@@ -1,0 +1,13 @@
+Value,LandSea Pass-Thru,Snow_Ice,Aerosol,Cirrus,Internal_CloudMask,Cloud_Shadow,SCF_Biome_Mask
+0,"0 LAND AggrQC (3,5) values {001}",No snow/ice detected,No or low atmospheric aerosol levels detected,No cirrus detected,No clouds,No cloud shadow detected,"Biome outside interval <1,4>"
+8,"0 LAND AggrQC (3,5) values {001}",No snow/ice detected,Average or high aerosol levels detected,No cirrus detected,No clouds,No cloud shadow detected,"Biome outside interval <1,4>"
+32,"0 LAND AggrQC (3,5) values {001}",No snow/ice detected,No or low atmospheric aerosol levels detected,No cirrus detected,Clouds were detected,No cloud shadow detected,"Biome outside interval <1,4>"
+48,"0 LAND AggrQC (3,5) values {001}",No snow/ice detected,No or low atmospheric aerosol levels detected,Cirrus was detected,Clouds were detected,No cloud shadow detected,"Biome outside interval <1,4>"
+64,"0 LAND AggrQC (3,5) values {001}",No snow/ice detected,No or low atmospheric aerosol levels detected,No cirrus detected,No clouds,Cloud shadow detected,"Biome outside interval <1,4>"
+72,"0 LAND AggrQC (3,5) values {001}",No snow/ice detected,Average or high aerosol levels detected,No cirrus detected,No clouds,Cloud shadow detected,"Biome outside interval <1,4>"
+128,"0 LAND AggrQC (3,5) values {001}",No snow/ice detected,No or low atmospheric aerosol levels detected,No cirrus detected,No clouds,No cloud shadow detected,"Biome in interval <1,4>"
+136,"0 LAND AggrQC (3,5) values {001}",No snow/ice detected,Average or high aerosol levels detected,No cirrus detected,No clouds,No cloud shadow detected,"Biome in interval <1,4>"
+160,"0 LAND AggrQC (3,5) values {001}",No snow/ice detected,No or low atmospheric aerosol levels detected,No cirrus detected,Clouds were detected,No cloud shadow detected,"Biome in interval <1,4>"
+176,"0 LAND AggrQC (3,5) values {001}",No snow/ice detected,No or low atmospheric aerosol levels detected,Cirrus was detected,Clouds were detected,No cloud shadow detected,"Biome in interval <1,4>"
+192,"0 LAND AggrQC (3,5) values {001}",No snow/ice detected,No or low atmospheric aerosol levels detected,No cirrus detected,No clouds,Cloud shadow detected,"Biome in interval <1,4>"
+200,"0 LAND AggrQC (3,5) values {001}",No snow/ice detected,Average or high aerosol levels detected,No cirrus detected,No clouds,Cloud shadow detected,"Biome in interval <1,4>"

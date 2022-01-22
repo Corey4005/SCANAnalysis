@@ -1,0 +1,11 @@
+Value,MODLAND,SCF_QC,Sensor,DeadDetector,CloudState
+0,Good quality (main algorithm with or without saturation),"Main (RT) method used, best result possible (no saturation)",Terra,"Detectors apparently fine for up to 50% of channels 1, 2",Significant clouds NOT present (clear)
+2,Good quality (main algorithm with or without saturation),"Main (RT) method used, best result possible (no saturation)",Aqua,"Detectors apparently fine for up to 50% of channels 1, 2",Significant clouds NOT present (clear)
+8,Good quality (main algorithm with or without saturation),"Main (RT) method used, best result possible (no saturation)",Terra,"Detectors apparently fine for up to 50% of channels 1, 2",Significant clouds WERE present
+10,Good quality (main algorithm with or without saturation),"Main (RT) method used, best result possible (no saturation)",Aqua,"Detectors apparently fine for up to 50% of channels 1, 2",Significant clouds WERE present
+16,Good quality (main algorithm with or without saturation),"Main (RT) method used, best result possible (no saturation)",Terra,"Detectors apparently fine for up to 50% of channels 1, 2",Mixed cloud present in pixel
+18,Good quality (main algorithm with or without saturation),"Main (RT) method used, best result possible (no saturation)",Aqua,"Detectors apparently fine for up to 50% of channels 1, 2",Mixed cloud present in pixel
+105,Other Quality (back-up algorithm or fill values),"Main (RT) method failed due to problems other than geometry, empirical algorithm used",Terra,"Detectors apparently fine for up to 50% of channels 1, 2",Significant clouds WERE present
+113,Other Quality (back-up algorithm or fill values),"Main (RT) method failed due to problems other than geometry, empirical algorithm used",Terra,"Detectors apparently fine for up to 50% of channels 1, 2",Mixed cloud present in pixel
+115,Other Quality (back-up algorithm or fill values),"Main (RT) method failed due to problems other than geometry, empirical algorithm used",Aqua,"Detectors apparently fine for up to 50% of channels 1, 2",Mixed cloud present in pixel
+157,Other Quality (back-up algorithm or fill values),"Pixel not produced at all, value couldn't be retrieved (possible reasons: bad L1B data, unusable MOD09GA data)",Terra,Dead detectors caused >50% adjacent detector retrieval,"Cloud state not defined, assumed clear"
