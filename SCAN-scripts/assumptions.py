@@ -52,9 +52,35 @@ class SCAN:
                    (self.new_df['station'] == '2114:AL:SCAN') |
                    (self.new_df['station'] == '2056:AL:SCAN') |
                    (self.new_df['station'] == '2115:AL:SCAN') |
-                   (self.new_df['station'] == '2053:AL:SCAN')]
+                   (self.new_df['station'] == '2053:AL:SCAN') |
+                   (self.new_df['station'] == '2078:AL:SCAN') |
+                   (self.new_df['station'] == '2177:AL:SCAN') |
+                   (self.new_df['station'] == '2173:AL:SCAN') |
+                   (self.new_df['station'] == '2178:AL:SCAN') |
+                   (self.new_df['station'] == '2175:AL:SCAN') |
+                   (self.new_df['station'] == '2174:AL:SCAN') |
+                   (self.new_df['station'] == '2182:AL:SCAN') |
+                   (self.new_df['station'] == '2179:AL:SCAN') |
+                   (self.new_df['station'] == '2181:AL:SCAN') |
+                   (self.new_df['station'] == '2176:AL:SCAN')]
     
     def soil_class(self): 
+        #stations notes
+        #2177 no field measurements of soil texture, will use lab measurements 
+            #in calculation. 
+        #2174 station pedon report missing. Will get info from web soil survey. 
+        #2173 missing field measurements of soil texture, will use lab measures
+            #in calculation.
+        #2178 - missing soil characterization 'field texture', will use lab 
+            #measures instead. 
+        #2181 - No field or lab texture measurements. 
+        #2182 - No pedon report. 
+        #2176 - Unable to read soil characteristics due to inadequate depth
+            #measures for each type. Therefore, this station will not be
+            #included. 
+        #2179 - Mising forty in soil characteristics due to inadequate depth
+            #measure. Will use lab reports and web soil survey
+        #2175 -
         
         '''
         Purpose:
@@ -110,11 +136,8 @@ class SCAN:
                 
             elif i == '2115:AL:SCAN':
                 
-                #I would not trust the 2in soil moisture caluculations here for now because 
-                #np.nans in iron measurement. I am not sure how it still calculates, even when 2in FE is nan. 
-                
                 soil_dict = {'two': 'LS', 'four': 'LS', 
-                              'eight':'SL', 'twenty': 'SCLGR', 'forty': 'GRCL'}
+                              'eight':'SL', 'twenty': 'SCL', 'forty': 'CL'}
                 
                 dict_list.append(soil_dict)
                 
@@ -125,6 +148,91 @@ class SCAN:
                               'forty': 'CL'}
             
             
+                dict_list.append(soil_dict)
+            
+            #new stations with assumptions
+            elif i == '2078:AL:SCAN':
+                
+                soil_dict = {'two': 'SICL', 'four': 'SIL', 
+                             'eight': 'SICL', 'twenty': 'SICL', 
+                             'forty': 'CL'}
+                
+                dict_list.append(soil_dict)
+                
+            elif i == '2177:AL:SCAN':
+            #using lab measurements
+                
+                soil_dict = {'two': 'SIC', 'four': 'SIC',
+                             'eight': 'SIC', 'twenty': 'SIC', 
+                             'forty': 'SIC'}
+                
+                dict_list.append(soil_dict)
+                
+            elif i == '2173:AL:SCAN':
+            #using lab measurements
+                soil_dict = {'two': 'SIL', 'four': 'SIL',
+                             'eight': 'SICL', 'twenty': 'SICL', 
+                             'forty': 'C'}
+                
+                dict_list.append(soil_dict)
+            
+            elif i == '2178:AL:SCAN':
+            #using lab measures
+                soil_dict = {'two': 'FSL', 'four': 'FSL', 
+                             'eight': 'FSL', 'twenty': 'FSL', 
+                             'forty': 'L'}
+                
+                dict_list.append(soil_dict)
+            
+            elif i == '2175:AL:SCAN':
+            #using lab measures
+                soil_dict = {'two': 'L', 'four': 'L', 
+                             'eight': 'L', 'twenty': 'L', 
+                             'forty': 'C'}
+                
+                dict_list.append(soil_dict)
+                
+            elif i == '2174:AL:SCAN':
+            #using web soil survey
+                soil_dict = {'two': 'SIC', 'four': 'SIC', 
+                             'eight': 'C', 'twenty': 'C',
+                             'forty': 'C'}
+            
+                dict_list.append(soil_dict)
+            elif i == '2182:AL:SCAN':
+            #using web soil survey
+                
+                soil_dict = {'two': 'LS', 'four': 'LS',
+                             'eight': 'LS', 'twenty': 'FS',
+                             'forty': 'SL'}
+            
+                dict_list.append(soil_dict)
+                
+            elif i == '2179:AL:SCAN':
+            #lab measures and websoil survey
+            
+                soil_dict = {'two': 'FSL', 'four': 'FSL', 
+                             'eight': 'FSL', 'twenty': 'FSL',
+                             'forty': 'BRCK'}
+                
+                dict_list.append(soil_dict)
+            
+            elif i == '2181:AL:SCAN':
+            #using websoil survey
+            
+                soil_dict = {'two': 'FSL', 'four': 'FSL', 
+                             'eight': 'FSL', 'twenty': 'SL',
+                             'forty': 'SCL'}
+                
+                dict_list.append(soil_dict)
+                
+            elif i == '2176:AL:SCAN':
+            #using websoil survey
+            
+                soil_dict = {'two': 'FS', 'four': 'FS', 
+                             'eight': 'FS', 'twenty': 'S',
+                             'forty': 'S'}
+                
                 dict_list.append(soil_dict)
                 
         self.stations['Soil Class Dictionary'] = dict_list
@@ -194,21 +302,217 @@ class SCAN:
         #two inch calculations
         ES_2 = []
         for i in self.stations.index:
-            #silty clay loam
+           #two inch soil 
             if self.stations['two_in_soil'][i] == 'SICL':
                 ES = ((self.stations['SMS-2.0in'][i] / 100)- 0.089) / (0.43 - 0.089)
                 ES_2.append(ES)
             
-            elif self.stations['two_in_soi'][i] == '': 
-                pass
-        print(ES_2)
+            elif self.stations['two_in_soil'][i] == 'SIC': 
+                ES = ((self.stations['SMS-2.0in'][i] / 100)- 0.070) / (0.36 - 0.070)
+                ES_2.append(ES)
                 
-                #(self.stations['two_in_soil'])
-                       #- 0.089) / (0.43 - 0.089))
-                #ES_2.append(ES)
-        
-        #self.stations['ES_2in'] = ES_2
+            elif self.stations['two_in_soil'][i] == 'FSL': 
+                ES = ((self.stations['SMS-2.0in'][i] / 100)- 0.065) / (0.41 - 0.065)
+                ES_2.append(ES)
+                
+            elif self.stations['two_in_soil'][i] == 'GRSIL': 
+                ES = ((self.stations['SMS-2.0in'][i] / 100)- 0.067) / (0.45 - 0.067)
+                ES_2.append(ES)
+                
+            elif self.stations['two_in_soil'][i] == 'SIL': 
+                ES = ((self.stations['SMS-2.0in'][i] / 100)- 0.067) / (0.45 - 0.067)
+                ES_2.append(ES)
+                
+            elif self.stations['two_in_soil'][i] == 'SL': 
+                ES = ((self.stations['SMS-2.0in'][i] / 100)- 0.065) / (0.41 - 0.065)
+                ES_2.append(ES)
+                
+            elif self.stations['two_in_soil'][i] == 'LS':
+                ES = ((self.stations['SMS-2.0in'][i] / 100)- 0.057) / (0.41 - 0.057)
+                ES_2.append(ES)
+                
+            elif self.stations['two_in_soil'][i] == 'FS': 
+                ES = ((self.stations['SMS-2.0in'][i] / 100)- 0.045) / (0.43 - 0.045)
+                ES_2.append(ES)
             
+            elif self.stations['two_in_soil'][i] == 'L':
+                ES = ((self.stations['SMS-2.0in'][i] / 100)- 0.078) / (0.43 - 0.078)
+                ES_2.append(ES)
+        
+        #four inch calculations
+        ES_4 = []
+        for i in self.stations.index:
+       
+            if self.stations['four_in_soil'][i] == 'SICL':
+                ES = ((self.stations['SMS-4.0in'][i] / 100)- 0.089) / (0.43 - 0.089)
+                ES_4.append(ES)
+                
+            elif self.stations['four_in_soil'][i] == 'SIL': 
+                ES = ((self.stations['SMS-4.0in'][i] / 100)- 0.067) / (0.45 - 0.067)
+                ES_4.append(ES)
+        
+            elif self.stations['four_in_soil'][i] == 'SIC': 
+                ES = ((self.stations['SMS-4.0in'][i] / 100)- 0.070) / (0.36 - 0.070)
+                ES_4.append(ES)
+            
+            elif self.stations['four_in_soil'][i] == 'FSL': 
+                ES = ((self.stations['SMS-4.0in'][i] / 100)- 0.065) / (0.41 - 0.065)
+                ES_4.append(ES)
+            
+            elif self.stations['four_in_soil'][i] == 'GRSIL': 
+                ES = ((self.stations['SMS-4.0in'][i] / 100)- 0.067) / (0.45 - 0.067)
+                ES_4.append(ES)
+            
+            
+            elif self.stations['four_in_soil'][i] == 'SL': 
+                ES = ((self.stations['SMS-4.0in'][i] / 100)- 0.065) / (0.41 - 0.065)
+                ES_4.append(ES)
+            
+            elif self.stations['four_in_soil'][i] == 'LS':
+                ES = ((self.stations['SMS-4.0in'][i] / 100)- 0.057) / (0.41 - 0.057)
+                ES_4.append(ES)
+            
+            elif self.stations['four_in_soil'][i] == 'FS': 
+                ES = ((self.stations['SMS-4.0in'][i] / 100)- 0.045) / (0.43 - 0.045)
+                ES_4.append(ES)
+        
+            elif self.stations['four_in_soil'][i] == 'L': 
+                ES = ((self.stations['SMS-4.0in'][i] / 100)- 0.078) / (0.43 - 0.078)
+                ES_4.append(ES)
+        
+                
+        ES_8 = []
+        for i in self.staion.index:
+            
+            if self.stations['eight_in_soil'][i] == 'SICL':
+                ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.089) / (0.43 - 0.089)
+                ES_8.append(ES)
+                
+            elif self.stations['eight_in_soil'][i] == 'SIC': 
+                ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.070) / (0.36 - 0.070)
+                ES_8.append(ES)
+                
+            elif self.stations['eight_in_soil'][i] == 'FSL': 
+                ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.065) / (0.41 - 0.065)
+                ES_8.append(ES)
+                
+            elif self.stations['eight_in_soil'][i] == 'C': 
+                ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.068) / (0.38 - 0.068)
+                ES_8.append(ES)
+            
+            elif self.stations['eight_in_soil'][i] == 'GRSIL': 
+                ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.067) / (0.45 - 0.067)
+                ES_8.append(ES)
+            
+            elif self.stations['eight_in_soil'][i] == 'SL': 
+                ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.065) / (0.41 - 0.065)
+                ES_8.append(ES)
+            
+            elif self.stations['eight_in_soil'][i] == 'LS':
+                ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.057) / (0.41 - 0.057)
+                ES_8.append(ES)
+            
+            elif self.stations['eight_in_soil'][i] == 'FS': 
+                ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.045) / (0.43 - 0.045)
+                ES_8.append(ES)
+                
+            elif self.stations['eight_in_soil'][i] == 'CL': 
+                ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.095) / (0.41 - 0.095)
+                ES_8.append(ES)
+            
+            elif self.stations['eight_in_soil'][i] == 'L': 
+                ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.078) / (0.43 - 0.078)
+                ES_8.append(ES)
+                
+            elif self.stations['eight_in_soil'][i] == 'SIL': 
+                ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.067) / (0.45 - 0.067)
+                ES_8.append(ES)
+            
+        
+        ES_20 = []
+        for i in self.staion.index:
+            
+            if self.stations['twenty_in_soil'][i] == 'SICL':
+                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.089) / (0.43 - 0.089)
+                ES_20.append(ES)
+                
+            elif self.stations['twenty_in_soil'][i] == 'SIC': 
+                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.070) / (0.36 - 0.070)
+                ES_20.append(ES)
+                
+            elif self.stations['twenty_in_soil'][i] == 'L': 
+                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.078) / (0.43 - 0.078)
+                ES_20.append(ES)
+            
+            elif self.stations['twenty_in_soil'][i] == 'C': 
+                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.068) / (0.38 - 0.068)
+                ES_20.append(ES)
+            
+            elif self.stations['twenty_in_soil'][i] == 'SL': 
+                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.065) / (0.41 - 0.065)
+                ES_20.append(ES)
+                
+            elif self.stations['twenty_in_soil'][i] == 'FSL': 
+                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.065) / (0.41 - 0.065)
+                ES_20.append(ES)
+                
+            elif self.stations['twenty_in_soil'][i] == 'FS': 
+                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.045) / (0.43 - 0.045)
+                ES_20.append(ES)
+            
+            elif self.stations['twenty_in_soil'][i] == 'S': 
+                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.045) / (0.43 - 0.045)
+                ES_20.append(ES)
+            
+            elif self.stations['twenty_in_soil'][i] == 'SCL': 
+                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.100) / (0.38 - 0.100)
+                ES_20.append(ES)
+            
+        ES_40 = []
+        #START HERE 
+        for i in self.staion.index:
+            
+            if self.stations['forty_in_soil'][i] == 'SICL':
+                ES = ((self.stations['SMS-40.0in'][i] / 100)- 0.089) / (0.43 - 0.089)
+                ES_40.append(ES)
+                
+            elif self.stations['forty_in_soil'][i] == 'SIC': 
+                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.070) / (0.36 - 0.070)
+                ES_20.append(ES)
+                
+            elif self.stations['twenty_in_soil'][i] == 'L': 
+                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.078) / (0.43 - 0.078)
+                ES_20.append(ES)
+            
+            elif self.stations['twenty_in_soil'][i] == 'C': 
+                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.068) / (0.38 - 0.068)
+                ES_20.append(ES)
+            
+            elif self.stations['twenty_in_soil'][i] == 'SL': 
+                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.065) / (0.41 - 0.065)
+                ES_20.append(ES)
+                
+            elif self.stations['twenty_in_soil'][i] == 'FSL': 
+                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.065) / (0.41 - 0.065)
+                ES_20.append(ES)
+                
+            elif self.stations['twenty_in_soil'][i] == 'FS': 
+                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.045) / (0.43 - 0.045)
+                ES_20.append(ES)
+            
+            elif self.stations['twenty_in_soil'][i] == 'S': 
+                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.045) / (0.43 - 0.045)
+                ES_20.append(ES)
+            
+            elif self.stations['twenty_in_soil'][i] == 'SCL': 
+                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.100) / (0.38 - 0.100)
+                ES_20.append(ES)
+                
+
+             
+         
+        return self
+    
     def show(self):
          '''
          Purpose: 
