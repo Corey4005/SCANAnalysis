@@ -17,6 +17,10 @@ note:
     
 """
 import pandas as pd
+import numpy as np
+import warnings
+warnings.filterwarnings('ignore')
+
 
 SCAN_ALL = '../data/SCAN_DEPTHS_ALL.csv'
 SCAN_READ = pd.read_csv(SCAN_ALL)
@@ -382,7 +386,7 @@ class SCAN:
         
                 
         ES_8 = []
-        for i in self.staion.index:
+        for i in self.stations.index:
             
             if self.stations['eight_in_soil'][i] == 'SICL':
                 ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.089) / (0.43 - 0.089)
@@ -430,7 +434,7 @@ class SCAN:
             
         
         ES_20 = []
-        for i in self.staion.index:
+        for i in self.stations.index:
             
             if self.stations['twenty_in_soil'][i] == 'SICL':
                 ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.089) / (0.43 - 0.089)
@@ -470,49 +474,168 @@ class SCAN:
             
         ES_40 = []
         #START HERE 
-        for i in self.staion.index:
+        for i in self.stations.index:
             
             if self.stations['forty_in_soil'][i] == 'SICL':
                 ES = ((self.stations['SMS-40.0in'][i] / 100)- 0.089) / (0.43 - 0.089)
                 ES_40.append(ES)
                 
+            elif self.stations['forty_in_soil'][i] == 'CL': 
+                ES = ((self.stations['SMS-40.0in'][i] / 100)- 0.095) / (0.41 - 0.095)
+                ES_40.append(ES)
+                
             elif self.stations['forty_in_soil'][i] == 'SIC': 
-                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.070) / (0.36 - 0.070)
-                ES_20.append(ES)
+                ES = ((self.stations['SMS-40.0in'][i] / 100)- 0.070) / (0.36 - 0.070)
+                ES_40.append(ES)
                 
-            elif self.stations['twenty_in_soil'][i] == 'L': 
-                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.078) / (0.43 - 0.078)
-                ES_20.append(ES)
+            elif self.stations['forty_in_soil'][i] == 'L': 
+                ES = ((self.stations['SMS-40.0in'][i] / 100)- 0.078) / (0.43 - 0.078)
+                ES_40.append(ES)
             
-            elif self.stations['twenty_in_soil'][i] == 'C': 
-                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.068) / (0.38 - 0.068)
-                ES_20.append(ES)
+            elif self.stations['forty_in_soil'][i] == 'C': 
+                ES = ((self.stations['SMS-40.0in'][i] / 100)- 0.068) / (0.38 - 0.068)
+                ES_40.append(ES)
             
-            elif self.stations['twenty_in_soil'][i] == 'SL': 
-                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.065) / (0.41 - 0.065)
-                ES_20.append(ES)
-                
-            elif self.stations['twenty_in_soil'][i] == 'FSL': 
-                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.065) / (0.41 - 0.065)
-                ES_20.append(ES)
-                
-            elif self.stations['twenty_in_soil'][i] == 'FS': 
-                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.045) / (0.43 - 0.045)
-                ES_20.append(ES)
+            elif self.stations['forty_in_soil'][i] == 'SCL': 
+                ES = ((self.stations['SMS-40.0in'][i] / 100)- 0.100) / (0.38 - 0.100)
+                ES_40.append(ES)
             
-            elif self.stations['twenty_in_soil'][i] == 'S': 
-                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.045) / (0.43 - 0.045)
-                ES_20.append(ES)
+            elif self.stations['forty_in_soil'][i] == 'SL': 
+                ES = ((self.stations['SMS-40.0in'][i] / 100)- 0.065) / (0.41 - 0.065)
+                ES_40.append(ES)
             
-            elif self.stations['twenty_in_soil'][i] == 'SCL': 
-                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.100) / (0.38 - 0.100)
-                ES_20.append(ES)
+            elif self.stations['forty_in_soil'][i] == 'S': 
+                ES = ((self.stations['SMS-40.0in'][i] / 100)- 0.045) / (0.43 - 0.045)
+                ES_40.append(ES)
+            
+            elif self.stations['forty_in_soil'][i] == 'BRCK':
+                ES = np.nan
+                ES_40.append(ES)
+            
                 
 
-             
-         
+        self.stations['ES_2in'] = ES_2
+        self.stations['ES_4in'] = ES_4
+        self.stations['ES_8in'] = ES_8
+        self.stations['ES_20in'] = ES_20
+        self.stations['ES_40in'] = ES_40
         return self
     
+
+    def OTHER_ESM(self):
+        
+        store = {}
+        for i in self.stations['station'].unique():
+            new_df = self.stations[self.stations['station'] == i]
+            new_df.set_index('Date', inplace=True)
+            new_df.index = pd.to_datetime(new_df.index)
+            new_df.sort_index(inplace=True)
+            
+            
+            if i == '2057:AL:SCAN':
+            #two in - SICL
+                ES_2in = ((new_df['SMS-2.0in'] / 100)- 0.089) / (0.47 - 0.089)
+                new_df['ES_2in'] = ES_2in
+                
+            #four in - SICL
+                ES_4in = ((new_df['SMS-4.0in'] / 100)- 0.089) / (0.47 - 0.089)
+                new_df['ES_4in'] = ES_4in
+            
+            #eight in - SICL
+                ES_8in = ((new_df['SMS-8.0in'] / 100)- 0.089) / (0.47 - 0.089)
+                new_df['ES_8in'] = ES_8in
+            #twenty in - SICL
+                ES_20in = ((new_df['SMS-20.0in'] / 100)- 0.089) / (0.47 - 0.089)
+                new_df['ES_20in'] = ES_20in
+            #forty in - SICL
+                ES_40in = ((new_df['SMS-40.0in'] / 100)- 0.089) / (0.55 - 0.089)
+                new_df['ES_40in'] = ES_40in
+                
+                new_df = new_df[['ES_2in', 'ES_4in', 'ES_8in', 'ES_20in', 
+                                 'ES_40in']]
+            #store it 
+                store[i] = new_df
+                
+            elif i =='2113:AL:SCAN':
+            #two - FSL
+                ES_2in = ((new_df['SMS-2.0in'] / 100)- 0.022) / (0.40 - 0.022)
+                new_df['ES_2in'] = ES_2in
+                
+                
+            #four - FSL 
+                ES_4in = ((new_df['SMS-4.0in'] / 100)- 0.022) / (0.40 - 0.022)
+                new_df['ES_4in'] = ES_4in
+                
+            #eight - FSL
+                ES_8in = ((new_df['SMS-8.0in'] / 100)- 0.022) / (0.40 - 0.022)
+                new_df['ES_8in'] = ES_8in
+                
+            #twenty - L
+                ES_20in = ((new_df['SMS-20.0in'] / 100)- 0.061) / (0.44 - 0.061)
+                new_df['ES_20in'] = ES_20in
+            
+            #forty - L
+                ES_40in = ((new_df['SMS-40.0in'] / 100)- 0.061) / (0.45 - 0.061)
+                new_df['ES_40in'] = ES_40in
+                
+                new_df = new_df[['ES_2in', 'ES_4in', 'ES_8in', 'ES_20in', 
+                                 'ES_40in']]
+            #store it 
+                store[i] = new_df
+            
+            elif i =='2055:AL:SCAN':
+            #two - GRSIL
+                ES_2in = ((new_df['SMS-2.0in'] / 100)- 0.033) / (0.48 - 0.033)
+                new_df['ES_2in'] = ES_2in
+            
+            # #four - GRSIL
+                ES_4in = ((new_df['SMS-4.0in'] / 100)- 0.033) / (0.48 - 0.033)
+                new_df['ES_4in'] = ES_4in
+                
+                
+            # #eight - GRSIL
+                ES_8in = ((new_df['SMS-8.0in'] / 100)- 0.033) / (0.48 - 0.033)
+                new_df['ES_8in'] = ES_4in
+                
+        
+            # #twenty - SICL
+                ES_20in = ((new_df['SMS-20.0in'] / 100)- 0.089) / (0.43 - 0.089)
+                new_df['ES_20in'] = ES_20in
+                print(ES_20in.max(), ES_20in.min())
+                new_df['ES_20in'].plot()
+            # #forty - L
+            #     ES_40in = ((new_df['SMS-40.0in'] / 100)- 0.061) / (0.45 - 0.061)
+            #     new_df['ES_40in'] = ES_40in
+                
+            #     new_df = new_df[['ES_2in', 'ES_4in', 'ES_8in', 'ES_20in', 
+            #                      'ES_40in']]
+            # #store it 
+            #     store[i] = new_df
+        return store
+            
+                
+          
+          #    '2180:AL:SCAN') |
+          #   '2114:AL:SCAN') |
+          #    '2056:AL:SCAN') |
+          #   ('2115:AL:SCAN') |
+          #   '2053:AL:SCAN') |
+          #   '2078:AL:SCAN') |
+          # '2177:AL:SCAN') |
+          #  '2173:AL:SCAN') |
+          #    '2178:AL:SCAN') |
+          #   '2175:AL:SCAN') |
+          #   '2174:AL:SCAN') |
+          #    '2182:AL:SCAN') |
+          #   '2179:AL:SCAN') |
+          #   '2181:AL:SCAN') |
+          #   ('2176:AL:SCAN': 
+                
+       
+            
+            
+        return store
+
     def show(self):
          '''
          Purpose: 
