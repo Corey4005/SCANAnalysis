@@ -599,24 +599,74 @@ class SCAN:
                 
         
             # #twenty - SICL
-                ES_20in = ((new_df['SMS-20.0in'] / 100)- 0.089) / (0.43 - 0.089)
+                ES_20in = ((new_df['SMS-20.0in'] / 100)- 0.089) / (0.49 - 0.089)
                 new_df['ES_20in'] = ES_20in
-                print(ES_20in.max(), ES_20in.min())
-                new_df['ES_20in'].plot()
-            # #forty - L
-            #     ES_40in = ((new_df['SMS-40.0in'] / 100)- 0.061) / (0.45 - 0.061)
-            #     new_df['ES_40in'] = ES_40in
                 
-            #     new_df = new_df[['ES_2in', 'ES_4in', 'ES_8in', 'ES_20in', 
-            #                      'ES_40in']]
+            # #forty - SICL
+                ES_40in = ((new_df['SMS-40.0in'] / 100)- 0.035) / (0.57 - 0.035)
+                new_df['ES_40in'] = ES_40in
+                
+                
+                new_df = new_df[['ES_2in', 'ES_4in', 'ES_8in', 'ES_20in', 'ES_40in']]
             # #store it 
-            #     store[i] = new_df
+                store[i] = new_df
+            
+            elif i == '2180:AL:SCAN':
+            #two - SL
+                ES_2in = ((new_df['SMS-2.0in'] / 100)- 0.005) / (0.37 - 0.005)
+                new_df['ES_2in'] = ES_2in
+                
+            #four - SL
+                ES_4in = ((new_df['SMS-4.0in'] / 100)- 0.005) / (0.37 - 0.005)
+                new_df['ES_4in'] = ES_4in
+                
+            #eight - SL
+                ES_8in = ((new_df['SMS-8.0in'] / 100)- 0.005) / (0.37 - 0.005)
+                new_df['ES_8in'] = ES_8in
+                
+            
+            #twenty - SL
+                ES_20in = ((new_df['SMS-20.0in'] / 100)- 0.005) / (0.37 - 0.005)
+                new_df['ES_20in'] = ES_20in
+                
+            
+            #forty - SCL
+                ES_40in = ((new_df['SMS-40.0in'] / 100)- 0.100) / (0.38 - 0.100)
+                new_df['ES_40in'] = ES_40in
+                
+                new_df = new_df[['ES_2in', 'ES_4in', 'ES_8in', 'ES_20in', 'ES_40in']]
+            # #store it 
+                store[i] = new_df
+            
+            elif i == '2114:AL:SCAN':
+            # two - SIL
+                ES_2in = ((new_df['SMS-2.0in'] / 100)- 0.040) / (0.45 - 0.040)
+                new_df['ES_2in'] = ES_2in
+            
+            # four - SIC
+                ES_4in = ((new_df['SMS-4.0in'] / 100)- 0.070) / (0.41 - 0.070)
+                new_df['ES_4in'] = ES_4in
+            
+            #eight - C
+                ES_8in = ((new_df['SMS-8.0in'] / 100)- 0.068) / (0.41 - 0.068)
+                new_df['ES_8in'] = ES_8in
+            
+            #twenty - C 
+                ES_20in = ((new_df['SMS-20.0in'] / 100)- 0.068) / (0.41 - 0.068)
+                new_df['ES_20in'] = ES_20in
+                
+            
+            #forty - C
+                ES_40in = ((new_df['SMS-40.0in'] / 100)- 0.068) / (0.48 - 0.068)
+                new_df['ES_40in'] = ES_40in
+            
+            elif i == '2056:AL:SCAN':
+                
+                
         return store
             
-                
           
-          #    '2180:AL:SCAN') |
-          #   '2114:AL:SCAN') |
+         
           #    '2056:AL:SCAN') |
           #   ('2115:AL:SCAN') |
           #   '2053:AL:SCAN') |
