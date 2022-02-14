@@ -661,13 +661,41 @@ class SCAN:
                 new_df['ES_40in'] = ES_40in
             
             elif i == '2056:AL:SCAN':
+            #two - L
+                ES_2in = ((new_df['SMS-2.0in'] / 100)- 0.078) / (0.52 - 0.078)
+                new_df['ES_2in'] = ES_2in
                 
                 
+            #four - L
+                ES_4in = ((new_df['SMS-4.0in'] / 100)- 0.078) / (0.52 - 0.078)
+                new_df['ES_4in'] = ES_2in
+                
+            #eight - CL
+                ES_8in = ((new_df['SMS-8.0in'] / 100)- 0.095) / (0.50 - 0.095)
+                new_df['ES_8in'] = ES_8in
+            
+            #twenty - C
+                ES_20in = ((new_df['SMS-20.0in'] / 100)- 0.068) / (0.41 - 0.068)
+                new_df['ES_20in'] = ES_20in
+            
+            #forty - C 
+                ES_40in = ((new_df['SMS-40.0in'] / 100)- 0.068) / (0.53 - 0.068)
+                new_df['ES_40in'] = ES_40in
+                
+            
+            elif i == '2115:AL:SCAN':
+                #two - LS
+                ES_2in = ((new_df['SMS-2.0in'] / 100)- 0.05) / (0.44 - 0.05)
+                new_df['ES_2in'] = ES_2in
+                print(ES_2in.max(), ES_2in.min())
+                new_df['ES_2in'].plot()
+                pass
+            
         return store
             
           
          
-          #    '2056:AL:SCAN') |
+         
           #   ('2115:AL:SCAN') |
           #   '2053:AL:SCAN') |
           #   '2078:AL:SCAN') |
