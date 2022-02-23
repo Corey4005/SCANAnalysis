@@ -18,6 +18,7 @@ note:
 """
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -298,237 +299,21 @@ class SCAN:
         self.stations['forty_in_soil'] = forty_in
             
         return self
+    
 
     def Calculate_ESM(self):
         '''
-        Purpose: 
-            Calcualte effective saturation given soil class textures.
         
-        returns: 
-            Pandas dataframe containing the columns necessary for 
-        
+
+        Returns
+        -------
+        store : Dictionary
+            Contains a dictionary of key-value pairs. Keys are StationTriplets
+            for USDA SCAN sites and values are pandas dataframes of effective
+            soil moisture values at various depths calculated with provided 
+            assumptions. 
+
         '''
-        #two inch calculations
-        ES_2 = []
-        for i in self.stations.index:
-           #two inch soil 
-            if self.stations['two_in_soil'][i] == 'SICL':
-                ES = ((self.stations['SMS-2.0in'][i] / 100)- 0.089) / (0.43 - 0.089)
-                ES_2.append(ES)
-            
-            elif self.stations['two_in_soil'][i] == 'SIC': 
-                ES = ((self.stations['SMS-2.0in'][i] / 100)- 0.070) / (0.36 - 0.070)
-                ES_2.append(ES)
-                
-            elif self.stations['two_in_soil'][i] == 'FSL': 
-                ES = ((self.stations['SMS-2.0in'][i] / 100)- 0.065) / (0.41 - 0.065)
-                ES_2.append(ES)
-                
-            elif self.stations['two_in_soil'][i] == 'GRSIL': 
-                ES = ((self.stations['SMS-2.0in'][i] / 100)- 0.067) / (0.45 - 0.067)
-                ES_2.append(ES)
-                
-            elif self.stations['two_in_soil'][i] == 'SIL': 
-                ES = ((self.stations['SMS-2.0in'][i] / 100)- 0.067) / (0.45 - 0.067)
-                ES_2.append(ES)
-                
-            elif self.stations['two_in_soil'][i] == 'SL': 
-                ES = ((self.stations['SMS-2.0in'][i] / 100)- 0.065) / (0.41 - 0.065)
-                ES_2.append(ES)
-                
-            elif self.stations['two_in_soil'][i] == 'LS':
-                ES = ((self.stations['SMS-2.0in'][i] / 100)- 0.057) / (0.41 - 0.057)
-                ES_2.append(ES)
-                
-            elif self.stations['two_in_soil'][i] == 'FS': 
-                ES = ((self.stations['SMS-2.0in'][i] / 100)- 0.045) / (0.43 - 0.045)
-                ES_2.append(ES)
-            
-            elif self.stations['two_in_soil'][i] == 'L':
-                ES = ((self.stations['SMS-2.0in'][i] / 100)- 0.078) / (0.43 - 0.078)
-                ES_2.append(ES)
-        
-        #four inch calculations
-        ES_4 = []
-        for i in self.stations.index:
-       
-            if self.stations['four_in_soil'][i] == 'SICL':
-                ES = ((self.stations['SMS-4.0in'][i] / 100)- 0.089) / (0.43 - 0.089)
-                ES_4.append(ES)
-                
-            elif self.stations['four_in_soil'][i] == 'SIL': 
-                ES = ((self.stations['SMS-4.0in'][i] / 100)- 0.067) / (0.45 - 0.067)
-                ES_4.append(ES)
-        
-            elif self.stations['four_in_soil'][i] == 'SIC': 
-                ES = ((self.stations['SMS-4.0in'][i] / 100)- 0.070) / (0.36 - 0.070)
-                ES_4.append(ES)
-            
-            elif self.stations['four_in_soil'][i] == 'FSL': 
-                ES = ((self.stations['SMS-4.0in'][i] / 100)- 0.065) / (0.41 - 0.065)
-                ES_4.append(ES)
-            
-            elif self.stations['four_in_soil'][i] == 'GRSIL': 
-                ES = ((self.stations['SMS-4.0in'][i] / 100)- 0.067) / (0.45 - 0.067)
-                ES_4.append(ES)
-            
-            
-            elif self.stations['four_in_soil'][i] == 'SL': 
-                ES = ((self.stations['SMS-4.0in'][i] / 100)- 0.065) / (0.41 - 0.065)
-                ES_4.append(ES)
-            
-            elif self.stations['four_in_soil'][i] == 'LS':
-                ES = ((self.stations['SMS-4.0in'][i] / 100)- 0.057) / (0.41 - 0.057)
-                ES_4.append(ES)
-            
-            elif self.stations['four_in_soil'][i] == 'FS': 
-                ES = ((self.stations['SMS-4.0in'][i] / 100)- 0.045) / (0.43 - 0.045)
-                ES_4.append(ES)
-        
-            elif self.stations['four_in_soil'][i] == 'L': 
-                ES = ((self.stations['SMS-4.0in'][i] / 100)- 0.078) / (0.43 - 0.078)
-                ES_4.append(ES)
-        
-                
-        ES_8 = []
-        for i in self.stations.index:
-            
-            if self.stations['eight_in_soil'][i] == 'SICL':
-                ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.089) / (0.43 - 0.089)
-                ES_8.append(ES)
-                
-            elif self.stations['eight_in_soil'][i] == 'SIC': 
-                ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.070) / (0.36 - 0.070)
-                ES_8.append(ES)
-                
-            elif self.stations['eight_in_soil'][i] == 'FSL': 
-                ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.065) / (0.41 - 0.065)
-                ES_8.append(ES)
-                
-            elif self.stations['eight_in_soil'][i] == 'C': 
-                ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.068) / (0.38 - 0.068)
-                ES_8.append(ES)
-            
-            elif self.stations['eight_in_soil'][i] == 'GRSIL': 
-                ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.067) / (0.45 - 0.067)
-                ES_8.append(ES)
-            
-            elif self.stations['eight_in_soil'][i] == 'SL': 
-                ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.065) / (0.41 - 0.065)
-                ES_8.append(ES)
-            
-            elif self.stations['eight_in_soil'][i] == 'LS':
-                ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.057) / (0.41 - 0.057)
-                ES_8.append(ES)
-            
-            elif self.stations['eight_in_soil'][i] == 'FS': 
-                ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.045) / (0.43 - 0.045)
-                ES_8.append(ES)
-                
-            elif self.stations['eight_in_soil'][i] == 'CL': 
-                ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.095) / (0.41 - 0.095)
-                ES_8.append(ES)
-            
-            elif self.stations['eight_in_soil'][i] == 'L': 
-                ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.078) / (0.43 - 0.078)
-                ES_8.append(ES)
-                
-            elif self.stations['eight_in_soil'][i] == 'SIL': 
-                ES = ((self.stations['SMS-8.0in'][i] / 100)- 0.067) / (0.45 - 0.067)
-                ES_8.append(ES)
-            
-        
-        ES_20 = []
-        for i in self.stations.index:
-            
-            if self.stations['twenty_in_soil'][i] == 'SICL':
-                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.089) / (0.43 - 0.089)
-                ES_20.append(ES)
-                
-            elif self.stations['twenty_in_soil'][i] == 'SIC': 
-                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.070) / (0.36 - 0.070)
-                ES_20.append(ES)
-                
-            elif self.stations['twenty_in_soil'][i] == 'L': 
-                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.078) / (0.43 - 0.078)
-                ES_20.append(ES)
-            
-            elif self.stations['twenty_in_soil'][i] == 'C': 
-                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.068) / (0.38 - 0.068)
-                ES_20.append(ES)
-            
-            elif self.stations['twenty_in_soil'][i] == 'SL': 
-                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.065) / (0.41 - 0.065)
-                ES_20.append(ES)
-                
-            elif self.stations['twenty_in_soil'][i] == 'FSL': 
-                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.065) / (0.41 - 0.065)
-                ES_20.append(ES)
-                
-            elif self.stations['twenty_in_soil'][i] == 'FS': 
-                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.045) / (0.43 - 0.045)
-                ES_20.append(ES)
-            
-            elif self.stations['twenty_in_soil'][i] == 'S': 
-                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.045) / (0.43 - 0.045)
-                ES_20.append(ES)
-            
-            elif self.stations['twenty_in_soil'][i] == 'SCL': 
-                ES = ((self.stations['SMS-20.0in'][i] / 100)- 0.100) / (0.38 - 0.100)
-                ES_20.append(ES)
-            
-        ES_40 = []
-        #START HERE 
-        for i in self.stations.index:
-            
-            if self.stations['forty_in_soil'][i] == 'SICL':
-                ES = ((self.stations['SMS-40.0in'][i] / 100)- 0.089) / (0.43 - 0.089)
-                ES_40.append(ES)
-                
-            elif self.stations['forty_in_soil'][i] == 'CL': 
-                ES = ((self.stations['SMS-40.0in'][i] / 100)- 0.095) / (0.41 - 0.095)
-                ES_40.append(ES)
-                
-            elif self.stations['forty_in_soil'][i] == 'SIC': 
-                ES = ((self.stations['SMS-40.0in'][i] / 100)- 0.070) / (0.36 - 0.070)
-                ES_40.append(ES)
-                
-            elif self.stations['forty_in_soil'][i] == 'L': 
-                ES = ((self.stations['SMS-40.0in'][i] / 100)- 0.078) / (0.43 - 0.078)
-                ES_40.append(ES)
-            
-            elif self.stations['forty_in_soil'][i] == 'C': 
-                ES = ((self.stations['SMS-40.0in'][i] / 100)- 0.068) / (0.38 - 0.068)
-                ES_40.append(ES)
-            
-            elif self.stations['forty_in_soil'][i] == 'SCL': 
-                ES = ((self.stations['SMS-40.0in'][i] / 100)- 0.100) / (0.38 - 0.100)
-                ES_40.append(ES)
-            
-            elif self.stations['forty_in_soil'][i] == 'SL': 
-                ES = ((self.stations['SMS-40.0in'][i] / 100)- 0.065) / (0.41 - 0.065)
-                ES_40.append(ES)
-            
-            elif self.stations['forty_in_soil'][i] == 'S': 
-                ES = ((self.stations['SMS-40.0in'][i] / 100)- 0.045) / (0.43 - 0.045)
-                ES_40.append(ES)
-            
-            elif self.stations['forty_in_soil'][i] == 'BRCK':
-                ES = np.nan
-                ES_40.append(ES)
-            
-                
-
-        self.stations['ES_2in'] = ES_2
-        self.stations['ES_4in'] = ES_4
-        self.stations['ES_8in'] = ES_8
-        self.stations['ES_20in'] = ES_20
-        self.stations['ES_40in'] = ES_40
-        return self
-    
-
-    def OTHER_ESM(self):
-        
         store = {}
         for i in self.stations['station'].unique():
             new_df = self.stations[self.stations['station'] == i]
@@ -1027,123 +812,8 @@ class SCAN:
                 store[i] = new_df
             
         return store
-    
-    def AVG(df):
-        '''
         
-
-        Parameters
-        ----------
-        df : pandas df
-            Pass the df from OTHER_ESM in the assumptions.py script.
-
-        Returns
-        -------
-        store : pandas df
-            contains seven day avereages of the effective satuaration.
-
-        '''
-        store = {}
         
-        for i in df:
-            f = df[i]
-            f.sort_index(inplace=True)
-            f = f.rolling('7D', min_periods=3).mean()
-            store[i] = f
-            
-        return store
-    
-    def JULIAN(df):
-        store = {}
-        
-        for i in df:
-            f = df[i]
-            f.asfreq('D')
-            f['jday'] = f.index.strftime('%j')
-            f.reset_index(inplace=True)
-            MASK = f.loc[f['jday'] == '366'].index
-            NEW_DF = f.drop(MASK)
-            store[i] = NEW_DF
-            
-        return store
-    
-    def ANOM(df):
-        store = {}
-        
-        for i in df:
-            f = df[i]
-            day_mean = f.groupby(f.jday).mean()
-            merge = f.merge(day_mean, on='jday', how='left', sort=False)
-            merge.set_index('Date', inplace=True)
-            merge.sort_index()
-            merge['ANOM_2in'] = (merge['ES_2in_x'] - merge['ES_2in_y'])
-            merge['ANOM_4in'] = (merge['ES_4in_x'] - merge['ES_4in_y'])
-            merge['ANOM_8in'] = (merge['ES_8in_x'] - merge['ES_8in_y'])
-            merge['ANOM_20in'] = (merge['ES_20in_x'] - merge['ES_20in_y'])
-            merge['ANOM_40in'] = (merge['ES_40in_x'] - merge['ES_40in_y'])
-            merge['StationTriplet'] = i
-            merge = merge[['jday', 'ANOM_2in', 'ANOM_4in', 'ANOM_8in', 
-                              'ANOM_20in', 'ANOM_40in', 'StationTriplet']]
-            store[i] = merge
-            
-        return store
-    
-    def MERGE(df):
-        
-        values = pd.concat(df.values())
-        merge = values.merge(GOES_READ, )
-        
-        return store
-    
-    def RUN(data=None):
-        '''
-        
-
-        Parameters
-        ----------
-        data : type = pandas dataframe
-            SCAN_READ. The default is None.
-
-        Returns
-        -------
-        Effective Saturation anomaly dataframe for each station in Alabama as a dictionary.
-
-        '''
-        I = SCAN(data=data)
-        soils = I.soil_class().unpack().OTHER_ESM()
-        avg = AVG(soils)
-        jul = JULIAN(avg)
-        anom = ANOM(jul)
-        #merge = MERGE(anom)
-        
-        return anom
-    
-    def STATION(station=None):
-        '''
-
-        Parameters
-        ----------
-        station : type = str
-            Input the desired alabama station triplet as a string. The default is None.
-
-        Returns
-        -------
-        Print Statement 
-            (Station, [list of soil types by depth]).
-
-        '''
-        I = SCAN(data=SCAN_READ)
-        soils = I.soil_class().unpack().show()
-        st = soils[soils['station'] == station]
-        two = st['two_in_soil'].unique()[0]
-        four = st['four_in_soil'].unique()[0]
-        eight = st['eight_in_soil'].unique()[0]
-        twenty = st['twenty_in_soil'].unique()[0]
-        forty = st['forty_in_soil'].unique()[0]
-        statement = (station + ' ', 'two: {}'.format(two), 'four: {}'.format(four), 
-              'eight: {}'.format(eight), 'twenty: {}'.format(twenty), 
-              'forty: {}'.format(forty))
-        return print(statement)
         
     def show(self):
          '''
@@ -1155,3 +825,186 @@ class SCAN:
          '''
          return self.stations
      
+############# NON-CLASS FUNCTIONS BELOW ###################
+
+def STATION(station=None):
+    '''
+
+    Parameters
+    ----------
+    station : type = str
+        Input the desired alabama station triplet as a string. The default is None.
+
+    Returns
+    -------
+    Print Statement 
+        (Station, [list of soil types by depth]).
+
+    '''
+    I = SCAN(data=SCAN_READ)
+    soils = I.soil_class().unpack().show()
+    st = soils[soils['station'] == station]
+    two = st['two_in_soil'].unique()[0]
+    four = st['four_in_soil'].unique()[0]
+    eight = st['eight_in_soil'].unique()[0]
+    twenty = st['twenty_in_soil'].unique()[0]
+    forty = st['forty_in_soil'].unique()[0]
+    statement = (station + ' ', 'two: {}'.format(two), 'four: {}'.format(four), 
+          'eight: {}'.format(eight), 'twenty: {}'.format(twenty), 
+          'forty: {}'.format(forty))
+    return print(statement)
+
+def RUN_CLASS_FUNCS(data=None):
+    '''
+        
+
+    Parameters
+    ----------
+    data : type = pandas dataframe
+        SCAN_READ. The default is None.
+
+    Returns
+    -------
+    Effective Saturation anomaly dataframe for each station in Alabama as a dictionary.
+
+    '''
+    I = SCAN(data=data)
+    soils = I.soil_class().unpack().Calculate_ESM()
+    
+    #merge = MERGE(anom)
+        
+    return soils
+
+def RUN_NON_CLASS_OPERATIONS(data=SCAN_READ):
+    '''
+    
+
+    Parameters
+    ----------
+    soils : Pandas Dataframe
+        Pass the dataframe returned from RUN_CLASS_FUNCS in assumptions.py.
+
+    Returns 
+    -------
+    merged : Pandas Dataframe
+        Contains merged ESI values from GOES with weekly, effective soil moisture 
+        anomalies at appropriate stations and dates. 
+    
+
+    '''
+    soils = RUN_CLASS_FUNCS(data=data)
+    avg = AVG(soils)
+    jul = JULIAN(avg)
+    anom = ANOM(jul)
+    
+    return anom
+def AVG(df):
+    '''
+    
+
+    Parameters
+    ----------
+    df : pandas df
+        Pass the df from Calulate_ESM() in the assumptions.py script.
+
+    Returns
+    -------
+    store : pandas df
+        contains seven day avereages of the effective satuaration.
+
+    '''
+    store = {}
+    
+    for i in df:
+        f = df[i]
+        f.sort_index(inplace=True)
+        f = f.rolling('7D', min_periods=3).mean()
+        store[i] = f
+        
+    return store
+
+def JULIAN(df):
+    store = {}
+    
+    for i in df:
+        f = df[i]
+        f.asfreq('D')
+        f['jday'] = f.index.strftime('%j')
+        f.reset_index(inplace=True)
+        MASK = f.loc[f['jday'] == '366'].index
+        NEW_DF = f.drop(MASK)
+        store[i] = NEW_DF
+        
+    return store
+
+def ANOM(df):
+    '''
+    
+
+    Parameters
+    ----------
+    df : Pandas Dataframe
+        Pass the df returned from JULIAN() in assumptions.py.
+        
+
+    Returns
+    -------
+    store : Pandas Dataframe
+        Dataframe containing the anomaly soil moisture values for each station
+        across Alabama. 
+
+    '''
+    store = {}
+    
+    for i in df:
+        f = df[i]
+        day_mean = f.groupby(f.jday).mean()
+        merge = f.merge(day_mean, on='jday', how='left', sort=False)
+        merge.set_index('Date', inplace=True)
+        merge.sort_index()
+        merge['ANOM_2in'] = (merge['ES_2in_x'] - merge['ES_2in_y'])
+        merge['ANOM_4in'] = (merge['ES_4in_x'] - merge['ES_4in_y'])
+        merge['ANOM_8in'] = (merge['ES_8in_x'] - merge['ES_8in_y'])
+        merge['ANOM_20in'] = (merge['ES_20in_x'] - merge['ES_20in_y'])
+        merge['ANOM_40in'] = (merge['ES_40in_x'] - merge['ES_40in_y'])
+        
+        merge['ANOM_2in_rescale'] = merge['ANOM_2in'] / abs(merge['ANOM_2in'].max()) * 3
+        merge['ANOM_4in_rescale'] = merge['ANOM_4in'] / abs(merge['ANOM_4in'].max()) * 3
+        merge['ANOM_8in_rescale'] = merge['ANOM_8in'] / abs(merge['ANOM_8in'].max()) * 3
+        merge['ANOM_20in_rescale'] = merge['ANOM_20in'] / abs(merge['ANOM_20in'].max()) * 3
+        merge['ANOM_40in_rescale'] = merge['ANOM_40in'] / abs(merge['ANOM_40in'].max()) * 3
+        
+        merge['StationTriplet'] = i
+        merge = merge[['jday', 'ANOM_2in_rescale', 'ANOM_4in_rescale', 'ANOM_8in_rescale', 
+                          'ANOM_20in_rescale', 'ANOM_40in_rescale', 'StationTriplet']]
+        store[i] = merge
+        
+    return store
+
+def PLOT_ALL_STNS(dictionary):
+    '''
+    
+
+    Parameters
+    ----------
+    df : Pass a dictionary from either AVG, JULIAN or ANOM fucntions in assumptions.py
+        
+
+    Returns
+    -------
+    Plot of all stations. 
+
+    '''
+    fig, ax = plt.subplots(9, 2, figsize=(18,35))
+    ax_array = ax.ravel()
+    for idx, key in enumerate(dictionary.keys()):
+        plot = dictionary[key].plot(ax=ax_array[idx], ylabel='Effective Saturation', title=f'{key}')
+        plot.get_legend().remove()
+    plt.legend(bbox_to_anchor=(1.05, 1))
+    plt.subplots_adjust(hspace=0.5, wspace=0.15)
+    plt.show()
+    
+def MERGE(df):
+    
+    values = pd.concat(df.values())
+    merge = values.merge(GOES_READ, )
