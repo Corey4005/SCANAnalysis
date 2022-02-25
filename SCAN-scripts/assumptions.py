@@ -37,10 +37,25 @@ class SCAN:
     characteristics based on soil classes. 
     
     functions: 
+        
         __init__ - create new_df attribute used in functions set on 
         SCAN_READ variable (raw import) in assumptions.py. 
         
-        properties of __init__:
+        soil_class - append the soil dictionary for each station that has an
+        available pedon report in Alabama.
+        
+        unpack - Unpack the self.stations dataframe containing the soil texture
+            class dictionaries and return pandas column with the soil
+            texture class for each depth. 
+        
+        Calculate_ESM - returns the effective saturation using assumed van-genuchten soil 
+        parameters from Carsel and Parrish look-up tables and soil data
+        from USDA SCAN / Web Soil Survey. 
+        
+        show -  return the self.stations property in its current form. 
+        
+        properties:
+            
             self.df - pandas dataframe of SCAN_READ
             
             self.new_df - pandas dataframe with correct soil depths, station, 
@@ -73,6 +88,52 @@ class SCAN:
                    (self.new_df['station'] == '2179:AL:SCAN') |
                    (self.new_df['station'] == '2181:AL:SCAN') |
                    (self.new_df['station'] == '2176:AL:SCAN')]
+    
+    def z_score(self): 
+        '''
+        Purpose: 
+            Calculates Z-score for each point in the raw data. 
+
+        Returns
+        -------
+        store : dictionary.
+            Stations with soil moisture and z-score information. 
+            
+
+        '''
+        store = {}
+        for i in self.stations['station'].unique():
+            new_df = self.stations[self.stations['station'] == i]
+            new_df.set_index('Date', inplace=True)
+            new_df.index = pd.to_datetime(new_df.index)
+            new_df.sort_index(inplace=True)
+            
+            #calculate standard deviation for each column. 
+            std_2 = new_df['SMS-2.0in'].std()
+            std_4 = new_df['SMS-4.0in'].std()
+            std_8 = new_df['SMS-8.0in'].std()
+            std_20 = new_df['SMS-20.0in'].std()
+            std_40 = new_df['SMS-40.0in'].std()
+            
+            #create z-score column. 
+            new_df['z_2'] = (new_df['SMS-2.0in'] - new_df['SMS-2.0in'].mean()) / std_2
+            new_df['z_4'] = (new_df['SMS-4.0in'] - new_df['SMS-4.0in'].mean()) / std_4
+            new_df['z_8'] = (new_df['SMS-8.0in'] - new_df['SMS-8.0in'].mean()) / std_8
+            new_df['z_20'] = (new_df['SMS-20.0in'] - new_df['SMS-20.0in'].mean()) / std_20
+            new_df['z_40'] = (new_df['SMS-40.0in'] - new_df['SMS-40.0in'].mean()) / std_40
+            
+            new_df = new_df[['station','SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 
+                             'SMS-20.0in','SMS-40.0in','z_2', 'z_4', 'z_8', 'z_20', 'z_40']]
+            new_df.reset_index()
+            
+            #store new df with z score. 
+            store[i] = new_df
+        
+        df = pd.concat(store, axis=0)
+        df.index = df.index.get_level_values(1)
+        
+        self.stations = df
+        return self
     
     def soil_class(self): 
         #stations notes
@@ -300,10 +361,17 @@ class SCAN:
             
         return self
     
-
+    def CLEAN_DATA(self):
+        df = self.stations
+        pass
+        
     def Calculate_ESM(self):
         '''
-        
+        Purpose: 
+            
+            returns the effective saturation using assumed van-genuchten soil 
+            parameters from Carsel and Parrish look-up tables and soil data
+            from USDA SCAN / Web Soil Survey. 
 
         Returns
         -------
@@ -317,7 +385,6 @@ class SCAN:
         store = {}
         for i in self.stations['station'].unique():
             new_df = self.stations[self.stations['station'] == i]
-            new_df.set_index('Date', inplace=True)
             new_df.index = pd.to_datetime(new_df.index)
             new_df.sort_index(inplace=True)
             
@@ -981,7 +1048,7 @@ def ANOM(df):
         
     return store
 
-def PLOT_ALL_STNS(dictionary):
+def PLOT_ALL_STNS_ES(dictionary):
     '''
     
 
@@ -989,7 +1056,13 @@ def PLOT_ALL_STNS(dictionary):
     ----------
     df : Pass a dictionary from either AVG, JULIAN or ANOM fucntions in assumptions.py
         
-
+    Example
+    -------
+    I = SCAN(data=SCAN_READ)
+    x = RUN_NON_CLASS_OPERATIONS()
+    
+    PLOT_ALL_STNS_Z_SCORE(x)
+    
     Returns
     -------
     Plot of all stations. 
@@ -1003,8 +1076,34 @@ def PLOT_ALL_STNS(dictionary):
     plt.legend(bbox_to_anchor=(1.05, 1))
     plt.subplots_adjust(hspace=0.5, wspace=0.15)
     plt.show()
+
+def PLOT_ALL_STNS_Z_SCORE(df):
+    '''
     
-def MERGE(df):
+
+    Parameters
+    ----------
+    df : Pass dictionary from z_score().show() functions of raw data in assumptions.py. 
+        
+    Example
+    ----------
+    I = SCAN(data=SCAN_READ)
+    x = I.z_score().show()
+    PLOT_ALL_STNS_Z_SCORE(x)
     
-    values = pd.concat(df.values())
-    merge = values.merge(GOES_READ, )
+    Returns
+    -------
+    Plot of all stations z_score. 
+
+    '''
+    fig, ax = plt.subplots(9, 2, figsize=(18,35))
+    ax_array = ax.ravel()
+    for idx, key in enumerate(df['station'].unique()):
+        new_df = df[df['station'] == key]
+        new_df = new_df[['z_2', 'z_4', 'z_8', 'z_20', 'z_40']]
+        plot = new_df.plot(ax=ax_array[idx], ylabel='z-score', title=f'{key} Raw Data')
+        plot.get_legend().remove()
+    plt.legend(bbox_to_anchor=(1.05, 1))
+    plt.subplots_adjust(hspace=0.5, wspace=0.15)
+    plt.show()
+
