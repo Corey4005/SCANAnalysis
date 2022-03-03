@@ -1020,6 +1020,22 @@ def AVG(df):
     return store
 
 def JULIAN(df):
+    '''
+    
+
+    Parameters
+    ----------
+    df : Pandas Dataframe
+        Pass the dataframe returned from AVG in assumptions.py.
+
+    Returns
+    -------
+    store : Dictionary
+        Returns a dictionary for each USDA station containing the julian day column 
+        and inserted dates where they are missing. Also drops julian days that are
+        day 366 for each station. 
+
+    '''
     store = {}
     
     for i in df:
@@ -1168,6 +1184,22 @@ def MERGE(dictionary):
     return store
 
 def CORRELATE(dictionary):
+    '''
+    
+
+    Parameters
+    ----------
+    dictionary : Dictionary
+        Pass the dictionray returned from the MERGE function in assumptions.py
+        containing ESI and Effective Saturation values at all stations. 
+
+    Returns
+    -------
+    store : Dictionary
+        returns a dictionary of dataframes for pairwise correlations between 
+        ESI and effective saturation values by station. 
+
+    '''
     store = {}
     for i in dictionary: 
         STN = dictionary.get(i)
@@ -1178,12 +1210,32 @@ def CORRELATE(dictionary):
     return store
 
 def UNSTACK_N_PLOT(dictionary):
+    '''
+    
+
+    Parameters
+    ----------
+    dictionary : Dictionary
+        Pass the dictionary returned from the CORRELATE function in assumptions.py.
+
+    Returns
+    -------
+    PLOT : Matplotlib plot
+        Returns a barplot showing pairwise correlations between ALEXI ESI and 
+        effective saturation values at each USDA SCAN site station across Alabama.
+
+    '''
     DF = pd.concat(dictionary)
     DF = DF.unstack(level=-1)['ESI']
     DF = DF.drop(['ESI'], axis=1)
-    DF.reset_index(inplace=True)
-    TIDY = DF.melt(id_vars='index')
-    fig, ax = plt.subplots(figsize=(20,10))
+    DF['mean_corr'] = (DF['ANOM_2in_rescale'] + DF['ANOM_4in_rescale'] + 
+                       DF['ANOM_8in_rescale'] + DF['ANOM_20in_rescale'] + 
+                       DF['ANOM_40in_rescale']) / 5
+    DF_sorted = DF.sort_values('mean_corr')
+    DF_sorted.reset_index(inplace=True)
+    DF_sorted.drop(['Latitude', 'Longitude'], axis=1, inplace=True)
+    TIDY = DF_sorted.melt(id_vars='index')
+    fig, ax = plt.subplots(figsize=(30,10))
     PLOT = sns.barplot(x='index', y='value', hue='variable', data=TIDY, ax=ax)
     ax.set_xlabel('Station')
     ax.set_ylabel('R Value')
@@ -1191,7 +1243,24 @@ def UNSTACK_N_PLOT(dictionary):
     PLOT.set_xticklabels(PLOT.get_xticklabels(), rotation=45, horizontalalignment='right')
     return PLOT
 
-def ALL_FUNCS_PLOT():
+def ALL_FUNCS_BARPLOT():
+    '''
+    Purpose
+    -------
+    Runs the following code in concert:
+        
+        X = RUN_NON_CLASS_OPERATIONS()
+        MERGED = MERGE(X)
+        CORR = CORRELATE(MERGED)
+        PLOT = UNSTACK_N_PLOT(CORR)
+
+    Returns
+    -------
+    PLOT : Matplotlib plot
+        Returns a barplot showing pairwise correlations between ALEXI ESI and 
+        effective saturation values at each USDA SCAN site station across Alabama.
+
+    '''
     X = RUN_NON_CLASS_OPERATIONS()
     MERGED = MERGE(X)
     CORR = CORRELATE(MERGED)
