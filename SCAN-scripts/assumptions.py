@@ -38,37 +38,87 @@ class SCAN:
     SCAN CLASS - used to set Alabama SCAN sites with assumed soil 
     characteristics based on soil classes. 
     
-    functions: 
+    Class functions: 
         
         __init__ - create new_df attribute used in functions set on 
-        SCAN_READ variable (raw import) in assumptions.py. 
+            SCAN_READ variable (raw import) in assumptions.py. 
         
         soil_class - append the soil dictionary for each station that has an
-        available pedon report in Alabama.
+            available pedon report in Alabama.
         
         unpack - Unpack the self.stations dataframe containing the soil texture
             class dictionaries and return pandas column with the soil
             texture class for each depth. 
         
         Calculate_ESM - returns the effective saturation using assumed van-genuchten soil 
-        parameters from Carsel and Parrish look-up tables and soil data
-        from USDA SCAN / Web Soil Survey. 
+            parameters from Carsel and Parrish look-up tables and soil data
+            from USDA SCAN / Web Soil Survey. 
         
         show -  return the self.stations property in its current form. 
         
-        properties:
+    Class properties:
             
-            self.df - pandas dataframe of SCAN_READ
+        self.df - pandas dataframe of SCAN_READ
             
-            self.new_df - pandas dataframe with correct soil depths, station, 
-                and dates.
+        self.new_df - pandas dataframe with correct soil depths, station, 
+            and dates.
                 
-            self.stations - pandas dataframe with all stations that have soil
-                texture characteristics listed in Pedon Report
+        self.stations - pandas dataframe with all stations that have soil
+            texture characteristics listed in Pedon Report
     
+    Example Codes: 
+        
+        Calculate Effective Saturation from Raw Data: 
+            
+            I = SCAN(data=SCAN_READ)
+            dictionary = I.standard_deviation().z_score().Calculate_ESM().show()
+            
+            returns: 
+                Dictionary
+                Contains effective saturation calculations for each station that 
+                can be called from the dictionary object using the .get([string])
+                method.
+                
+                example:
+                    #get station 2053 information
+                    
+                    st2053 = dictionary.get('2053:AL:SCAN')
+        
+        Return clean effective saturation data
+        
+            I = SCAN(data=SCAN_READ)
+            dictionary = I.standard_deviation().z_score().clean_data().Calculate_ESM()
+            
+            returns: 
+                Dictionary
+                Contains cleaned effective saturation values at each station with data
+                up to +/- 3.5 standard deviations from the mean. Each station can be 
+                called with the .get([string]) method.
+                
+                example: 
+                    #get station 2057 information
+                    
+                    st2057 = dictionary.get('2057:AL:SCAN')
+
     '''
 
     def __init__(self, data):
+        '''
+        
+
+        Parameters
+        ----------
+        data : pandas df
+            Data Parameter passed in the SCAN class when initialized.
+
+        Returns
+        -------
+        attributes:
+            
+            self.df
+            self.new_df
+            self.stations
+        '''
         self.df = data
         self.new_df = self.df[['Date', 'station','SMS-2.0in', 'SMS-4.0in', 
                                'SMS-8.0in', 'SMS-20.0in','SMS-40.0in']].copy()
@@ -92,6 +142,18 @@ class SCAN:
                    (self.new_df['station'] == '2176:AL:SCAN')]
     
     def standard_deviation(self):
+        '''
+        Purpose:
+            Calculates the Standard Deviation by Month for Each USDA SCAN station
+            and appends it to the dataframe. 
+
+        Returns
+        -------
+        self.stations property
+            This is an updated dataframe with monthly standard deviations appended
+            to each reading. 
+
+        '''
         store = {}
         df = self.stations
         for i in df['station'].unique():
@@ -124,7 +186,6 @@ class SCAN:
         store : dictionary.
             Stations with soil moisture and z-score information. 
             
-
         '''
         store = {}
         for i in self.stations['station'].unique():
@@ -153,20 +214,90 @@ class SCAN:
         self.stations = df
         return self
     
-    def clean_data(self):
-        top = 3.5
+    def quality_z_score(self, std=None):
+        '''
+        Parameters
+        ----------
+        std : float
+            pass the number of standard deviations you would like to set as 
+            'good data'. 
+            
+        Purpose:
+            creates data quality columns depending on z-score
+
+        Returns
+        -------
+        pandas dataframe
+            Dataframe containing raw data, z-score and data quality columns
+
+        '''
         df = self.stations
-        two_clean = df[(df['z_2'] >= -top) & (df['z_2']<=top)]
-        four_clean = two_clean[(two_clean['z_4'] >= -top) & (two_clean['z_4']<=top)]
-        eight_clean = four_clean[(four_clean['z_8'] >= -top) & (four_clean['z_8']<=top)]
-        twenty_clean = eight_clean[(eight_clean['z_20'] >= -top) & (eight_clean['z_20']<=top)]
-        forty_clean = twenty_clean[(twenty_clean['z_40'] >= -top) & (twenty_clean['z_40']<=top)]
+        std = std
+        def encoder(df, column=None):
+            '''
+            
+
+            Parameters
+            ----------
+            df : self.stations
+            
+            column : string, optional
+                pass the column string you would like to encode. The default is None.
+                
+
+            Returns
+            -------
+            new_col : list
+                A list of data quality ('too high, too low, or good data') 
+                for the column passed in the encoder in question.
+
+            '''
+            new_col = []
+            for i in df[column]:
+                if i > std:
+                    word = 'Too High'
+                    new_col.append(word)
+                elif i < -std:
+                    word = 'Too Low'
+                    new_col.append(word)
+                else:
+                    word = 'Good Data'
+                    new_col.append(word)
+            
+            return new_col
         
-        #fix 2179 problemby reducing to 2.25 std
-        forty_clean.replace(forty_clean[(forty_clean['station']=='2179:AL:SCAN') & (forty_clean['z_4']>=2.25)]['SMS-4.0in_x'].values, np.nan, inplace=True)
-        forty_clean.replace(forty_clean[(forty_clean['station']=='2179:AL:SCAN') & (forty_clean['z_4']<=-2.25)]['SMS-4.0in_x'].values, np.nan, inplace=True)
+        df['2in_quality'] = encoder(df, column='z_2')
+        df['4in_quality'] = encoder(df, column='z_4')
+        df['8in_quality'] = encoder(df, column='z_8')
+        df['20in_quality'] = encoder(df, column='z_20')
+        df['40in_quality'] = encoder(df, column='z_40')
         
-        self.stations = forty_clean
+        
+        self.stations = df
+        return self
+    
+    def clean_data(self):
+        df = self.stations
+        #two
+        df.loc[df['2in_quality'] == 'Too High', 'SMS-2.0in_x'] = np.nan
+        df.loc[df['2in_quality'] == 'Too Low', 'SMS-2.0in_x'] = np.nan
+        #four
+        df.loc[df['4in_quality'] == 'Too High', 'SMS-4.0in_x'] = np.nan
+        df.loc[df['4in_quality'] == 'Too Low', 'SMS-4.0in_x'] = np.nan
+        #eight
+        df.loc[df['8in_quality'] == 'Too High', 'SMS-8.0in_x'] = np.nan
+        df.loc[df['8in_quality'] == 'Too Low', 'SMS-8.0in_x'] = np.nan
+        #twenty
+        df.loc[df['20in_quality'] == 'Too High', 'SMS-20.0in_x'] = np.nan
+        df.loc[df['20in_quality'] == 'Too Low', 'SMS-20.0in_x'] = np.nan
+        #forty
+        df.loc[df['40in_quality'] == 'Too High', 'SMS-40.0in_x'] = np.nan
+        df.loc[df['40in_quality'] == 'Too Low', 'SMS-40.0in_x'] = np.nan
+        
+        #get rid of all values above 100%
+        df[df['SMS-4.0in_x']>100] = np.nan
+        
+        self.stations = df
         return self
         
     def soil_class(self): 
@@ -950,45 +1081,49 @@ def STATION(station=None):
           'forty: {}'.format(forty))
     return print(statement)
 
-def RUN_CLASS_FUNCS(data=None):
+def RUN_CLASS_FUNCS(std=None):
     '''
-        
-
+    
     Parameters
-    ----------
-    data : type = pandas dataframe
-        SCAN_READ. The default is None.
+    ---------
+    std : float
+        pass the number of standard deviations you would like to set as 
+        'good data'. 
+        
+    Purpose:
+        Return cleaned effective saturation values in with one function calling 
+        appropriate SCAN class functions. 
 
     Returns
     -------
-    Effective Saturation anomaly dataframe for each station in Alabama as a dictionary.
+    Effective Saturation dataframe for each station in Alabama as a dictionary.
 
     '''
-    I = SCAN(data=data)
-    soils = I.standard_deviation().z_score().clean_data().Calculate_ESM()
+    I = SCAN(data=SCAN_READ)
+    soils = I.standard_deviation().z_score().quality_z_score(std=std).clean_data().show()
     
-    #merge = MERGE(anom)
         
     return soils
 
-def RUN_NON_CLASS_OPERATIONS(data=SCAN_READ):
+def RUN_NON_CLASS_OPERATIONS(std=None):
     '''
-    
-
     Parameters
-    ----------
-    soils : Pandas Dataframe
-        Pass the dataframe returned from RUN_CLASS_FUNCS in assumptions.py.
-
-    Returns 
+    ---------
+    std : float
+        pass the number of standard deviations you would like to set as 
+        'good data'. 
+        
+    Puropse
     -------
-    merged : Pandas Dataframe
-        Contains merged ESI values from GOES with weekly, effective soil moisture 
-        anomalies at appropriate stations and dates. 
+    Creates anomalies for effective saturation calculations. 
     
+    Returns
+    -------
+    anom : Pandas dataframe
+        contains anomaly calculations for soil. 
 
     '''
-    soils = RUN_CLASS_FUNCS(data=data)
+    soils = RUN_CLASS_FUNCS(std=std)
     avg = AVG(soils)
     jul = JULIAN(avg)
     anom = ANOM(jul)
@@ -1106,7 +1241,7 @@ def PLOT_ALL_STNS_ES(dictionary):
     I = SCAN(data=SCAN_READ)
     x = RUN_NON_CLASS_OPERATIONS()
     
-    PLOT_ALL_STNS_Z_SCORE(x)
+    PLOT_ALL_STNS_ES(x)
     
     Returns
     -------
@@ -1201,14 +1336,16 @@ def CORRELATE(dictionary):
 
     '''
     store = {}
-    for i in dictionary: 
-        STN = dictionary.get(i)
-        CORR = STN.corr()['ESI']
-        DF = pd.DataFrame(CORR)
-        DF['station'] = i
-        store[i] = DF
+    for i in dictionary:
+        get = dictionary[i]
+        lat = get['Latitude'].values[0]
+        lon = get['Longitude'].values[0]
+        corr = get.corr()['ESI'].drop(['Latitude', 'Longitude'])
+        corr['Latitude'] = lat
+        corr['Longitude'] = lon
+        store[i] = corr
+        
     return store
-
 def UNSTACK_N_PLOT(dictionary):
     '''
     
@@ -1225,15 +1362,26 @@ def UNSTACK_N_PLOT(dictionary):
         effective saturation values at each USDA SCAN site station across Alabama.
 
     '''
+    
+    
     DF = pd.concat(dictionary)
-    DF = DF.unstack(level=-1)['ESI']
-    DF = DF.drop(['ESI'], axis=1)
+    DF = DF.unstack(level=-1)
+    DF.drop('ESI', axis=1, inplace=True)
     DF['mean_corr'] = (DF['ANOM_2in_rescale'] + DF['ANOM_4in_rescale'] + 
                        DF['ANOM_8in_rescale'] + DF['ANOM_20in_rescale'] + 
                        DF['ANOM_40in_rescale']) / 5
-    DF_sorted = DF.sort_values('mean_corr')
+    print('Here are the columns to sort by:', DF.columns)
+    sort = input('Which column would you like to sort? Enter Here:')
+    DF_sorted = DF.sort_values(sort)
     DF_sorted.reset_index(inplace=True)
     DF_sorted.drop(['Latitude', 'Longitude'], axis=1, inplace=True)
+    DF_sorted['ANOM_2in_rescale'] = DF_sorted['ANOM_2in_rescale'].astype('float')
+    DF_sorted['ANOM_4in_rescale'] = DF_sorted['ANOM_4in_rescale'].astype('float')
+    DF_sorted['ANOM_8in_rescale'] = DF_sorted['ANOM_8in_rescale'].astype('float')
+    DF_sorted['ANOM_20in_rescale'] = DF_sorted['ANOM_20in_rescale'].astype('float')
+    DF_sorted['ANOM_40in_rescale'] = DF_sorted['ANOM_40in_rescale'].astype('float')
+    DF_sorted['mean_corr'] = DF_sorted['mean_corr'].astype('float')
+
     TIDY = DF_sorted.melt(id_vars='index')
     fig, ax = plt.subplots(figsize=(30,10))
     PLOT = sns.barplot(x='index', y='value', hue='variable', data=TIDY, ax=ax)
