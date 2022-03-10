@@ -201,16 +201,19 @@ class SCAN:
             new_df['z_20'] = (new_df['SMS-20.0in_x'] - new_df['SMS-20.0in_x'].mean()) / new_df['SMS-20.0in_y']
             new_df['z_40'] = (new_df['SMS-40.0in_x'] - new_df['SMS-40.0in_x'].mean()) / new_df['SMS-40.0in_y']
             
-            new_df = new_df[['station','SMS-2.0in_x', 'SMS-4.0in_x', 'SMS-8.0in_x', 
+            new_df = new_df[['station','SMS-2.0in_x', 'SMS-4.0in_x', 'SMS-8.0in_x', 'SMS-2.0in_y',
+                             'SMS-4.0in_y', 'SMS-8.0in_y', 'SMS-20.0in_y', 'SMS-40.0in_y', 
                              'SMS-20.0in_x','SMS-40.0in_x','z_2', 'z_4', 'z_8', 'z_20', 'z_40']]
             new_df.reset_index()
             
             #store new df with z score. 
             store[i] = new_df
-        
+    
         df = pd.concat(store, axis=0)
         df.index = df.index.get_level_values(1)
-        
+        df.rename(columns={'SMS-2.0in_y': '2in-stdev', 'SMS-4.0in_y': '4in-stdev',
+                           'SMS-8.0in_y': '8in-stdev', 'SMS-20.0in_y': '20in-stdev',
+                           'SMS-40.0in_y': '40in-stdev'}, inplace=True)
         self.stations = df
         return self
     
@@ -278,6 +281,41 @@ class SCAN:
     
     def clean_data(self):
         df = self.stations
+        #print lengths 
+        two_high = len(df.loc[df['2in_quality'] == 'Too High', 'SMS-2.0in_x'])
+        two_low = len(df.loc[df['2in_quality'] == 'Too Low', 'SMS-2.0in_x'])
+        
+        #four 
+        four_high = len(df.loc[df['4in_quality'] == 'Too High', 'SMS-4.0in_x'])
+        four_low = len(df.loc[df['4in_quality'] == 'Too Low', 'SMS-4.0in_x']) 
+        
+        #eight
+        eight_high = len(df.loc[df['8in_quality'] == 'Too High', 'SMS-8.0in_x']) 
+        eight_low = len(df.loc[df['8in_quality'] == 'Too Low', 'SMS-8.0in_x'])
+        
+        #twenty 
+        twenty_high = len(df.loc[df['20in_quality'] == 'Too High', 'SMS-20.0in_x'])
+        twenty_low = len(df.loc[df['20in_quality'] == 'Too Low', 'SMS-20.0in_x'])
+        
+        #forty
+        forty_high = len(df.loc[df['40in_quality'] == 'Too High', 'SMS-40.0in_x'])
+        forty_low = len(df.loc[df['40in_quality'] == 'Too Low', 'SMS-40.0in_x'])
+        
+        data_scrubbed = {'two-in-cleaned': [two_high, two_low], 
+                         'four-in-cleaned': [four_high, four_low],
+                         'eight-in-cleaned': [eight_high, eight_low], 
+                         'twenty-in-cleaned': [twenty_high, twenty_low],
+                         'forty-in-cleaned':[forty_high, forty_low]}
+        
+        data_scrubbed_df = pd.DataFrame(data_scrubbed)
+        transpose = data_scrubbed_df.transpose()
+        transpose.columns=['Too High', 'Too Low']
+        
+        print('\n')
+        print('The data cleaned as outliers are in the following dataframe:')
+        print('\n')
+        print(transpose)
+        
         #two
         df.loc[df['2in_quality'] == 'Too High', 'SMS-2.0in_x'] = np.nan
         df.loc[df['2in_quality'] == 'Too Low', 'SMS-2.0in_x'] = np.nan
@@ -294,7 +332,12 @@ class SCAN:
         df.loc[df['40in_quality'] == 'Too High', 'SMS-40.0in_x'] = np.nan
         df.loc[df['40in_quality'] == 'Too Low', 'SMS-40.0in_x'] = np.nan
         
+        print('\n')
         #get rid of all values above 100%
+        one_hundred_values = len(df[df['SMS-4.0in_x']>100])
+        
+        print(f'Total values > 100% volumetric soil moisture cleaned: {one_hundred_values}')
+        
         df[df['SMS-4.0in_x']>100] = np.nan
         
         self.stations = df
