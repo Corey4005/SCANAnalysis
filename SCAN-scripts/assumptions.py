@@ -71,7 +71,7 @@ class SCAN:
         Calculate Effective Saturation from Raw Data: 
             
             I = SCAN(data=SCAN_READ)
-            dictionary = I.standard_deviation().z_score().Calculate_ESM().show()
+            dictionary = I.standard_deviation().z_score().Calculate_ESM()
             
             returns: 
                 Dictionary
@@ -82,12 +82,12 @@ class SCAN:
                 example:
                     #get station 2053 information
                     
-                    st2053 = dictionary.get('2053:AL:SCAN')
+                    st2053 = dictionary.get('2053:AL:SCAN').plot()
         
         Return clean effective saturation data
         
             I = SCAN(data=SCAN_READ)
-            dictionary = I.standard_deviation().z_score().clean_data().Calculate_ESM()
+            dictionary = I.standard_deviation().z_score().quality_z_score(std=3.5).clean_data().Calculate_ESM()
             
             returns: 
                 Dictionary
@@ -98,7 +98,7 @@ class SCAN:
                 example: 
                     #get station 2057 information
                     
-                    st2057 = dictionary.get('2057:AL:SCAN')
+                    st2057 = dictionary.get('2057:AL:SCAN').plot()
 
     '''
 
@@ -338,7 +338,7 @@ class SCAN:
         
         print(f'Total values > 100% volumetric soil moisture cleaned: {one_hundred_values}')
         
-        df[df['SMS-4.0in_x']>100] = np.nan
+        df.loc[df['SMS-4.0in_x']>100, 'SMS-4.0in_x'] = np.nan
         
         self.stations = df
         return self
@@ -1143,7 +1143,7 @@ def RUN_CLASS_FUNCS(std=None):
 
     '''
     I = SCAN(data=SCAN_READ)
-    soils = I.standard_deviation().z_score().quality_z_score(std=std).clean_data().show()
+    soils = I.standard_deviation().z_score().quality_z_score(std=std).clean_data().Calculate_ESM()
     
         
     return soils
@@ -1282,7 +1282,7 @@ def PLOT_ALL_STNS_ES(dictionary):
     Example
     -------
     I = SCAN(data=SCAN_READ)
-    x = RUN_NON_CLASS_OPERATIONS()
+    x = RUN_NON_CLASS_OPERATIONS(std=3.5)
     
     PLOT_ALL_STNS_ES(x)
     
@@ -1317,7 +1317,7 @@ def PLOT_ALL_STNS_Z_SCORE(df):
     Example for data after cleaning
     -----------
     I = SCAN(data=SCAN_READ)
-    x = I.standard_deviation().z_score().clean_data().show()
+    x = I.standard_deviation().z_score().quality_z_score(std=3.5).clean_data().show()
     PLOT_ALL_STNS_Z_SCORE(x)
     
     Returns
@@ -1434,7 +1434,7 @@ def UNSTACK_N_PLOT(dictionary):
     PLOT.set_xticklabels(PLOT.get_xticklabels(), rotation=45, horizontalalignment='right')
     return PLOT
 
-def ALL_FUNCS_BARPLOT():
+def ALL_FUNCS_BARPLOT(std=None):
     '''
     Purpose
     -------
@@ -1452,7 +1452,7 @@ def ALL_FUNCS_BARPLOT():
         effective saturation values at each USDA SCAN site station across Alabama.
 
     '''
-    X = RUN_NON_CLASS_OPERATIONS()
+    X = RUN_NON_CLASS_OPERATIONS(std=std)
     MERGED = MERGE(X)
     CORR = CORRELATE(MERGED)
     PLOT = UNSTACK_N_PLOT(CORR)
