@@ -1456,3 +1456,23 @@ def ALL_FUNCS_BARPLOT(std=None):
     MERGED = MERGE(X)
     CORR = CORRELATE(MERGED)
     PLOT = UNSTACK_N_PLOT(CORR)
+    return PLOT
+
+def high_low(x):
+    if x > 0:
+        return 'high'
+    else:
+        return 'low'
+    
+def MODEL_ESI(std=None):
+    #run operations to get final merged dataframe
+    x = RUN_NON_CLASS_OPERATIONS(std=std)
+    MERGED = MERGE(x)
+    CONCAT = pd.concat(MERGED, axis=0, ignore_index=True)
+    
+    #create a high/low column for prediction
+    CONCAT['high/low'] = CONCAT['ESI'].apply(high_low)
+    
+    #drop the things that dont matter in the dataframe
+    CONCAT.drop(columns=['Date', 'jday', 'Longitude', 'Latitude', 'StationTriplet'], inplace=True)
+    return CONCAT
