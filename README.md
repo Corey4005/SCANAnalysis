@@ -33,3 +33,6 @@ comparisons?
 | [Functions](https://github.com/Corey4005/SCANAnalysis/blob/main/SCAN-scripts/assumptions.py) |This is a list of functions for cleaning the USDA soil moisture data and calculating effective saturation using soil texture characteristic tables from [*Carsel et. al.*](https://hwbdocuments.env.nm.gov/Los%20Alamos%20National%20Labs/General/14689.PDF?msclkid=a36b5239b03c11ec83b65afc7552cc4a) With this module you can calculate standard deviations, z-scores, clean and calculate soil moisture anomalies, and plot ESI relationships with each USDA SCAN site. |
 |[Shapefiles](https://github.com/Corey4005/SCANAnalysis/tree/main/shapefiles)| These are the shapefiles representing the shape of each ALEXI pixel corresponding to a USDA SCAN site. used to extract information from various sattelite remote sensing datasets |
 
+# Task List
+- [ ] Update data section with a README.md. 
+- [ ] Remove random LAI files from LAI section. 
