@@ -613,13 +613,12 @@ class SCAN:
                 new_df['ES_40in'] = ES_40in
                 
                 new_df = new_df[['ES_2in', 'ES_4in', 'ES_8in', 'ES_20in', 'ES_40in']]
-                
             #store it 
                 store[i] = new_df
                 
             elif i =='2113:AL:SCAN':
             #two - FSL
-                ES_2in = ((new_df['SMS-2.0in_x'] / 100)- 0.001) / (0.405 - 0.001)
+                ES_2in = ((new_df['SMS-2.0in_x'] / 100)- 0.0295) / (0.40 - 0.0295)
                 new_df['ES_2in'] = ES_2in
                 
                 
@@ -1457,6 +1456,24 @@ def ALL_FUNCS_BARPLOT(std=None):
     CORR = CORRELATE(MERGED)
     PLOT = UNSTACK_N_PLOT(CORR)
     return PLOT
+
+def CONVERT_IN_TO_CM(soil_inches = [2, 4, 8, 20, 40]):
+        """
+        FUNCTION INFO: function will convert inches to centimeters. 
+        
+        PARAMATERS: 
+            soil_inches (list) - A list of desired sensor depths in inches. 
+            Default argument is [2, 4, 8, 20, 40] for most but can be 
+            changed for desired depths. 
+            
+        OUTPUT: 
+            prints a conversion to centimeters for every inch argument in 
+            soil_inches parameter. 
+        
+
+        """
+        for i in soil_inches: 
+            print('{} inches is:'.format(i), i*2.54, 'centimeters')
 
 def high_low(x):
     if x > 0:
