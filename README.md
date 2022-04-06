@@ -35,4 +35,5 @@ comparisons?
 
 # Task List
 - [ ] Update data section with a README.md. 
-- [ ] Remove random LAI files from LAI section. 
+- [ ] Create a math section describing assumptions. 
+- [ ] Create Jupyter notebook showing land-class and ALEXI vs SCAN pearson R.
