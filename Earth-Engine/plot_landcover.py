@@ -4,16 +4,15 @@ import seaborn as sns
 import os
 
 #import data
-trees_loc = '..\data\SCANTreeCover'
+trees_loc = '../data/SCANTreeCover'
 
 #create datapath
 dp = os.path.join(os.getcwd(), trees_loc)
-
 #create filelist to store all .csvs
 filelist = []
 
 #get all the files from the trees_loc to a list:
-for root, dirs, files in os.walk(dp):
+for root, dirs, files in os.walk(trees_loc):
     for f in files:
         filelist.append(f)
 
@@ -37,9 +36,11 @@ for f in new_filelist:
     df.set_index('station', inplace=True)
     dic[f] = df
 
+
 #concat the dictionary
 df = pd.concat(dic)
 df = df.droplevel(level=0)
+print(df.columns)
 
 
 #calculate evergreen mean for 20 years
@@ -60,19 +61,14 @@ df['Mean Deciduous Cover'] = (df['Total Deciduous 2001'] + df['Total Deciduous 2
                         + df['Total Deciduous 2011'] + df['Total Deciduous 2013']
                         + df['Total Deciduous 2016'] + df['Total Deciduous 2019']) / 8
 
-df = df[['Mean Evergreen Cover', 'Mean Mixed Cover', 'Mean Deciduous Cover']]
+#get a tree cover dataset for each station
+df = df[['Mean Evergreen Cover', 'Mean Mixed Cover', 'Mean Deciduous Cover', 'Mean Tree Cover']]
 
-df.sort_values('Mean Deciduous Cover', inplace=True)
+#rename the 'Mean Tree Cover" coloumn to something more appropriate
+df.rename(columns={'Mean Tree Cover':'Total Tree Cover'}, inplace=True)
 df.reset_index(inplace=True)
 
-#create an order for the mean tree cover plot
-
-melt = pd.melt(df, id_vars='station')
-plot = sns.barplot(x='station', y='value', hue='variable', data=melt)
-plot.set_xticklabels(labels=df.index, rotation=90)
-
-# #plot mean treecover 
-# plot = sns.barplot(x=df.index, y=df['Mean Evergreen Cover'], data=df, order=order.index)
-# plot.set_xticklabels(labels=order.index, rotation=90)
-# plot.set_title('ALEXI Pixel Tree Cover 2001-2019')
-
+#save the data to the correct filepath
+dataloc = '../data'
+dataloc = os.path.join(os.getcwd(), dataloc)
+df.to_csv(dataloc + '/'+ 'tree_cover_by_station_pixel.csv')

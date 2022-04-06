@@ -21,18 +21,28 @@ import numpy as np
 import matplotlib.pyplot as plt
 import warnings
 import seaborn as sns
+from scipy.stats import pearsonr
 warnings.filterwarnings('ignore')
 
-
+#SCAN station data 
 SCAN_ALL = '../data/SCAN_DEPTHS_ALL.csv'
 SCAN_READ = pd.read_csv(SCAN_ALL)
+# SCAN_READ.replace(0, np.nan)
+# SCAN_READ.dropna(inplace=True)
 
+#GOES ESI data
 GOES_ESI_ALL = '../data/1_wk_ESI_all.csv'
 GOES_READ = pd.read_csv(GOES_ESI_ALL)
 GOES_READ['Date'] = pd.to_datetime(GOES_READ['Date'])
 GOES_READ.drop('Unnamed: 0', axis=1, inplace=True)
 GOES_READ = GOES_READ[GOES_READ['ESI'] > -9999]
 GOES_READ.dropna(inplace=True)
+
+#treecover data 
+TREE_COVER = '../data/tree_cover_by_station_pixel.csv'
+TREE_READ = pd.read_csv(TREE_COVER)
+TREE_READ.drop('Unnamed: 0', axis=1, inplace=True)
+
 class SCAN:
     '''
     SCAN CLASS - used to set Alabama SCAN sites with assumed soil 
@@ -815,7 +825,7 @@ class SCAN:
                 new_df['ES_2in'] = ES_2in
                 
                 #four - SIL
-                ES_4in = ((new_df['SMS-4.0in_x'] /  100)- 0.070) / (0.43 - 0.070)
+                ES_4in = ((new_df['SMS-4.0in_x'] /  100)- 0.070) / (0.46 - 0.070)
                 new_df['ES_4in'] = ES_4in
                 
                 #eight - SICL
@@ -835,6 +845,7 @@ class SCAN:
                 
                 # #store it 
                 store[i] = new_df
+                
                 
             elif i == '2177:AL:SCAN':
                 #two - SIC
@@ -1171,6 +1182,7 @@ def RUN_NON_CLASS_OPERATIONS(std=None):
     anom = ANOM(jul)
     
     return anom
+
 def AVG(df):
     '''
     
@@ -1388,6 +1400,107 @@ def CORRELATE(dictionary):
         store[i] = corr
         
     return store
+
+def CORRELATE_DF(dictionary):
+    '''
+    
+
+    Parameters
+    ----------
+    dictionary : Dictionary
+        Pass the dictionary returned from the CORRELATE function in
+        assumptions.py.
+
+    Returns
+    -------
+    DF: pandas dataframe
+        returns a pandas dataframe containing station and correlations with 
+        ESI. 
+
+    '''
+    
+    store = {}
+    for i in dictionary:
+        DF = pd.DataFrame(dictionary.get(i))
+        DF['station'] = i
+        DF.drop('ESI', axis=0, inplace=True)
+        DF.drop('Latitude', axis=0, inplace=True)
+        DF.drop('Longitude', axis=0, inplace=True)
+        store[i] = DF
+    
+    DF = pd.concat(store)
+    DF.index = DF.index.get_level_values(1)
+    DF.reset_index(inplace=True)
+    
+    return DF
+
+def MERGE_CORRDF_TREE_DF(TREE_READ):
+    '''
+    
+
+    Parameters
+    ----------
+    TREE_READ : Dataframe
+    
+        Tree Class Cover by ALEXI station pixel.
+        
+    Returns
+    -------
+    merged_t : Dataframe
+        returns a merged dataframe of TREE_READ with ESI vs SCAN 
+        correlated values across different depths. 
+
+    '''
+    #core functions 
+    X = RUN_NON_CLASS_OPERATIONS(std=3.5)
+    merged = MERGE(X)
+    corr = CORRELATE(merged)
+    corr_df = CORRELATE_DF(corr)
+    
+    func = lambda x: x[-4:] + ':' + 'AL' + ':' + 'SCAN'
+    TREE_READ['station'] = TREE_READ['station'].apply(func)
+    
+    merged_t = pd.merge(TREE_READ, corr_df, on='station')
+    
+    merged_t.rename(columns={'ESI':'Alexi ESI vs SCAN Pearson Coeficient Value'}, inplace=True)
+    
+
+    return merged_t
+
+def PLOT_TREE_CORR(df):
+    '''
+    
+
+    Parameters
+    ----------
+    df : Dataframe
+        Input the dataframe created by the MERGE_CORR_DF_TREE_DF() function in
+        assumptions.py.
+
+    Returns
+    -------
+    Tile plot (5 plots) of tree cover and ALEXI ESI vs SCAN Pearson Coeficient 
+    Values for all index (2, 4, 8, 20, 40) (inch) depths.
+
+    '''
+    
+    plot = sns.lmplot(x='Total Tree Cover', y='Alexi ESI vs SCAN Pearson Coeficient Value', col='index', data=df, palette='rocket')
+    
+    
+    ax_array = plot.axes.ravel()
+    
+    #getting covariance and pearson r
+    for idx, key in enumerate(df['index'].unique()):
+        new_df = df[df['index'] == key]
+        new_df.dropna(inplace=True)
+        x = new_df['Total Tree Cover'].values
+        y = new_df['Alexi ESI vs SCAN Pearson Coeficient Value'].values
+        stats_array = pearsonr(x, y)
+        print(f'{key}' + ' ' + ' R value:', stats_array[0], 'P value:', stats_array[1])
+        
+    return plot
+    
+        
 def UNSTACK_N_PLOT(dictionary):
     '''
     
