@@ -37,3 +37,4 @@ comparisons?
 - [ ] Update data section with a README.md. 
 - [ ] Create a math section describing assumptions. 
 - [ ] Create Jupyter notebook showing land-class and ALEXI vs SCAN pearson R.
+- [ ] Update data folder with script to acquire SCAN data. 
