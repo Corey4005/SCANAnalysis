@@ -130,26 +130,9 @@ class SCAN:
             self.stations
         '''
         self.df = data
-        self.new_df = self.df[['Date', 'station','SMS-2.0in', 'SMS-4.0in', 
+        self.stations = self.df[['Date', 'station','SMS-2.0in', 'SMS-4.0in', 
                                'SMS-8.0in', 'SMS-20.0in','SMS-40.0in']].copy()
-        self.stations = self.new_df[(self.new_df['station'] == '2057:AL:SCAN') | 
-                   (self.new_df['station'] == '2113:AL:SCAN') | 
-                   (self.new_df['station'] == '2055:AL:SCAN') |
-                   (self.new_df['station'] == '2180:AL:SCAN') |
-                   (self.new_df['station'] == '2114:AL:SCAN') |
-                   (self.new_df['station'] == '2056:AL:SCAN') |
-                   (self.new_df['station'] == '2115:AL:SCAN') |
-                   (self.new_df['station'] == '2053:AL:SCAN') |
-                   (self.new_df['station'] == '2078:AL:SCAN') |
-                   (self.new_df['station'] == '2177:AL:SCAN') |
-                   (self.new_df['station'] == '2173:AL:SCAN') |
-                   (self.new_df['station'] == '2178:AL:SCAN') |
-                   (self.new_df['station'] == '2175:AL:SCAN') |
-                   (self.new_df['station'] == '2174:AL:SCAN') |
-                   (self.new_df['station'] == '2182:AL:SCAN') |
-                   (self.new_df['station'] == '2179:AL:SCAN') |
-                   (self.new_df['station'] == '2181:AL:SCAN') |
-                   (self.new_df['station'] == '2176:AL:SCAN')]
+
     
     def standard_deviation(self):
         '''
@@ -211,9 +194,11 @@ class SCAN:
             new_df['z_20'] = (new_df['SMS-20.0in_x'] - new_df['SMS-20.0in_x'].mean()) / new_df['SMS-20.0in_y']
             new_df['z_40'] = (new_df['SMS-40.0in_x'] - new_df['SMS-40.0in_x'].mean()) / new_df['SMS-40.0in_y']
             
-            new_df = new_df[['station','SMS-2.0in_x', 'SMS-4.0in_x', 'SMS-8.0in_x', 'SMS-2.0in_y',
-                             'SMS-4.0in_y', 'SMS-8.0in_y', 'SMS-20.0in_y', 'SMS-40.0in_y', 
-                             'SMS-20.0in_x','SMS-40.0in_x','z_2', 'z_4', 'z_8', 'z_20', 'z_40']]
+            new_df = new_df[['station','SMS-2.0in_x', 'SMS-4.0in_x', 'SMS-8.0in_x', 
+                             'SMS-20.0in_x', 'SMS-40.0in_x', 'SMS-2.0in_y','SMS-4.0in_y', 
+                             'SMS-8.0in_y', 'SMS-20.0in_y', 'SMS-40.0in_y', 
+                             'z_2', 'z_4', 'z_8', 'z_20', 'z_40']]
+            
             new_df.reset_index()
             
             #store new df with z score. 
@@ -771,7 +756,7 @@ class SCAN:
                 new_df['ES_2in'] = ES_2in
                 
                 #four - LS
-                ES_4in = ((new_df['SMS-4.0in_x'] / 100)- 0.001) / (0.31 - 0.001)
+                ES_4in = ((new_df['SMS-4.0in_x'] / 100)- 0.057) / (0.41 - 0.057)
                 new_df['ES_4in'] = ES_4in
                 
                 #eight - SL
@@ -788,7 +773,8 @@ class SCAN:
                 
                 #create new frame 
                 new_df = new_df[['ES_2in', 'ES_4in', 'ES_8in', 'ES_20in', 'ES_40in']]
-                
+                for i in new_df:
+                    print(i, new_df[i].max(), new_df[i].min())
                 # #store it 
                 store[i] = new_df
                  
