@@ -94,7 +94,7 @@ class SCAN:
                     
                     st2053 = dictionary.get('2053:AL:SCAN').plot()
         
-        Return clean effective saturation data
+        Return clean effective saturation data:
         
             I = SCAN(data=SCAN_READ)
             dictionary = I.standard_deviation().z_score().quality_z_score(std=3.5).clean_data().Calculate_ESM()
@@ -109,7 +109,12 @@ class SCAN:
                     #get station 2057 information
                     
                     st2057 = dictionary.get('2057:AL:SCAN').plot()
-
+        
+        Plot tree cover versus ALESI ESI correlations with soil moisture:
+            
+            I = SCAN(data=SCAN_READ)
+            dictionary = I.standard_deviation().z_score().quality_z_score(std=3.5).clean_data().Calculate_ESM()
+            
     '''
 
     def __init__(self, data):
@@ -773,8 +778,7 @@ class SCAN:
                 
                 #create new frame 
                 new_df = new_df[['ES_2in', 'ES_4in', 'ES_8in', 'ES_20in', 'ES_40in']]
-                for i in new_df:
-                    print(i, new_df[i].max(), new_df[i].min())
+            
                 # #store it 
                 store[i] = new_df
                  
@@ -1333,6 +1337,7 @@ def PLOT_ALL_STNS_Z_SCORE(df):
     plt.subplots_adjust(hspace=0.5, wspace=0.15)
     plt.show()
 
+        
 def MERGE(dictionary):
     '''
     
@@ -1358,7 +1363,7 @@ def MERGE(dictionary):
         
     return store
 
-def CORRELATE(dictionary):
+def CORRELATE(dictionary, month=None):
     '''
     
 
@@ -1378,11 +1383,9 @@ def CORRELATE(dictionary):
     store = {}
     for i in dictionary:
         get = dictionary[i]
-        lat = get['Latitude'].values[0]
-        lon = get['Longitude'].values[0]
+        get.set_index('Date', inplace=True)
+        get = get[get.index.month == month]
         corr = get.corr()['ESI'].drop(['Latitude', 'Longitude'])
-        corr['Latitude'] = lat
-        corr['Longitude'] = lon
         store[i] = corr
         
     return store
@@ -1410,8 +1413,6 @@ def CORRELATE_DF(dictionary):
         DF = pd.DataFrame(dictionary.get(i))
         DF['station'] = i
         DF.drop('ESI', axis=0, inplace=True)
-        DF.drop('Latitude', axis=0, inplace=True)
-        DF.drop('Longitude', axis=0, inplace=True)
         store[i] = DF
     
     DF = pd.concat(store)
@@ -1440,8 +1441,9 @@ def MERGE_CORRDF_TREE_DF(TREE_READ):
     #core functions 
     X = RUN_NON_CLASS_OPERATIONS(std=3.5)
     merged = MERGE(X)
-    corr = CORRELATE(merged)
+    corr = CORRELATE(merged, month=10)
     corr_df = CORRELATE_DF(corr)
+    
     
     func = lambda x: x[-4:] + ':' + 'AL' + ':' + 'SCAN'
     TREE_READ['station'] = TREE_READ['station'].apply(func)
@@ -1475,6 +1477,7 @@ def PLOT_TREE_CORR(df):
     
     ax_array = plot.axes.ravel()
     
+    lis = []
     #getting covariance and pearson r
     for idx, key in enumerate(df['index'].unique()):
         new_df = df[df['index'] == key]
@@ -1482,8 +1485,19 @@ def PLOT_TREE_CORR(df):
         x = new_df['Total Tree Cover'].values
         y = new_df['Alexi ESI vs SCAN Pearson Coeficient Value'].values
         stats_array = pearsonr(x, y)
+        lis.append(stats_array)
         print(f'{key}' + ' ' + ' R value:', stats_array[0], 'P value:', stats_array[1])
-        
+
+
+    for i, key in enumerate(ax_array):
+        r = lis[i][0]
+        p = lis[i][1]
+        r_format = '{:.3f}'.format(r)
+        p_format = '{:.3f}'.format(p)
+        ax = ax_array[i]
+        ax.annotate('R: {} \nP: {}'.format(r_format, p_format), xy=(5, 3), xycoords='axes points')
+            
+            
     return plot
     
         
