@@ -18,10 +18,12 @@ soil moisture be used to guide agricultural activities in locations far from
 soil moisture sensors?
 - [Deep learning model barplot (line 13) showing accuracy of classifying soil moiture as high or low across 4 depths using ESI as input parameter](https://github.com/Corey4005/SCANAnalysis/blob/main/SCAN-scripts/SCAN%20vs%20ESI%20updates.ipynb) 
 
+4. How does land classification type relate to correlations?
+- [Plot showing correlation between % tree cover and ALEXI / SCAN correlations at month 10 at 4, 20, and 40 inch depths. There is a statistical significance of 0.05 accpeted at 40 inch depth](https://github.com/Corey4005/SCANAnalysis/blob/main/images/Statistics%20SCAN/ESI_vs_SCAN_vs_TreeCover_month_10.png)
+
 # Questions without Answers 
-1. Does Leaf Area Index affect the relationship between ESI and USDA SCAN? 
-2. How does land classification type relate to correlations? 
-3. What are the accuracy and error characteristics of these ESI-to-observation
+1. Does Leaf Area Index affect the relationship between ESI and USDA SCAN?  
+2. What are the accuracy and error characteristics of these ESI-to-observation
 comparisons?
 
 ## Useful Repository Scripts 
