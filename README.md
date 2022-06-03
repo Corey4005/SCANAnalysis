@@ -6,8 +6,6 @@ This repo will analyze several research questions and provide answers to those q
 # Research Questions with Answers
 1. How does ALEXI ESI compare to USDA SCAN site effective saturation anomalies?
 - [Linear regression analysis showing slight relationship between known soil moisture and ESI at USDA SCAN station 2053](https://github.com/Corey4005/SCANAnalysis/blob/main/notebooks/Timeseries%20Analysis%20-%20SCAN%202053.ipynb)
-- [A Plot (line 8) showing time series analysis between drought year 2006 at three soil depths corresponding to USDA SCAN site 2053 and associated ESI values](https://github.com/Corey4005/SCANAnalysis/blob/main/SCAN-scripts/SCAN%20vs%20ESI%20updates.ipynb)
-- [Barplot (line 11) showing pairwise correlations across 8 stations at 5 depths with ESI](https://github.com/Corey4005/SCANAnalysis/blob/main/SCAN-scripts/SCAN%20vs%20ESI%20updates.ipynb) [*assuming* 2017 USDA Soil Parameters (pg. 209)](https://www.nrcs.usda.gov/wps/portal/nrcs/detailfull/soils/ref/?cid=nrcs142p2_054262)
 - [Barplot (line 3) showing pairwise correlations across 18 stations at 5 depths using soil parameter tables from](https://github.com/Corey4005/SCANAnalysis/blob/main/SCAN-scripts/Statistics.ipynb) [*Carsel et. al.*](https://hwbdocuments.env.nm.gov/Los%20Alamos%20National%20Labs/General/14689.PDF?msclkid=a36b5239b03c11ec83b65afc7552cc4a)
 
 2. What are the spatial and temporal relationships between ALEXI ESI and USDA SCAN sites across Alabama? 
