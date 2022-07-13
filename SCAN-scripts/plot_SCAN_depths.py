@@ -24,9 +24,9 @@ negatives = data[data['theta_r_difference']<0]
 I = SCAN(data=SCAN_READ)
 
 #clean the data
-cleaned_df = I.standard_deviation().z_score().quality_z_score(std=3.5).clean_data().show()
-cleaned_df = cleaned_df[['station', 'SMS-2.0in_x', 'SMS-4.0in_x', 'SMS-8.0in_x', 'SMS-20.0in_x',
-                         'SMS-40.0in_x']]
+cleaned_df = I.standard_deviation_by_month().mean_soil_moisture_by_month().z_score().quality_z_score(std=3.5).clean_data().show()
+cleaned_df = cleaned_df[['station', 'SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-20.0in',
+                         'SMS-40.0in']]
 
 #create theta table to index with
 theta_tab = theta_table(cleaned_df)
@@ -47,7 +47,7 @@ def plot(df, station=None, depth=None, save_fig=False):
     depth : str, not optional
         Set the depth by calling the column. You may call 2, 4, 8, 20 and 40 inches below the surface. 
         ex:
-            depth='SMS-2.0in_x'
+            depth='SMS-2.0in'
 
     Returns
     -------
@@ -93,7 +93,7 @@ def trend_plots(df, station, depth, save_fig=False):
     depth : str, not optional
         Set the depth by calling the column. You may call 2, 4, 8, 20 and 40 inches below the surface. 
         ex:
-            depth='SMS-4.0in_x'
+            depth='SMS-4.0in'
         
     save_fig : bool, optional
         Set this to true to save images to the filepath referenced in the code below. The default is False.
@@ -138,8 +138,8 @@ def trend_plots(df, station, depth, save_fig=False):
     avg_frame['Year-Month'] = pd.to_datetime(avg_frame['Year-Month'])
 
     avg_frame.set_index('Year-Month', inplace=True)
-    avg_frame = avg_frame[['SMS-2.0in_x', 'SMS-4.0in_x', 'SMS-8.0in_x', 'SMS-20.0in_x', 
-                           'SMS-40.0in_x']]
+    avg_frame = avg_frame[['SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-20.0in', 
+                           'SMS-40.0in']]
     
     avg_frame.dropna(axis=0, inplace=True)
     length = range(0,len(avg_frame))
@@ -190,7 +190,9 @@ def plot_all_stns_trend():
 
     '''
     for i in cleaned_df['station'].unique():
+        count = 0
         print('Plotting trends for station {}'.format(i) + ' ' + 'now!')
-        for j in cleaned_df[['SMS-2.0in_x', 'SMS-4.0in_x', 'SMS-8.0in_x', 'SMS-20.0in_x', 'SMS-40.0in_x']]:
-            trend_plots(cleaned_df, i, j, save_fig=True)
+        count = count + 1
+        for j in cleaned_df[['SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-20.0in', 'SMS-40.0in']]:
+            trend_plots(cleaned_df, i, j, save_fig=False)
         
