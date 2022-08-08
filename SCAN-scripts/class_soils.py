@@ -1,149 +1,83 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Tue Jul 12 16:20:08 2022
-
-Class resample: 
-    
-    a class to resample the daily data from a dataframe and correlate the result
-    to its corresponding GOES ESI data. 
+Created on Tue Jul 26 14:33:21 2022
 
 @author: cwalker
 """
-from climatology_assumption import SCAN, SCAN_READ
-import pandas as pd
 
-class resample:
+from class_resample import resample
+import pandas as pd
+import numpy as np
+
+#just to get the data
+from datasets import SCAN_READ
+
+class soils(resample):
     
     def __init__(self, data):
-        """
-        Purpose: 
-            resample class constructor.
-
-        Parameters
-        ----------
-        data : Pandas DataFrame
-            Pass the SCAN_READ object from the SCAN class in class_SCAN.py
-
-        Returns
-        -------
-        self.scan_instance - constructed SCAN object
-        self.stdev - monthly standard deviation dataframe for each SCAN station
-        self.mean - monthly mean dataframe for each SCAN station
-        self.z_score - dataframe containing the z_score for each SCAN observation
-        self.quality - dataframe containing the quality of each SCAN observation
-        self.clean - dataframe containing the cleaned data.
-        self.resampled - dataframe of resampled data (can be empty, 1w, 2w, 3w, and 4w resamples).
-        self.soil - dataframe containing the 
         
-
-        """
-        #data from scan object
-        self.scan_instance = SCAN(data=SCAN_READ)
-        self.stdev = self.scan_instance.standard_deviation_by_month()
-        self.mean = self.scan_instance.mean_soil_moisture_by_month()
-        self.z_score = self.scan_instance.z_score()
-        self.quality = self.scan_instance.quality_z_score(std=3.5) ## 'good data' is 3.5 standard deviations
-        self.clean = self.scan_instance.clean_data().show()
-        self.resampled = pd.DataFrame()   
-        self.soil = pd.DataFrame()
+        resample.__init__(self, data)
+        
+        
     
-    ## class getters 
-    def get_stdev_df(self):
-        return self.stdev
-    
-    def get_mean_df(self):
-        return self.mean
-    
-    def get_z_score_df(self):
-        return self.z_score
-    
-    def get_quality_df(self):
-        return self.quality
-    
-    def get_clean_data(self):
-        return self.clean
-    
-    def get_resampled_df(self):
-        df = self.resampled
-        if df.empty:
-            print('Dataframe is empty. Use a resample function.')
-        else:
-            return self.resampled
+    def create_soil_columns(self, data_option=False):
+        
+        ##check to see if the data parameter is true
+        while data_option==False: 
+            print('pass a data option: 1d, 1w, 2w, 3w, 4w')
+            print('d="day", \n w="week"')
+            break
+        
+        if data_option == '1d':
+            self.append_soils(self.clean)
+            print('The 1d soils dataframe can be accessed now with class method: get_soil_df()')
+        
+        if data_option == '1w':
+            if self.one_week_resampled.empty:
+                self.one_week_resample()
+                self.__append_soils(self.one_week_resampled)
+                print('The 1w soils dataframe can be accessed now with class method: get_soil_df()')
+            else:
+                self.__append_soils(self.one_week_resampled)
+                print('The 1w soils dataframe can be accessed now with class method: get_soil_df()')
+         
+        if data_option == '2w':
+             if self.two_week_resampled.empty:
+                 self.two_week_resample()
+                 self.__append_soils(self.two_week_resampled)
+                 print('The 2w soils dataframe can be accessed now with class method: get_soil_df()')
+             else:
+                 self.__append_soils(self.two_week_resampled)
+                 print('The 2w soils dataframe can be accessed now with class method: get_soil_df()')
+                 
+        if data_option == '3w':
+             if self.three_week_resampled.empty:
+                 self.three_week_resample()
+                 self.__append_soils(self.three_week_resampled)
+                 print('The 3w soils dataframe can be accessed now with class method: get_soil_df()')
+             else:
+                 self.__append_soils(self.three_week_resampled)
+                 print('The 3w soils dataframe can be accessed now with class method: get_soil_df()')
+                 
+        if data_option == '4w':
+             if self.three_week_resampled.empty:
+                 self.three_week_resample()
+                 self.__append_soils(self.three_week_resampled)
+                 print('The 3w soils dataframe can be accessed now with class method: get_soil_df()')
+             else:
+                 self.__append_soils(self.three_week_resampled)
+                 print('The 3w soils dataframe can be accessed now with class method: get_soil_df()')
     
     def get_soil_df(self):
         df = self.soil
         if df.empty:
-            print('Dataframe is empty. Use a resample function, then the soils function.')
+            print('Dataframe is empty. Use a resample function, then the create_soil_columns() function.')
         else:
             return self.soil
         
-    ##class resamplers
-    def one_week_resample(self):
-        df = self.clean[['station', 'SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-20.0in', 'SMS-40.0in']]
-        #compute the resample for each station in the dataframe:
-        store={}
-        for i in df['station'].unique():
-            new_df = df[df['station']==i]
-            one_week_resample = new_df.resample('1w').mean()
-            one_week_resample['station'] = i
-            one_week_resample
-            store[i] = one_week_resample
-        
-        #create a newdataframe with the resample from store
-        new_df = pd.concat(store, axis=0)
-        new_df.index = new_df.index.get_level_values('Date')
-        self.resampled = new_df
-    
-    def two_week_resample(self):
-        df = self.clean[['station', 'SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-20.0in', 'SMS-40.0in']]
-        #compute the resample for each station in the dataframe:
-        store={}
-        for i in df['station'].unique():
-            new_df = df[df['station']==i]
-            one_week_resample = new_df.resample('2w').mean()
-            one_week_resample['station'] = i
-            one_week_resample
-            store[i] = one_week_resample
-        
-        #create a newdataframe with the resample from store
-        new_df = pd.concat(store, axis=0)
-        new_df.index = new_df.index.get_level_values('Date')
-        self.resampled = new_df
-    
-    def three_week_resample(self):
-        df = self.clean[['station', 'SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-20.0in', 'SMS-40.0in']]
-        #compute the resample for each station in the dataframe:
-        store={}
-        for i in df['station'].unique():
-            new_df = df[df['station']==i]
-            one_week_resample = new_df.resample('3w').mean()
-            one_week_resample['station'] = i
-            one_week_resample
-            store[i] = one_week_resample
-        
-        #create a newdataframe with the resample from store
-        new_df = pd.concat(store, axis=0)
-        new_df.index = new_df.index.get_level_values('Date')
-        self.resampled = new_df
-    
-    def four_week_resample(self):
-        df = self.clean[['station', 'SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-20.0in', 'SMS-40.0in']]
-        #compute the resample for each station in the dataframe:
-        store={}
-        for i in df['station'].unique():
-            new_df = df[df['station']==i]
-            one_week_resample = new_df.resample('4w').mean()
-            one_week_resample['station'] = i
-            one_week_resample
-            store[i] = one_week_resample
-        
-        #create a newdataframe with the resample from store
-        new_df = pd.concat(store, axis=0)
-        new_df.index = new_df.index.get_level_values('Date')
-        self.resampled = new_df
-    
-    def append_soils(self, df):
+    ########## PRIVATE HELPER METHODS
+    def __append_soils(self, df):
         dict_list = []
         for i in df['station']:
             if i == '2057:AL:SCAN':
@@ -321,20 +255,53 @@ class resample:
             
         self.soil = df
         
-    def create_soil_columns(self):
-    
-        resampled = self.resampled
-        clean = self.clean
-        if resampled.empty:
-            self.append_soils(clean)
-            print('self.soil attribute has been updated with self.clean data and appended soil columns')
-        else:
-            self.append_soils(resampled)
-            print('self.soil attribute has been updated with self.resampled data and appended soil columns')
+    def reclassify_soils(self):
+        
+        #lookup function
+        def lookup(x):
+            if (x == 'S') or (x=='LS') or (x=='SL') or (x=='FSL') or (x=='FS'):
+                return 'A' ## Sands
             
+            elif (x == 'SIL') or (x=='SI') or (x=='GRSIL') or (x=='L'):
+                return 'B' ## Silts and Loam
             
+            elif x == 'SCL':
+                return 'C' ## Sandy Clay Loam
+            
+            elif (x == 'C') or (x=='CL') or (x=='SICL') or (x=='SC') or (x=='SIC'):
+                return 'D' ## Clays
+            
+            elif (x=='BRCK'):
+                return np.nan
+            
+        ##return the new soil classifications to a list
+        two = [lookup(x) for x in self.soil['Two Soil']]
+        four = [lookup(x) for x in self.soil['Four Soil']]
+        eight = [lookup(x) for x in self.soil['Eight Soil']]
+        twenty = [lookup(x) for x in self.soil['Twenty Soil']]
+        forty = [lookup(x) for x in self.soil['Forty Soil']]
         
+        ##create the new columns
+        self.soil['Two Soil Reclassified'] = two
+        self.soil['Four Soil Reclassified'] = four
+        self.soil['Eight Soil Reclassified'] = eight
+        self.soil['Twenty Soil Reclassified'] = twenty
+        self.soil['Forty Soil Reclassified'] = forty
         
+    def soils_csv(self):
+        df = self.soil
+        store = {}
+        for i in df['station'].unique():
+            new_df = df[df['station'] == i]
+            new_df = new_df[['Two Soil', 'Four Soil',
+            'Eight Soil', 'Twenty Soil', 'Forty Soil', 'Two Soil Reclassified',
+            'Four Soil Reclassified', 'Eight Soil Reclassified',
+            'Twenty Soil Reclassified', 'Forty Soil Reclassified']]
+            soils_list = []
+            for j in new_df:
+                soil = new_df[j].unique().item()
+                soils_list.append(soil)
+            store[i] = soils_list
         
-
-
+        concat = pd.DataFrame(store)
+        concat.to_csv('soil_class.csv')

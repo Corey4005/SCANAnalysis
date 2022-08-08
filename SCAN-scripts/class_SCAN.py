@@ -15,8 +15,7 @@ contact:
 note: 
     Please site this repository if the functions are used in another analysis. 
     
-TASK LIST
-fix get_soils() to be based on resample class
+
     
 """
 import pandas as pd
@@ -46,17 +45,11 @@ class SCAN:
             z_score(...) - a method to calculate distance from mean for each data point
             quality_z_score(...) - a method to get the quality of each data point based on z_score stat
             clean_data(...) - a method to clean bad data based on the quality of the z_score
-            soil_class(...) - a method to return the soil classes dictionaries for station column
-            unpack(...) - a method to unpack the soil class column dictionaries into single columns for each depth
-        
+            
         Dataframe getters: 
             
             show(...) - a method to print the data assigned to the constructor when called. 
         
-    Non-class functions:
-        
-            theta_df(...) - function to return a comparison table of climatology theta values compared to Parish et al. 
-            get_station_soil - function to return soil properties for each depth at a station triplet of interest. 
             
     Example Codes: 
         
@@ -100,6 +93,11 @@ class SCAN:
         self.df = data
         self.stations = self.df[['Date', 'station','SMS-2.0in', 'SMS-4.0in', 
                                'SMS-8.0in', 'SMS-20.0in','SMS-40.0in']].copy()
+        self.stdev = self.standard_deviation_by_month().show()
+        self.mean = self.mean_soil_moisture_by_month().show()
+        self.z_score = self.z_score().show()
+        self.quality = self.quality_z_score(std=3.5).show() ## 'good data' is 3.5 standard deviations
+        self.clean = self.clean_data().show()
     
     def standard_deviation_by_month(self):
         '''
@@ -390,15 +388,20 @@ class SCAN:
         
         self.stations = df
         
+    ## class getters 
+    def get_stdev_df(self):
+        return self.stdev
     
+    def get_mean_df(self):
+        return self.mean
+    
+    def get_z_score_df(self):
+        return self.z_score
+    
+    def get_quality_df(self):
+        return self.quality
+    
+    def get_clean_data(self):
+        return self.clean
         
-    def show(self):
-         '''
-         Purpose: 
-             return the self.stations property in its current form. 
-             
-         returns: 
-             printed dataframe
-         '''
-         return self.stations
      
