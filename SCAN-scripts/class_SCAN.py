@@ -93,11 +93,25 @@ class SCAN:
         self.df = data
         self.stations = self.df[['Date', 'station','SMS-2.0in', 'SMS-4.0in', 
                                'SMS-8.0in', 'SMS-20.0in','SMS-40.0in']].copy()
-        self.stdev = self.standard_deviation_by_month().show()
-        self.mean = self.mean_soil_moisture_by_month().show()
-        self.z_score = self.z_score().show()
-        self.quality = self.quality_z_score(std=3.5).show() ## 'good data' is 3.5 standard deviations
-        self.clean = self.clean_data().show()
+        self.stdev = pd.DataFrame()
+        self.mean = pd.DataFrame()
+        self.merged = pd.DataFrame()
+        self.z_score_df = pd.DataFrame()
+        self.quality = pd.DataFrame() 
+        self.clean = pd.DataFrame()
+    
+    def get_stations_month(self):
+        df = self.stations
+        df['Date'] = pd.to_datetime(df['Date'])
+        
+        month_list = []
+        for i in df['Date']:
+            month = i.month
+            month_list.append(month)
+            
+        df['Month'] = month_list
+        
+        self.stations = df
     
     def standard_deviation_by_month(self):
         '''
@@ -114,7 +128,9 @@ class SCAN:
         '''
         store = {}
         df = self.stations
+        print('\n')
         for i in df['station'].unique():
+            print('Calculating Monthly Standard Deviation for', i)
             new_df = df[df['station'] == i]
             new_df.set_index('Date', inplace=True)
             new_df.index = pd.to_datetime(new_df.index)
@@ -123,15 +139,15 @@ class SCAN:
             std['station'] = i
             std.reset_index(inplace=True)
             std.rename(columns={'Date':'Month'}, inplace=True)
-            
-            new_df['Month'] = new_df.index.month
-            new_df.reset_index(inplace=True)
-            merged = new_df.merge(std, on=['station', 'Month'])
-            store[i] = merged
+            std.rename(columns={'SMS-2.0in':'SMS-2.0in_stdev', 'SMS-4.0in':'SMS-4.0in_stdev', 'SMS-8.0in':'SMS-8.0in_stdev', 
+                                'SMS-20.0in':'SMS-20.0in_stdev','SMS-40.0in':'SMS-40.0in_stdev'}, inplace=True)
+            store[i] = std
+        print('\n')
+        print('Done!')
         df = pd.concat(store, axis=0)
         df.index = df.index.get_level_values(1)
         
-        self.stations = df
+        self.stdev = df
         
     
     def mean_soil_moisture_by_month(self):
@@ -152,7 +168,9 @@ class SCAN:
         
         store = {}
         df = self.stations
+        print('\n')
         for i in df['station'].unique():
+            print('Calculating Monthly Mean for', i)
             #get the station dataframe for the unique item
             new_df = df[df['station'] == i]
             
@@ -165,46 +183,46 @@ class SCAN:
             new_df['Month'] = new_df.index.month
             
             #create a seperate soil moisture frame to calculate means on
-            soil_moisture_frame = new_df[['station','SMS-2.0in_x', 'SMS-4.0in_x', 
-                              'SMS-8.0in_x', 'SMS-20.0in_x','SMS-40.0in_x']]
+            soil_moisture_frame = new_df[['station','SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-20.0in',
+                   'SMS-40.0in']]
             
             #mean frame
             mean_frame = soil_moisture_frame.groupby(soil_moisture_frame.index.month).mean()
+            
+            #set the station column
+            mean_frame['station'] = i
             
             #reset the index
             mean_frame.reset_index(inplace=True)
             
             #merge the mean frame back into the new_df
             mean_frame.rename(columns={'Date':'Month'}, inplace=True)
-            merged = new_df.merge(mean_frame, on='Month')
-            
-            #set the index to new_df
-            merged.index = new_df.index
-            
-            
-            merged.rename(columns={'SMS-2.0in_x_x':'SMS-2.0in', 'SMS-4.0in_x_x':'SMS-4.0in',
-                                    'SMS-8.0in_x_x':'SMS-8.0in', 'SMS-20.0in_x_x':'SMS-20.0in',
-                                    'SMS-40.0in_x_x':'SMS-40.0in', 'SMS-2.0in_y':'SMS-2.0in_std', 
-                                    'SMS-4.0in_y':'SMS-4.0in_std', 'SMS-8.0in_y':'SMS-8.0in_std',
-                                    'SMS-20.0in_y':'SMS-20.0in_std', 'SMS-40.0in_y':'SMS-40.0in_std', 
-                                    'SMS-2.0in_x_y':'SMS-2.0in_month','SMS-4.0in_x_y':'SMS-4.0in_month', 
-                                    'SMS-8.0in_x_y':'SMS-8.0in_month', 'SMS-20.0in_x_y':'SMS-20.0in_month', 
-                                    'SMS-40.0in_x_y':'SMS-40.0in_month'}, 
-                          inplace=True)
-            
+            mean_frame.rename(columns={'SMS-2.0in':'SMS-2.0in_month_mean', 
+                                    'SMS-4.0in':'SMS-4.0in_month_mean', 'SMS-8.0in':'SMS-8.0in_month_mean',
+                                    'SMS-20.0in':'SMS-20.0in_month_mean', 'SMS-40.0in':'SMS-40.0in_month_mean'}, inplace=True)
+          
             #store the dataframe
-            store[i] = merged
+            store[i] = mean_frame
         
         #concat all the stored frames
+        print('\n')
+        print('Done!')
         df = pd.concat(store, axis=0)
         df.index = df.index.get_level_values(1)
         df.reset_index(inplace=True)
+        df.drop('index', axis=1, inplace=True)
+        self.mean = df
         
-        self.stations = df
         
+    def merge_station_stdev_mean(self):
+        std = self.stdev
+        mean = self.mean
+        df = self.stations
         
+        stats_merge = pd.merge(std, mean, how='left')
+        df_merge = pd.merge(df, stats_merge, how='left')
+        self.merged = df_merge
         
-    
     def z_score(self): 
         '''
         Purpose: 
@@ -219,34 +237,38 @@ class SCAN:
             Stations with soil moisture and z-score information. 
             
         '''
+        merged = self.merged
         store = {}
-        for i in self.stations['station'].unique():
-            new_df = self.stations[self.stations['station'] == i]
+        print('\n')
+        for i in merged['station'].unique():
+            print('Calculating z-scores for', i)    
+            new_df = merged[merged['station'] == i]
             new_df.set_index('Date', inplace=True)
             new_df.index = pd.to_datetime(new_df.index)
             new_df.sort_index(inplace=True)
            
             #create z-score column. 
-            new_df['z_2'] = (new_df['SMS-2.0in'] - new_df['SMS-2.0in_month']) / new_df['SMS-2.0in_std']
-            new_df['z_4'] = (new_df['SMS-4.0in'] - new_df['SMS-4.0in_month']) / new_df['SMS-4.0in_std']
-            new_df['z_8'] = (new_df['SMS-8.0in'] - new_df['SMS-8.0in_month']) / new_df['SMS-8.0in_std']
-            new_df['z_20'] = (new_df['SMS-20.0in'] - new_df['SMS-20.0in_month']) / new_df['SMS-20.0in_std']
-            new_df['z_40'] = (new_df['SMS-40.0in'] - new_df['SMS-40.0in_month']) / new_df['SMS-40.0in_std']
+            new_df['z_2'] = (new_df['SMS-2.0in'] - new_df['SMS-2.0in_month_mean']) / new_df['SMS-2.0in_stdev']
+            new_df['z_4'] = (new_df['SMS-4.0in'] - new_df['SMS-4.0in_month_mean']) / new_df['SMS-4.0in_stdev']
+            new_df['z_8'] = (new_df['SMS-8.0in'] - new_df['SMS-8.0in_month_mean']) / new_df['SMS-8.0in_stdev']
+            new_df['z_20'] = (new_df['SMS-20.0in'] - new_df['SMS-20.0in_month_mean']) / new_df['SMS-20.0in_stdev']
+            new_df['z_40'] = (new_df['SMS-40.0in'] - new_df['SMS-40.0in_month_mean']) / new_df['SMS-40.0in_stdev']
             
-            new_df = new_df[['station','SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-20.0in', 'SMS-40.0in', 'SMS-2.0in_month',
-                              'SMS-4.0in_month', 'SMS-8.0in_month', 'SMS-20.0in_month', 'SMS-40.0in_month', 
-                              'SMS-2.0in_std', 'SMS-4.0in_std', 'SMS-8.0in_std', 'SMS-20.0in_std',
-                              'SMS-40.0in_std', 'z_2', 'z_4', 'z_8', 'z_20', 'z_40']]
+            new_df = new_df[['station','SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-20.0in', 'SMS-40.0in', 'SMS-2.0in_month_mean',
+                              'SMS-4.0in_month_mean', 'SMS-8.0in_month_mean', 'SMS-20.0in_month_mean', 'SMS-40.0in_month_mean', 
+                              'SMS-2.0in_stdev', 'SMS-4.0in_stdev', 'SMS-8.0in_stdev', 'SMS-20.0in_stdev',
+                              'SMS-40.0in_stdev', 'z_2', 'z_4', 'z_8', 'z_20', 'z_40']]
             
             new_df.reset_index()
             
             #store new df with z score. 
             store[i] = new_df
-    
+        print('\n')
+        print('Done!')
         df = pd.concat(store, axis=0)
         df.index = df.index.get_level_values(1)
         
-        self.stations = df
+        self.z_score_df = df
         
     
     def quality_z_score(self, std=None):
@@ -266,7 +288,9 @@ class SCAN:
             Dataframe containing raw data, z-score and data quality columns
 
         '''
-        df = self.stations
+        print('\n')
+        print('Creating quality columns for', std, 'standard deviations now!')
+        df = self.z_score_df
         std = std
         def encoder(df, column=None):
             '''
@@ -308,10 +332,16 @@ class SCAN:
         df['40in_quality'] = encoder(df, column='z_40')
         
         
-        self.stations = df
+        self.quality = df
+        print('\n')
+        print('Done!')
         
     def clean_data(self):
-        df = self.stations
+        print('\n')
+        print('Cleaning data now!')
+        print('\n')
+        
+        df = self.quality
         #print lengths 
         two_high = len(df.loc[df['2in_quality'] == 'Too High', 'SMS-2.0in'])
         two_low = len(df.loc[df['2in_quality'] == 'Too Low', 'SMS-2.0in'])
@@ -343,7 +373,7 @@ class SCAN:
         transpose.columns=['Too High', 'Too Low']
         
         print('\n')
-        print('The data cleaned as outliers are in the following dataframe:')
+        print('The data cleaned as outliers are the following:')
         print('\n')
         print(transpose)
         
@@ -386,7 +416,7 @@ class SCAN:
         df.loc[df['SMS-20.0in']>100, 'SMS-20.0in'] = np.nan
         df.loc[df['SMS-40.0in']>100, 'SMS-40.0in'] = np.nan
         
-        self.stations = df
+        self.clean = df
         
     ## class getters 
     def get_stdev_df(self):

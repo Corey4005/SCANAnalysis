@@ -13,9 +13,6 @@ Class resample:
 from class_SCAN import SCAN
 import pandas as pd
 
-##to get the data
-from datasets import SCAN_READ
-
 class resample(SCAN):
     
     def __init__(self, data):
@@ -24,6 +21,7 @@ class resample(SCAN):
         self.two_week_resampled = pd.DataFrame()
         self.three_week_resampled = pd.DataFrame()
         self.four_week_resampled = pd.DataFrame()
+        
         SCAN.__init__(self, data)
 
     

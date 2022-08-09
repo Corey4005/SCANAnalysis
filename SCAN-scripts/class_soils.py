@@ -10,9 +10,6 @@ from class_resample import resample
 import pandas as pd
 import numpy as np
 
-#just to get the data
-from datasets import SCAN_READ
-
 class soils(resample):
     
     def __init__(self, data):
