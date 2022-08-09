@@ -23,15 +23,15 @@ class resample(SCAN):
         self.four_week_resampled = pd.DataFrame()
         
         SCAN.__init__(self, data)
-
-    
     
       
-  
     
         
     ##class resamplers
     def one_week_resample(self):
+        print('\n')
+        print('Resampling to 1w now!')
+        
         df = self.clean[['station', 'SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-20.0in', 'SMS-40.0in']]
         #compute the resample for each station in the dataframe:
         store={}
@@ -46,8 +46,13 @@ class resample(SCAN):
         new_df = pd.concat(store, axis=0)
         new_df.index = new_df.index.get_level_values('Date')
         self.one_week_resampled = new_df
-    
+        
+        print('Stored 1w resample in resample class attributes called self.one_week_resampled')
+        
     def two_week_resample(self):
+        print('\n')
+        print('Resampling to 2w now!')
+        
         df = self.clean[['station', 'SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-20.0in', 'SMS-40.0in']]
         #compute the resample for each station in the dataframe:
         store={}
@@ -62,8 +67,12 @@ class resample(SCAN):
         new_df = pd.concat(store, axis=0)
         new_df.index = new_df.index.get_level_values('Date')
         self.two_week_resampled = new_df
-    
+        print('Stored 2w resample in resample class attributes called self.two_week_resampled')
+        
     def three_week_resample(self):
+        print('\n')
+        print('Resampling to 3w now!')
+        
         df = self.clean[['station', 'SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-20.0in', 'SMS-40.0in']]
         #compute the resample for each station in the dataframe:
         store={}
@@ -78,8 +87,13 @@ class resample(SCAN):
         new_df = pd.concat(store, axis=0)
         new_df.index = new_df.index.get_level_values('Date')
         self.three_week_resampled = new_df
-    
+        
+        print('Stored 3w resample in resample class attributes called self.three_week_resampled')
+        
     def four_week_resample(self):
+        print('\n')
+        print('Resampling to 4w now!')
+        
         df = self.clean[['station', 'SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-20.0in', 'SMS-40.0in']]
         #compute the resample for each station in the dataframe:
         store={}
@@ -95,7 +109,7 @@ class resample(SCAN):
         new_df.index = new_df.index.get_level_values('Date')
         self.four_week_resampled = new_df
     
-        
+        print('Stored 4w resample in resample class attributes called self.four_week_resampled')
 
         
         

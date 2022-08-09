@@ -15,66 +15,57 @@ class soils(resample):
     def __init__(self, data):
         
         resample.__init__(self, data)
-        
-        
+        self.one_w_soil_df = pd.DataFrame()
+        self.two_w_soil_df = pd.DataFrame()
+        self.three_w_soil_df = pd.DataFrame()
+        self.four_w_soil_df = pd.DataFrame()
     
-    def create_soil_columns(self, data_option=False):
+    def create_1w_soil_columns(self, data_option='1w'): 
         
-        ##check to see if the data parameter is true
-        while data_option==False: 
-            print('pass a data option: 1d, 1w, 2w, 3w, 4w')
-            print('d="day", \n w="week"')
-            break
+        self.__append_soils(self.one_week_resampled, data_option)
+        self.__reclassify_soils(which_dataframe=data_option)
+        print('The 1w soils dataframe have been appended, reclassified and stored in the self.one_w_soil_df class_attribute!')
+        print('\n')
         
-        if data_option == '1d':
-            self.append_soils(self.clean)
-            print('The 1d soils dataframe can be accessed now with class method: get_soil_df()')
-        
-        if data_option == '1w':
-            if self.one_week_resampled.empty:
-                self.one_week_resample()
-                self.__append_soils(self.one_week_resampled)
-                print('The 1w soils dataframe can be accessed now with class method: get_soil_df()')
-            else:
-                self.__append_soils(self.one_week_resampled)
-                print('The 1w soils dataframe can be accessed now with class method: get_soil_df()')
+    def create_2w_soil_columns(self, data_option='2w'): 
          
-        if data_option == '2w':
-             if self.two_week_resampled.empty:
-                 self.two_week_resample()
-                 self.__append_soils(self.two_week_resampled)
-                 print('The 2w soils dataframe can be accessed now with class method: get_soil_df()')
-             else:
-                 self.__append_soils(self.two_week_resampled)
-                 print('The 2w soils dataframe can be accessed now with class method: get_soil_df()')
-                 
-        if data_option == '3w':
-             if self.three_week_resampled.empty:
-                 self.three_week_resample()
-                 self.__append_soils(self.three_week_resampled)
-                 print('The 3w soils dataframe can be accessed now with class method: get_soil_df()')
-             else:
-                 self.__append_soils(self.three_week_resampled)
-                 print('The 3w soils dataframe can be accessed now with class method: get_soil_df()')
-                 
-        if data_option == '4w':
-             if self.three_week_resampled.empty:
-                 self.three_week_resample()
-                 self.__append_soils(self.three_week_resampled)
-                 print('The 3w soils dataframe can be accessed now with class method: get_soil_df()')
-             else:
-                 self.__append_soils(self.three_week_resampled)
-                 print('The 3w soils dataframe can be accessed now with class method: get_soil_df()')
-    
-    def get_soil_df(self):
-        df = self.soil
+        self.__append_soils(self.two_week_resampled, data_option)
+        self.__reclassify_soils(which_dataframe=data_option)
+        print('The 2w soils dataframe have been appended, reclassified and stored in the self.two_w_soil_df class_attribute!')
+        print('\n')
+        
+    def create_3w_soil_columns(self, data_option='3w'):
+        
+        self.__append_soils(self.three_week_resampled, data_option)
+        self.__reclassify_soils(which_dataframe=data_option)
+        print('The 3w soils dataframe have been appended, reclassified and stored in the self.three_w_soil_df class_attribute!')
+        print('\n')
+        
+    def create_4w_soil_columns(self, data_option='4w'):
+        
+        self.__append_soils(self.four_week_resampled, data_option)
+        self.__reclassify_soils(which_dataframe=data_option)
+        print('The 4w soils dataframe have been appended, reclassified and stored in the self.four_w_soil_df class_attribute!')
+        print('\n')
+        
+    def get_soil_df(self, data_option=None):
+        if data_option == '1w':
+            df = self.one_w_soil_df
+        elif data_option == '2w':
+            df = self.two_w_soil_df
+        elif data_option == '3w':
+            df = self.three_w_soil_df
+        else: 
+            df = self.four_w_soil_df
+            
         if df.empty:
             print('Dataframe is empty. Use a resample function, then the create_soil_columns() function.')
         else:
-            return self.soil
+            return df
         
     ########## PRIVATE HELPER METHODS
-    def __append_soils(self, df):
+    def __append_soils(self, df, data_option):
+        print('Appending soils to', data_option, 'data!')
         dict_list = []
         for i in df['station']:
             if i == '2057:AL:SCAN':
@@ -249,11 +240,28 @@ class soils(resample):
         df['Eight Soil'] = eight_soil
         df['Twenty Soil'] = twenty_soil
         df['Forty Soil'] = forty_soil
+        
+        if data_option=='1w':
+            self.one_w_soil_df = df
+        elif data_option=='2w':
+            self.two_w_soil_df = df
+        elif data_option=='3w':
+            self.three_w_soil_df = df
+        else:
+            self.four_w_soil_df = df
             
-        self.soil = df
         
-    def reclassify_soils(self):
+    def __reclassify_soils(self, which_dataframe=None):
         
+        if which_dataframe == '1w':
+            df = self.one_w_soil_df
+        elif which_dataframe == '2w':
+            df = self.two_w_soil_df
+        elif which_dataframe == '3w':
+            df = self.three_w_soil_df
+        else: 
+            df = self.four_w_soil_df
+            
         #lookup function
         def lookup(x):
             if (x == 'S') or (x=='LS') or (x=='SL') or (x=='FSL') or (x=='FS'):
@@ -272,18 +280,27 @@ class soils(resample):
                 return np.nan
             
         ##return the new soil classifications to a list
-        two = [lookup(x) for x in self.soil['Two Soil']]
-        four = [lookup(x) for x in self.soil['Four Soil']]
-        eight = [lookup(x) for x in self.soil['Eight Soil']]
-        twenty = [lookup(x) for x in self.soil['Twenty Soil']]
-        forty = [lookup(x) for x in self.soil['Forty Soil']]
+        two = [lookup(x) for x in df['Two Soil']]
+        four = [lookup(x) for x in df['Four Soil']]
+        eight = [lookup(x) for x in df['Eight Soil']]
+        twenty = [lookup(x) for x in df['Twenty Soil']]
+        forty = [lookup(x) for x in df['Forty Soil']]
         
         ##create the new columns
-        self.soil['Two Soil Reclassified'] = two
-        self.soil['Four Soil Reclassified'] = four
-        self.soil['Eight Soil Reclassified'] = eight
-        self.soil['Twenty Soil Reclassified'] = twenty
-        self.soil['Forty Soil Reclassified'] = forty
+        df['Two Soil Reclassified'] = two
+        df['Four Soil Reclassified'] = four
+        df['Eight Soil Reclassified'] = eight
+        df['Twenty Soil Reclassified'] = twenty
+        df['Forty Soil Reclassified'] = forty
+        
+        if which_dataframe == '1w':
+            self.one_w_soil_df == df
+        elif which_dataframe == '2w':
+            self.two_w_soil_df == df
+        elif which_dataframe == '3w':
+            self.three_w_soil_df == df
+        else: 
+            self.four_w_soil_df == df
         
     def soils_csv(self):
         df = self.soil

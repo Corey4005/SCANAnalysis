@@ -100,7 +100,7 @@ class SCAN:
         self.quality = pd.DataFrame() 
         self.clean = pd.DataFrame()
     
-    def get_stations_month(self):
+    def get_month_from_dates(self):
         df = self.stations
         df['Date'] = pd.to_datetime(df['Date'])
         
