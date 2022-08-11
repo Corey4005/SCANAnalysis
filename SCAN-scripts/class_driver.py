@@ -56,11 +56,14 @@ class Driver(soils):
         depth = []
         station = []
         resample_type = []
+        num_observations = []
         
         for i in df['Two Soil Reclassified'].unique():
             new_df = df[df['Two Soil Reclassified'] == i]
             for j in new_df['station'].unique():
                 station_df = new_df[new_df['station'] == j]
+                number_observations = station_df['SMS-2.0in'].count()
+                num_observations.append(number_observations)
                 corr = station_df.corr()['ESI']['SMS-2.0in']
                 corr_list.append(corr)
                 station.append(j)
@@ -72,6 +75,8 @@ class Driver(soils):
             new_df = df[df['Four Soil Reclassified'] == i]
             for j in new_df['station'].unique():
                 station_df = new_df[new_df['station'] == j]
+                number_observations = station_df['SMS-4.0in'].count()
+                num_observations.append(number_observations)
                 corr = station_df.corr()['ESI']['SMS-4.0in']
                 corr_list.append(corr)
                 station.append(j)
@@ -83,6 +88,8 @@ class Driver(soils):
             new_df = df[df['Eight Soil Reclassified'] == i]
             for j in new_df['station'].unique():
                 station_df = new_df[new_df['station'] == j]
+                number_observations = station_df['SMS-8.0in'].count()
+                num_observations.append(number_observations)
                 corr = station_df.corr()['ESI']['SMS-8.0in']
                 corr_list.append(corr)
                 station.append(j)
@@ -94,6 +101,8 @@ class Driver(soils):
             new_df = df[df['Twenty Soil Reclassified'] == i]
             for j in new_df['station'].unique():
                 station_df = new_df[new_df['station'] == j]
+                number_observations = station_df['SMS-20.0in'].count()
+                num_observations.append(number_observations)
                 corr = station_df.corr()['ESI']['SMS-20.0in']
                 corr_list.append(corr)
                 station.append(j)
@@ -105,6 +114,8 @@ class Driver(soils):
             new_df = df[df['Forty Soil Reclassified'] == i]
             for j in new_df['station'].unique():
                 station_df = new_df[new_df['station'] == j]
+                number_observations = station_df['SMS-40.0in'].count()
+                num_observations.append(number_observations)
                 corr = station_df.corr()['ESI']['SMS-40.0in']
                 corr_list.append(corr)
                 station.append(j)
@@ -117,6 +128,7 @@ class Driver(soils):
         self.one_w_corr['soil type'] = soil_type
         self.one_w_corr['depth'] = depth
         self.one_w_corr['resample type'] = resample_type
+        self.one_w_corr['number observations'] = num_observations
 
     def corr_2w_resample_ESI_by_soils(self):
         df = self.merge2wALEXI
@@ -125,11 +137,14 @@ class Driver(soils):
         depth = []
         station = []
         resample_type = []
+        num_observations = []
         
         for i in df['Two Soil Reclassified'].unique():
             new_df = df[df['Two Soil Reclassified'] == i]
             for j in new_df['station'].unique():
                 station_df = new_df[new_df['station'] == j]
+                number_observations = station_df['SMS-2.0in'].count()
+                num_observations.append(number_observations)
                 corr = station_df.corr()['ESI']['SMS-2.0in']
                 corr_list.append(corr)
                 station.append(j)
@@ -141,6 +156,8 @@ class Driver(soils):
             new_df = df[df['Four Soil Reclassified'] == i]
             for j in new_df['station'].unique():
                 station_df = new_df[new_df['station'] == j]
+                number_observations = station_df['SMS-4.0in'].count()
+                num_observations.append(number_observations)
                 corr = station_df.corr()['ESI']['SMS-4.0in']
                 corr_list.append(corr)
                 station.append(j)
@@ -152,6 +169,8 @@ class Driver(soils):
             new_df = df[df['Eight Soil Reclassified'] == i]
             for j in new_df['station'].unique():
                 station_df = new_df[new_df['station'] == j]
+                number_observations = station_df['SMS-8.0in'].count()
+                num_observations.append(number_observations)
                 corr = station_df.corr()['ESI']['SMS-8.0in']
                 corr_list.append(corr)
                 station.append(j)
@@ -163,6 +182,8 @@ class Driver(soils):
             new_df = df[df['Twenty Soil Reclassified'] == i]
             for j in new_df['station'].unique():
                 station_df = new_df[new_df['station'] == j]
+                number_observations = station_df['SMS-20.0in'].count()
+                num_observations.append(number_observations)
                 corr = station_df.corr()['ESI']['SMS-20.0in']
                 corr_list.append(corr)
                 station.append(j)
@@ -174,6 +195,8 @@ class Driver(soils):
             new_df = df[df['Forty Soil Reclassified'] == i]
             for j in new_df['station'].unique():
                 station_df = new_df[new_df['station'] == j]
+                number_observations = station_df['SMS-40.0in'].count()
+                num_observations.append(number_observations)
                 corr = station_df.corr()['ESI']['SMS-40.0in']
                 corr_list.append(corr)
                 station.append(j)
@@ -186,6 +209,7 @@ class Driver(soils):
         self.two_w_corr['soil type'] = soil_type
         self.two_w_corr['depth'] = depth
         self.two_w_corr['resample type'] = resample_type
+        self.two_w_corr['number observations'] = num_observations
         
     def corr_3w_resample_ESI_by_soils(self):
         df = self.merge3wALEXI
@@ -194,11 +218,14 @@ class Driver(soils):
         depth = []
         station = []
         resample_type = []
+        num_observations = []
         
         for i in df['Two Soil Reclassified'].unique():
             new_df = df[df['Two Soil Reclassified'] == i]
             for j in new_df['station'].unique():
                 station_df = new_df[new_df['station'] == j]
+                number_observations = station_df['SMS-2.0in'].count()
+                num_observations.append(number_observations)
                 corr = station_df.corr()['ESI']['SMS-2.0in']
                 corr_list.append(corr)
                 station.append(j)
@@ -210,6 +237,8 @@ class Driver(soils):
             new_df = df[df['Four Soil Reclassified'] == i]
             for j in new_df['station'].unique():
                 station_df = new_df[new_df['station'] == j]
+                number_observations = station_df['SMS-4.0in'].count()
+                num_observations.append(number_observations)
                 corr = station_df.corr()['ESI']['SMS-4.0in']
                 corr_list.append(corr)
                 station.append(j)
@@ -221,6 +250,8 @@ class Driver(soils):
             new_df = df[df['Eight Soil Reclassified'] == i]
             for j in new_df['station'].unique():
                 station_df = new_df[new_df['station'] == j]
+                number_observations = station_df['SMS-8.0in'].count()
+                num_observations.append(number_observations)
                 corr = station_df.corr()['ESI']['SMS-8.0in']
                 corr_list.append(corr)
                 station.append(j)
@@ -232,6 +263,8 @@ class Driver(soils):
             new_df = df[df['Twenty Soil Reclassified'] == i]
             for j in new_df['station'].unique():
                 station_df = new_df[new_df['station'] == j]
+                number_observations = station_df['SMS-20.0in'].count()
+                num_observations.append(number_observations)
                 corr = station_df.corr()['ESI']['SMS-20.0in']
                 corr_list.append(corr)
                 station.append(j)
@@ -243,6 +276,8 @@ class Driver(soils):
             new_df = df[df['Forty Soil Reclassified'] == i]
             for j in new_df['station'].unique():
                 station_df = new_df[new_df['station'] == j]
+                number_observations = station_df['SMS-40.0in'].count()
+                num_observations.append(number_observations)
                 corr = station_df.corr()['ESI']['SMS-40.0in']
                 corr_list.append(corr)
                 station.append(j)
@@ -255,6 +290,7 @@ class Driver(soils):
         self.three_w_corr['soil type'] = soil_type
         self.three_w_corr['depth'] = depth
         self.three_w_corr['resample type'] = resample_type
+        self.three_w_corr['number observations'] = num_observations
         
     def corr_4w_resample_ESI_by_soils(self):
         df = self.merge4wALEXI
@@ -263,11 +299,14 @@ class Driver(soils):
         depth = []
         station = []
         resample_type = []
+        num_observations = []
         
         for i in df['Two Soil Reclassified'].unique():
             new_df = df[df['Two Soil Reclassified'] == i]
             for j in new_df['station'].unique():
                 station_df = new_df[new_df['station'] == j]
+                number_observations = station_df['SMS-2.0in'].count()
+                num_observations.append(number_observations)
                 corr = station_df.corr()['ESI']['SMS-2.0in']
                 corr_list.append(corr)
                 station.append(j)
@@ -279,6 +318,8 @@ class Driver(soils):
             new_df = df[df['Four Soil Reclassified'] == i]
             for j in new_df['station'].unique():
                 station_df = new_df[new_df['station'] == j]
+                number_observations = station_df['SMS-4.0in'].count()
+                num_observations.append(number_observations)
                 corr = station_df.corr()['ESI']['SMS-4.0in']
                 corr_list.append(corr)
                 station.append(j)
@@ -290,6 +331,8 @@ class Driver(soils):
             new_df = df[df['Eight Soil Reclassified'] == i]
             for j in new_df['station'].unique():
                 station_df = new_df[new_df['station'] == j]
+                number_observations = station_df['SMS-8.0in'].count()
+                num_observations.append(number_observations)
                 corr = station_df.corr()['ESI']['SMS-8.0in']
                 corr_list.append(corr)
                 station.append(j)
@@ -301,6 +344,8 @@ class Driver(soils):
             new_df = df[df['Twenty Soil Reclassified'] == i]
             for j in new_df['station'].unique():
                 station_df = new_df[new_df['station'] == j]
+                number_observations = station_df['SMS-20.0in'].count()
+                num_observations.append(number_observations)
                 corr = station_df.corr()['ESI']['SMS-20.0in']
                 corr_list.append(corr)
                 station.append(j)
@@ -312,6 +357,8 @@ class Driver(soils):
             new_df = df[df['Forty Soil Reclassified'] == i]
             for j in new_df['station'].unique():
                 station_df = new_df[new_df['station'] == j]
+                number_observations = station_df['SMS-40.0in'].count()
+                num_observations.append(number_observations)
                 corr = station_df.corr()['ESI']['SMS-40.0in']
                 corr_list.append(corr)
                 station.append(j)
@@ -324,6 +371,7 @@ class Driver(soils):
         self.four_w_corr['soil type'] = soil_type
         self.four_w_corr['depth'] = depth
         self.four_w_corr['resample type'] = resample_type
+        self.four_w_corr['number observations'] = num_observations
     
     def concatinate_corr_dataframes(self):
         df = self.one_w_corr

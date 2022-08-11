@@ -8,6 +8,7 @@ Created on Mon Aug  8 18:17:41 2022
 
 from class_driver import Driver
 from datasets import SCAN_READ
+import seaborn as sns
 
 #instantiate a driver object with data
 obj = Driver(SCAN_READ)
@@ -58,3 +59,13 @@ obj.corr_3w_resample_ESI_by_soils()
 obj.corr_4w_resample_ESI_by_soils()
 
 obj.concatinate_corr_dataframes()
+
+#plots - uncomment each one at a time
+# ax = sns.boxplot(x="resample type", y="correlation", data=obj.concatinated_corr_df)
+# ax = sns.swarmplot(x="resample type", y="correlation", data=obj.concatinated_corr_df, color=".25")
+
+# ax2 = sns.boxplot(x="soil type", y="correlation", data=obj.concatinated_corr_df)
+# ax2 = sns.swarmplot(x="soil type", y="correlation", data=obj.concatinated_corr_df, color=".25")
+
+# ax3 = sns.relplot(x="number observations", y="correlation", data=obj.concatinated_corr_df, hue="resample type")
+# ax3 = sns.relplot(x="number observations", y="correlation", data=obj.concatinated_corr_df, hue="soil type")
