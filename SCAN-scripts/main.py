@@ -9,6 +9,7 @@ Created on Mon Aug  8 18:17:41 2022
 from class_driver import Driver
 from datasets import SCAN_READ
 import seaborn as sns
+import matplotlib.pyplot as plt
 
 #instantiate a driver object with data
 obj = Driver(SCAN_READ)
@@ -34,13 +35,18 @@ obj.quality_z_score(std=3.5)
 #clean the data and remove data that is outside the 3.5 standard deviation limit
 obj.clean_data()
 
-#resample the data and return 1w, 2w, 3w, 4w dataframes and store in resample class
-obj.one_week_resample()
-obj.two_week_resample()
-obj.three_week_resample()
-obj.four_week_resample()
+#resample the SMS data and return 1w, 2w, 3w, 4w dataframes and store in resample class
+obj.soil_moisture_one_week_resample()
+obj.soil_moisture_two_week_resample()
+obj.soil_moisture_three_week_resample()
+obj.soil_moisture_four_week_resample()
 
-#append the soils 
+#resample the ALEXI data to 2w, 3w, and 4w and store in resample class
+obj.ALEXI_two_week_resample()
+obj.ALEXI_three_week_resample()
+obj.ALEXI_four_week_resample()
+
+#append the soils to SMS dataframes
 obj.create_1w_soil_columns()
 obj.create_2w_soil_columns()
 obj.create_3w_soil_columns()
@@ -58,8 +64,54 @@ obj.corr_2w_resample_ESI_by_soils()
 obj.corr_3w_resample_ESI_by_soils()
 obj.corr_4w_resample_ESI_by_soils()
 
+#concatinate the correlation dataframes into one.
 obj.concatinate_corr_dataframes()
 
+#all station plots without soil type hue
+# obj.plot_stations_corr_by_depth(depth='SMS-2.0in', resample_type='1w')
+# obj.plot_stations_corr_by_depth(depth='SMS-4.0in', resample_type='1w')
+# obj.plot_stations_corr_by_depth(depth='SMS-8.0in', resample_type='1w')
+# obj.plot_stations_corr_by_depth(depth='SMS-20.0in', resample_type='1w')
+# obj.plot_stations_corr_by_depth(depth='SMS-40.0in', resample_type='1w')
+# obj.plot_stations_corr_by_depth(depth='SMS-2.0in', resample_type='2w')
+# obj.plot_stations_corr_by_depth(depth='SMS-4.0in', resample_type='2w')
+# obj.plot_stations_corr_by_depth(depth='SMS-8.0in', resample_type='2w')
+# obj.plot_stations_corr_by_depth(depth='SMS-20.0in', resample_type='2w')
+# obj.plot_stations_corr_by_depth(depth='SMS-40.0in', resample_type='2w')
+# obj.plot_stations_corr_by_depth(depth='SMS-2.0in', resample_type='3w')
+# obj.plot_stations_corr_by_depth(depth='SMS-4.0in', resample_type='3w')
+# obj.plot_stations_corr_by_depth(depth='SMS-8.0in', resample_type='3w')
+# obj.plot_stations_corr_by_depth(depth='SMS-20.0in', resample_type='3w')
+# obj.plot_stations_corr_by_depth(depth='SMS-40.0in', resample_type='3w')
+# obj.plot_stations_corr_by_depth(depth='SMS-2.0in', resample_type='4w')
+# obj.plot_stations_corr_by_depth(depth='SMS-4.0in', resample_type='4w')
+# obj.plot_stations_corr_by_depth(depth='SMS-8.0in', resample_type='4w')
+# obj.plot_stations_corr_by_depth(depth='SMS-20.0in', resample_type='4w')
+# obj.plot_stations_corr_by_depth(depth='SMS-40.0in', resample_type='4w')
+
+#plot all stations with soil type hue
+# obj.plot_stations_corr_by_depth(depth='SMS-2.0in', resample_type='1w', hue=True)
+# obj.plot_stations_corr_by_depth(depth='SMS-4.0in', resample_type='1w', hue=True)
+# obj.plot_stations_corr_by_depth(depth='SMS-8.0in', resample_type='1w', hue=True)
+# obj.plot_stations_corr_by_depth(depth='SMS-20.0in', resample_type='1w', hue=True)
+# obj.plot_stations_corr_by_depth(depth='SMS-40.0in', resample_type='1w', hue=True)
+# obj.plot_stations_corr_by_depth(depth='SMS-2.0in', resample_type='2w', hue=True)
+# obj.plot_stations_corr_by_depth(depth='SMS-4.0in', resample_type='2w', hue=True)
+# obj.plot_stations_corr_by_depth(depth='SMS-8.0in', resample_type='2w', hue=True)
+# obj.plot_stations_corr_by_depth(depth='SMS-20.0in', resample_type='2w', hue=True)
+# obj.plot_stations_corr_by_depth(depth='SMS-40.0in', resample_type='2w', hue=True)
+# obj.plot_stations_corr_by_depth(depth='SMS-2.0in', resample_type='3w', hue=True)
+# obj.plot_stations_corr_by_depth(depth='SMS-4.0in', resample_type='3w', hue=True)
+# obj.plot_stations_corr_by_depth(depth='SMS-8.0in', resample_type='3w', hue=True)
+# obj.plot_stations_corr_by_depth(depth='SMS-20.0in', resample_type='3w', hue=True)
+# obj.plot_stations_corr_by_depth(depth='SMS-40.0in', resample_type='3w', hue=True)
+# obj.plot_stations_corr_by_depth(depth='SMS-2.0in', resample_type='4w', hue=True)
+# obj.plot_stations_corr_by_depth(depth='SMS-4.0in', resample_type='4w', hue=True)
+# obj.plot_stations_corr_by_depth(depth='SMS-8.0in', resample_type='4w', hue=True)
+# obj.plot_stations_corr_by_depth(depth='SMS-20.0in', resample_type='4w', hue=True)
+# obj.plot_stations_corr_by_depth(depth='SMS-40.0in', resample_type='4w', hue=True)
+
+#
 #plots - uncomment each one at a time
 # ax = sns.boxplot(x="resample type", y="correlation", data=obj.concatinated_corr_df)
 # ax = sns.swarmplot(x="resample type", y="correlation", data=obj.concatinated_corr_df, color=".25")

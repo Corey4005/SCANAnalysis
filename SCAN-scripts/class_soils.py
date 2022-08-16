@@ -22,28 +22,28 @@ class soils(resample):
     
     def create_1w_soil_columns(self, data_option='1w'): 
         
-        self.__append_soils(self.one_week_resampled, data_option)
+        self.__append_soils(self.sms_one_week_resampled, data_option)
         self.__reclassify_soils(which_dataframe=data_option)
         print('The 1w soils dataframe have been appended, reclassified and stored in the self.one_w_soil_df class_attribute!')
         print('\n')
         
     def create_2w_soil_columns(self, data_option='2w'): 
          
-        self.__append_soils(self.two_week_resampled, data_option)
+        self.__append_soils(self.sms_two_week_resampled, data_option)
         self.__reclassify_soils(which_dataframe=data_option)
         print('The 2w soils dataframe have been appended, reclassified and stored in the self.two_w_soil_df class_attribute!')
         print('\n')
         
     def create_3w_soil_columns(self, data_option='3w'):
         
-        self.__append_soils(self.three_week_resampled, data_option)
+        self.__append_soils(self.sms_three_week_resampled, data_option)
         self.__reclassify_soils(which_dataframe=data_option)
         print('The 3w soils dataframe have been appended, reclassified and stored in the self.three_w_soil_df class_attribute!')
         print('\n')
         
     def create_4w_soil_columns(self, data_option='4w'):
         
-        self.__append_soils(self.four_week_resampled, data_option)
+        self.__append_soils(self.sms_four_week_resampled, data_option)
         self.__reclassify_soils(which_dataframe=data_option)
         print('The 4w soils dataframe have been appended, reclassified and stored in the self.four_w_soil_df class_attribute!')
         print('\n')
