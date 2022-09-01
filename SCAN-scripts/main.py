@@ -8,8 +8,7 @@ Created on Mon Aug  8 18:17:41 2022
 
 from class_driver import Driver
 from datasets import SCAN_READ
-import seaborn as sns
-import matplotlib.pyplot as plt
+import numpy as np
 
 #instantiate a driver object with data
 obj = Driver(SCAN_READ)
@@ -111,10 +110,30 @@ obj.concatinate_corr_dataframes()
 # obj.plot_stations_corr_by_depth(depth='SMS-20.0in', resample_type='4w', hue=True)
 # obj.plot_stations_corr_by_depth(depth='SMS-40.0in', resample_type='4w', hue=True)
 
-#
 #plots - uncomment each one at a time
-# ax = sns.boxplot(x="resample type", y="correlation", data=obj.concatinated_corr_df)
-# ax = sns.swarmplot(x="resample type", y="correlation", data=obj.concatinated_corr_df, color=".25")
+obj.create_time_series_box_plot_df()
+
+# #create a list of resamples, soils and depths and plot each frame
+# resample_list = ['1w', '2w', '3w', '4w']
+# soils = ['A', 'B', 'C', 'D']
+# depths = ['SMS-2.0in', 'SMS-4.0in', 'SMS-8.0in', 'SMS-20.0in', 'SMS-40.0in']
+# for i, r in enumerate(resample_list):
+#     resampletype = r
+#     for j, s in enumerate(soils):
+#         soiltype = s
+#         for x, d in enumerate(depths):
+#             depth = d
+#             if obj.time_series_box_plot_df[(obj.time_series_box_plot_df['resample list']==resampletype) & (obj.time_series_box_plot_df['soil'] == soiltype) & (obj.time_series_box_plot_df['depth'] == depth)].empty:
+#                 print('Cannot plot' + ' ' + resampletype, soiltype, depth + 'because dataframe is empty')
+#             else:
+#                 print('Plotting', resampletype, soiltype, depth)
+#                 obj.plot_time_series_boxplot(resample_input=resampletype, soil_type=soiltype, depth_input=depth)
+
+obj.plot_sig_box_plot_stations_by_month(resample_input='1w', depth_input='SMS-4.0in')
+obj.station_signifigance_plots_lat_lon_month(resample_input='1w', depth_input='SMS-4.0in')
+# obj.plot_time_series_boxplot(resample_input='2w')
+# obj.plot_time_series_boxplot(resample_input='3w')
+# obj.plot_time_series_boxplot(resample_input='4w')
 
 # ax2 = sns.boxplot(x="soil type", y="correlation", data=obj.concatinated_corr_df)
 # ax2 = sns.swarmplot(x="soil type", y="correlation", data=obj.concatinated_corr_df, color=".25")

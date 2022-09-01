@@ -20,8 +20,11 @@ import pandas as pd
 #SCAN station data 
 SCAN_ALL = '../data/SCAN_DEPTHS_ALL.csv'
 SCAN_READ = pd.read_csv(SCAN_ALL)
-# SCAN_READ.replace(0, np.nan)
-# SCAN_READ.dropna(inplace=True)
+
+#SCAN METADATA
+SCAN_META = '../data/SCAN_METADATA.csv'
+SCAN_META_READ = pd.read_csv(SCAN_META)
+SCAN_META_READ.rename(columns={'stationTriplet':'station'}, inplace=True)
 
 #GOES ESI data
 GOES_ESI_ALL = '../data/1_wk_ESI_all.csv'
@@ -35,3 +38,5 @@ GOES_READ.dropna(inplace=True)
 TREE_COVER = '../data/tree_cover_by_station_pixel.csv'
 TREE_READ = pd.read_csv(TREE_COVER)
 TREE_READ.drop('Unnamed: 0', axis=1, inplace=True)
+station_coverter = lambda x: x[-4:] + ':'+ 'AL'+':'+x[0:4]
+TREE_READ['station'] = TREE_READ['station'].apply(station_coverter)
