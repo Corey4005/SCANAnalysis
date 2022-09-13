@@ -8,15 +8,7 @@ This repo will analyze several research questions and provide answers to those q
 - [Linear regression analysis showing slight relationship between known soil moisture and ESI at USDA SCAN station 2053](https://github.com/Corey4005/SCANAnalysis/blob/main/notebooks/Timeseries%20Analysis%20-%20SCAN%202053.ipynb)
 - [Barplot (line 3) showing pairwise correlations across 18 stations at 5 depths using soil parameter tables from](https://github.com/Corey4005/SCANAnalysis/blob/main/SCAN-scripts/Statistics.ipynb) [*Carsel et. al.*](https://hwbdocuments.env.nm.gov/Los%20Alamos%20National%20Labs/General/14689.PDF?msclkid=a36b5239b03c11ec83b65afc7552cc4a)
 
-2. What are the spatial and temporal relationships between ALEXI ESI and USDA SCAN sites across Alabama? 
-- [Timeseries plots (lines 9 / 10) showing seasonal variablity in correlations between soil moisture anomalies and ALEXI ESI](https://github.com/Corey4005/SCANAnalysis/blob/main/SCAN-scripts/SCAN%20vs%20ESI%20updates.ipynb)
-
-3. Can the derived statistical relationships between ALEXI ESI and observed
-soil moisture be used to guide agricultural activities in locations far from
-soil moisture sensors?
-- [Deep learning model barplot (line 13) showing accuracy of classifying soil moiture as high or low across 4 depths using ESI as input parameter](https://github.com/Corey4005/SCANAnalysis/blob/main/SCAN-scripts/SCAN%20vs%20ESI%20updates.ipynb) 
-
-4. How does land classification type relate to correlations?
+2. How does land classification type relate to correlations?
 - [Plot showing correlation between % tree cover and ALEXI / SCAN correlations at month 10 at 4, 20, and 40 inch depths. There is a statistical significance of 0.05 accpeted at 40 inch depth](https://github.com/Corey4005/SCANAnalysis/blob/main/images/Statistics%20SCAN/ESI_vs_SCAN_vs_TreeCover_month_10.png)
 
 # Questions without Answers 
