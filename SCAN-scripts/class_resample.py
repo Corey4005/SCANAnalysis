@@ -23,6 +23,7 @@ class resample(SCAN):
 
     def __init__(self, data):
         
+        SCAN.__init__(self, data)
         self.sms_one_week_resampled = pd.DataFrame() #dataframe containing the one week resampled soil moisture data (rolling mean)
         self.sms_two_week_resampled = pd.DataFrame() #dataframe containing the two week resampled soil moisture data (rolling mean)
         self.sms_three_week_resampled = pd.DataFrame() #dataframe containing the three week resampled soil moisture data (rolling mean)
@@ -31,11 +32,6 @@ class resample(SCAN):
         self.ALEXI_two_week_resampled = pd.DataFrame() #dataframe containing the two week resampled ALEXI data (using resample function)
         self.ALEXI_three_week_resampled = pd.DataFrame() #dataframe containing the three week resampled ALEXI data (using resample function)
         self.ALEXI_four_week_resampled = pd.DataFrame() #dataframe containing the four week resampled ALEXI data (using resample function)
-        
-        SCAN.__init__(self, data)
-    
-      
-    
         
     ##class resamplers
     def soil_moisture_one_week_resample(self):

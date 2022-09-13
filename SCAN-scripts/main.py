@@ -8,7 +8,7 @@ Created on Mon Aug  8 18:17:41 2022
 
 from class_driver import Driver
 from datasets import SCAN_READ
-import numpy as np
+
 
 #instantiate a driver object with data
 obj = Driver(SCAN_READ)
@@ -112,7 +112,7 @@ obj.concatinate_corr_dataframes()
 
 #plots - uncomment each one at a time
 obj.create_time_series_box_plot_df()
-
+# obj.station_signifigance_plots_lat_lon_month(resample_input='1w', depth_input='SMS-4.0in')
 # #create a list of resamples, soils and depths and plot each frame
 # resample_list = ['1w', '2w', '3w', '4w']
 # soils = ['A', 'B', 'C', 'D']
@@ -129,8 +129,8 @@ obj.create_time_series_box_plot_df()
 #                 print('Plotting', resampletype, soiltype, depth)
 #                 obj.plot_time_series_boxplot(resample_input=resampletype, soil_type=soiltype, depth_input=depth)
 
-obj.plot_sig_box_plot_stations_by_month(resample_input='1w', depth_input='SMS-4.0in')
-obj.station_signifigance_plots_lat_lon_month(resample_input='1w', depth_input='SMS-4.0in')
+obj.plot_sig_box_plot_stations_by_month(resample_input='4w', depth_input='SMS-4.0in')
+# obj.station_signifigance_plots_lat_lon_month(resample_input='1w', depth_input='SMS-4.0in')
 # obj.plot_time_series_boxplot(resample_input='2w')
 # obj.plot_time_series_boxplot(resample_input='3w')
 # obj.plot_time_series_boxplot(resample_input='4w')
