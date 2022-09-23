@@ -15,7 +15,6 @@ from datasets import GOES_READ
 import pandas as pd
 
 dfgoes = GOES_READ[['StationTriplet', 'Date', 'ESI']]
-dfgoes.set_index('Date', inplace=True)
 dfgoes.rename(columns={'StationTriplet':'station'}, inplace=True)
 
 
@@ -119,10 +118,12 @@ class resample(SCAN):
         print('\n')
         print('Resampling ALEXI data to two weeks now!')
         df = self.ALEXI
-        
+        print(df)
+       
         store = {}
         for i in df['station'].unique():
             new_df = df[df['station']==i]
+            new_df.set_index('Date', inplace=True)
             two_week_resample = new_df.resample('2w').mean()
             two_week_resample['station'] = i
             store[i] = two_week_resample
@@ -138,10 +139,13 @@ class resample(SCAN):
         print('\n')
         print('Resampling ALEXI data to three weeks now!')
         df = self.ALEXI
+        print(df)
+        
         
         store = {}
         for i in df['station'].unique():
             new_df = df[df['station']==i]
+            new_df.set_index('Date', inplace=True)
             three_week_resample = new_df.resample('3w').mean()
             three_week_resample['station'] = i
             store[i] = three_week_resample
@@ -158,11 +162,12 @@ class resample(SCAN):
         print('\n')
         print('Resampling ALEXI data to four weeks now!')
         df = self.ALEXI
-        
+     
         store = {}
         for i in df['station'].unique():
             new_df = df[df['station']==i]
-            four_week_resample = new_df.resample('3w').mean()
+            new_df.set_index('Date', inplace=True)
+            four_week_resample = new_df.resample('4w').mean()
             four_week_resample['station'] = i
             store[i] = four_week_resample
 
