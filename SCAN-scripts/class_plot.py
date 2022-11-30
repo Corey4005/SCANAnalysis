@@ -10,7 +10,6 @@ from class_correlate import Correlate
 from scipy import stats
 import matplotlib.pyplot as plt
 import seaborn as sns
-from datasets import TREE_READ
 from datasets import SCAN_META_READ
 import pandas as pd
 import cartopy.crs as ccrs
@@ -18,11 +17,13 @@ import cartopy.feature as cfeature
 import matplotlib.ticker as mticker
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import numpy as np
+import datetime
+
 
 class Plot(Correlate):
 
   def __init__(self, data):
-        
+      
       Correlate.__init__(self, data)
       self.stations_corr_by_month = pd.DataFrame()
       self.time_series_box_plot_df = pd.DataFrame()
@@ -219,7 +220,6 @@ class Plot(Correlate):
       
       fig = plt.figure()
       ax = fig.add_axes([0, 0, 1, 1], projection=ccrs.PlateCarree())
-
       ax.set_extent([final_df['Longitude'].min()-0.5, final_df['Longitude'].max()+0.5, final_df['Latitude'].min()-0.5, final_df['Latitude'].max()+0.5], 
                     ccrs.PlateCarree())
       
@@ -255,52 +255,7 @@ class Plot(Correlate):
       plt.show()
       self.station_sig_by_month = final_df
       
-      
-  def tree_cover_comparison_plots(self, resample_input=None, depth_input=None):
-      sig_df = self.time_series_box_plot_df[(self.time_series_box_plot_df['signifigance']<0.05) & (self.time_series_box_plot_df['resample list']==resample_input) & (self.time_series_box_plot_df['depth']==depth_input)]
-      
-      trees_df = sig_df.merge(TREE_READ, on='station')
-      final_df = trees_df.merge(SCAN_META_READ, on='station')
-      
-      self.tree_cover_sig_df = final_df
-      
-       #broken code 
-      # elif (resample_input!=None) and (depth_input==None): 
-         
-      #     sig_df = self.time_series_box_plot_df[(self.time_series_box_plot_df['signifigance']<0.05) & (self.time_series_box_plot_df['resample list']==resample_input)]
-          
-      #     for i in sig_df['depth'].unique():
-      #         df = sig_df[sig_df['depth'] == i]
-              
-      #         for m in df['Month'].unique():
-      #             month_list.append(m)
-      #             new_df = sig_df[sig_df['Month']==m]
-      #             obs_sum = new_df['observations'].sum()
-      #             observation_sums.append(obs_sum)
-      #             depth_list.append(i)
-          
-      #     count_list = pd.DataFrame()
-      #     count_list['month'] = month_list
-      #     count_list['observations'] = observation_sums
-      #     count_list['depths'] = depth_list
-      #     count_list.set_index('month', inplace=True)
-      #     count_list.sort_index(inplace=True)
-          
-      #     plot_list = {0:'SMS-2.0in', 1:'SMS-4.0in', 2:'SMS-8.0in', 3:'SMS-20.0in', 4:'SMS-40.0in'}
-      #     fig, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1, figsize=(15,10))
-      #     count = 0
-      #     x_ticks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-      #     for j, ax in enumerate(fig.axes):
-      #         df = count_list[count_list['depths']==plot_list.get(count)]
-      #         count+=1
-      #         ax = sns.lineplot(x='month', y='observations', data=df, color=depth_input_color.get(i))
-      #         plt.xticks(ticks=x_ticks)
-          # ax.set_title(str(resample_input) + ' ' + str(depth_input)+ ' ' + 'Observations Contributing to <0.05 p-value Correlations')
-          # plt.xlabel('Month')
-          # plt.ylabel('Count')
-          
-      #broken code ^
-      
+
       
   #helper function
   def __plot_corr_by_month(self, depth_input, resample_input, hue):

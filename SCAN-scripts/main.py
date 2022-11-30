@@ -66,9 +66,11 @@ obj.corr_4w_resample_ESI_by_soils()
 #concatinate the correlation dataframes into one.
 obj.concatinate_corr_dataframes()
 
+obj.plot_stations_corr_by_depth('SMS-4.0in')
+
 #plots - uncomment each one at a time
 obj.create_time_series_box_plot_df()
 
 #plot signifigant station counts by month 
-obj.plot_sig_box_plot_stations_by_month(resample_input='1w', depth_input='SMS-4.0in')
+obj.plot_time_series_boxplot(resample_input='1w', soil_type='C', depth_input='SMS-4.0in')
 
