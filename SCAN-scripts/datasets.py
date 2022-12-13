@@ -43,6 +43,10 @@ TREE_READ.drop('Unnamed: 0', axis=1, inplace=True)
 station_coverter = lambda x: x[-4:] + ':'+ 'AL'+':'+x[0:4]
 TREE_READ['station'] = TREE_READ['station'].apply(station_coverter)
 
+#landcover data
+LANDCOVER = '../data/landcover_data_by_scansite.csv'
+LANDCOVER_READ = pd.read_csv(LANDCOVER)
+
 #data for the sm anomalies vs ESI bin
 SM_ANOM_ESI_BIN = '../data/Mean_SM_anomalies_for_ESI_bin.csv'
 SM_ANOM_ESI_BIN_READ = pd.read_csv(SM_ANOM_ESI_BIN)
