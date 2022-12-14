@@ -36,6 +36,10 @@ GOES_READ.drop('Unnamed: 0', axis=1, inplace=True)
 GOES_READ = GOES_READ[GOES_READ['ESI'] > -9999]
 GOES_READ.dropna(inplace=True)
 
+#hydrologic soils by depth 
+SOILS = '../data/soil_class.csv'
+SOILS_READ = pd.read_csv(SOILS)
+
 #treecover data 
 TREE_COVER = '../data/tree_cover_by_station_pixel.csv'
 TREE_READ = pd.read_csv(TREE_COVER)
