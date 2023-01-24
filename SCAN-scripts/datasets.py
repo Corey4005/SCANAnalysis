@@ -56,6 +56,15 @@ SM_ANOM_ESI_BIN = '../data/Mean_SM_anomalies_for_ESI_bin.csv'
 SM_ANOM_ESI_BIN_READ = pd.read_csv(SM_ANOM_ESI_BIN)
 SM_ANOM_ESI_BIN_READ.drop('Unnamed: 0', axis=1, inplace=True)
 
+#data for sm station vs esi
+SM_VS_ESI_ANOM = '../data/sm_anomaly_by_station_and_esi_all_years.csv'
+SM_VS_ESI_ANOM_READ = pd.read_csv(SM_VS_ESI_ANOM)
+
+#data for drought monitor
+DROUGHT = '../data/drought_category_by_scan_site.csv'
+DROUGHT_READ = pd.read_csv(DROUGHT)
+DROUGHT_READ['date']=pd.to_datetime(DROUGHT_READ['date'], format='%Y%m%d')
+
 #data for average stdev and mean for each stn
 SM_MEAN_STD = '../data/ALL_STN_Means_STDevs.csv'
 SM_MEAN_STD_READ = pd.read_csv(SM_MEAN_STD)
