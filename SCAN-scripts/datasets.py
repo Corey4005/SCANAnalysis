@@ -19,6 +19,7 @@ datasets:
 import pandas as pd
 import os
 import glob
+
 #SCAN station data 
 SCAN_ALL = '../data/SCAN_DEPTHS_ALL.csv'
 SCAN_READ = pd.read_csv(SCAN_ALL)
@@ -27,6 +28,11 @@ SCAN_READ = pd.read_csv(SCAN_ALL)
 SCAN_META = '../data/SCAN_METADATA.csv'
 SCAN_META_READ = pd.read_csv(SCAN_META)
 SCAN_META_READ.rename(columns={'stationTriplet':'station'}, inplace=True)
+
+#SCAN signifigance data 
+SCAN_SIG = '../data/signifigance_df.csv'
+SCAN_SIG_READ = pd.read_csv(SCAN_SIG)
+SCAN_SIG_READ = SCAN_SIG_READ[SCAN_SIG_READ['resample list']=='1w']
 
 #GOES ESI data
 GOES_ESI_ALL = '../data/1_wk_ESI_all.csv'
