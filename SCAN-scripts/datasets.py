@@ -20,6 +20,10 @@ import pandas as pd
 import os
 import glob
 
+#ALEXI ESI data for all stations
+ALEXI_ESI = '../data/ALEXI_ALL_DATA_ALL_STATIONS.csv'
+ALEXI_ESI_READ = pd.read_csv(ALEXI_ESI)
+
 #SCAN station data 
 SCAN_ALL = '../data/SCAN_DEPTHS_ALL.csv'
 SCAN_READ = pd.read_csv(SCAN_ALL)
