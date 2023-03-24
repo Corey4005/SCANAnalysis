@@ -110,3 +110,7 @@ for file in glob.glob(NLCD_geotiffs_path+"*.tiff"):
         pass
     else:
         NLCD_list.append(file)
+
+#Land Cover Data for Each Station
+LANDPATH = '../data/DominantLandByStation.csv'
+LANDREAD = pd.read_csv(LANDPATH)
