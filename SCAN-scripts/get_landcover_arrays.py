@@ -12,6 +12,7 @@ This is a module to create a dataframe with NLCD land cover data for each SCAN s
 
 #imports 
 from datasets import scan_shape_files_list
+print()
 from datasets import NLCD_list
 from datasets import SCAN_META_READ
 import matplotlib.pyplot as plt
@@ -117,6 +118,9 @@ def get_array(nlcd, shape, plot=False):
         ax.scatter(x, y, color='black', marker=".", s=800, label=station_id)
         
         ax.legend()
+        ax.set_title('Example of Land Cover Class Diversity at {}'.format(station_id), fontsize=15)
+        ax.yaxis.set_tick_params(labelsize=15)
+        ax.xaxis.set_tick_params(labelsize=15)
         # print(shape_name, point)
     return new_array
 
@@ -149,18 +153,24 @@ def reclassify(array):
 
 #main ------------------------------------------------------------------------
 
-#create a dictionary to hold arrays of landcover for each station
-landCoverDict = {}
+# if you want to get all arrays do this section:
+# #create a dictionary to hold arrays of landcover for each station
+# landCoverDict = {}
 
-for i in range(len(NLCD_list)):
-    #get the year and the filepath
-    year = NLCD_list[i][41:45]
-    NLCD_file_path = NLCD_list[i]
+# for i in range(len(NLCD_list)):
+#     #get the year and the filepath
+#     year = NLCD_list[i][41:45]
+#     NLCD_file_path = NLCD_list[i]
     
-    for j in range(len(scan_shape_files_list)):
-        #get the shape name, read the shapefile, reproject it to NLCD, and get the landcover array
-        shape_name = scan_shape_files_list[j][-12:-4]
-        shapepath = scan_shape_files_list[j]
-        array = get_array(NLCD_file_path, shapepath, plot=False)
-        landCoverDict[year+shape_name]=array
-        print("Storing NLCD {} for {} in landCoverDict!".format(year, shape_name))
+#     for j in range(len(scan_shape_files_list)):
+#         #get the shape name, read the shapefile, reproject it to NLCD, and get the landcover array
+#         shape_name = scan_shape_files_list[j][-12:-4]
+#         shapepath = scan_shape_files_list[j]
+#         array = get_array(NLCD_file_path, shapepath, plot=False)
+#         landCoverDict[year+shape_name]=array
+#         print("Storing NLCD {} for {} in landCoverDict!".format(year, shape_name))
+
+#plotting one 
+shape_name = scan_shape_files_list[7][-12:-4] #2115
+shapepath = scan_shape_files_list[7]
+array = get_array(NLCD_list[0], shapepath, plot=True)
