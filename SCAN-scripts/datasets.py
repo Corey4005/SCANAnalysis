@@ -99,18 +99,6 @@ scan_shape_files_list = []
 for file in glob.glob(scan_shape_path+"*.shp"):
     scan_shape_files_list.append(file)
 
-#NLCD data
-# NLCD_geotiffs_path = '/rhome/cwalker/Downloads/LAND_COVER/'
-# NLCD_geotiffs_path = os.path.join(here, NLCD_geotiffs_path)
-# NLCD_list = []
-# for file in glob.glob(NLCD_geotiffs_path+"*.tiff"):
-#     if file == '/rhome/cwalker/Downloads/LAND_COVER/NLCD_2001_2019_change_index_L48_20210604_H2RcUt3qX2gydjAF1lPp.tiff':
-#         pass
-#     elif "_masked" in file:
-#         pass
-#     else:
-#         NLCD_list.append(file)
-
 #NLCD data for windows machine (uncomment here)
 NLCD_geotiffs_path = r'C:/Users/Corey4005/Desktop/landcover2019/'
 NLCD_geotiffs_path = os.path.join(here, NLCD_geotiffs_path)

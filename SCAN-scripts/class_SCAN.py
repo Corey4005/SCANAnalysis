@@ -135,7 +135,7 @@ class SCAN:
             new_df.set_index('Date', inplace=True)
             new_df.index = pd.to_datetime(new_df.index)
             new_df.sort_index(inplace=True)
-            std = new_df.groupby(new_df.index.month).std()
+            std = new_df.groupby(new_df.index.month).std(numeric_only=True)
             std['station'] = i
             std.reset_index(inplace=True)
             std.rename(columns={'Date':'Month'}, inplace=True)
@@ -187,7 +187,7 @@ class SCAN:
                    'SMS-40.0in']]
             
             #mean frame
-            mean_frame = soil_moisture_frame.groupby(soil_moisture_frame.index.month).mean()
+            mean_frame = soil_moisture_frame.groupby(soil_moisture_frame.index.month).mean(numeric_only=True)
             
             #set the station column
             mean_frame['station'] = i

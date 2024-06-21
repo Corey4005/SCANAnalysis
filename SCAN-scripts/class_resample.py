@@ -42,7 +42,7 @@ class resample(SCAN):
         store={}
         for i in df['station'].unique():
             new_df = df[df['station']==i]
-            one_week_resample = new_df.rolling(7, min_periods=3).mean()
+            one_week_resample = new_df.rolling(7, min_periods=3).mean(numeric_only=True)
             one_week_resample['station'] = i
             store[i] = one_week_resample
         
@@ -62,7 +62,7 @@ class resample(SCAN):
         store={}
         for i in df['station'].unique():
             new_df = df[df['station']==i]
-            two_week_resample = new_df.rolling(14, min_periods=6).mean()
+            two_week_resample = new_df.rolling(14, min_periods=6).mean(numeric_only=True)
             two_week_resample['station'] = i
             store[i] = two_week_resample
         
@@ -81,7 +81,7 @@ class resample(SCAN):
         store={}
         for i in df['station'].unique():
             new_df = df[df['station']==i]
-            three_week_resample = new_df.rolling(21, min_periods=9).mean()
+            three_week_resample = new_df.rolling(21, min_periods=9).mean(numeric_only=True)
             three_week_resample['station'] = i
             store[i] = three_week_resample
         
@@ -101,7 +101,7 @@ class resample(SCAN):
         store={}
         for i in df['station'].unique():
             new_df = df[df['station']==i]
-            four_week_resample = new_df.rolling(28, min_periods=12).mean()
+            four_week_resample = new_df.rolling(28, min_periods=12).mean(numeric_only=True)
             four_week_resample['station'] = i
             store[i] = four_week_resample
         
@@ -124,7 +124,7 @@ class resample(SCAN):
         for i in df['station'].unique():
             new_df = df[df['station']==i]
             new_df.set_index('Date', inplace=True)
-            two_week_resample = new_df.resample('2w').mean()
+            two_week_resample = new_df.resample('2w').mean(numeric_only=True)
             two_week_resample['station'] = i
             store[i] = two_week_resample
 
@@ -146,7 +146,7 @@ class resample(SCAN):
         for i in df['station'].unique():
             new_df = df[df['station']==i]
             new_df.set_index('Date', inplace=True)
-            three_week_resample = new_df.resample('3w').mean()
+            three_week_resample = new_df.resample('3w').mean(numeric_only=True)
             three_week_resample['station'] = i
             store[i] = three_week_resample
 
@@ -167,7 +167,7 @@ class resample(SCAN):
         for i in df['station'].unique():
             new_df = df[df['station']==i]
             new_df.set_index('Date', inplace=True)
-            four_week_resample = new_df.resample('4w').mean()
+            four_week_resample = new_df.resample('4w').mean(numeric_only=True)
             four_week_resample['station'] = i
             store[i] = four_week_resample
 
